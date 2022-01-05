@@ -69,7 +69,11 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestMultiplyByZero)
 		{
-
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = i;
+			llint r[COUNTLL] = {};
+			Assert::IsTrue(CalcEqual(MultiplyByScalar(l, 0ul), r));
 		}
 	};
 }

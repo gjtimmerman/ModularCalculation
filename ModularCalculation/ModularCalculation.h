@@ -24,3 +24,4 @@ const llint	lintmask = ~0ul;
 llint* CalcSubtract(llint* l, llint* r);
 bool CalcEqual(llint* l, llint* r);
 void AddAssignScalar(lint* n, int lpos, lint scalar);
+llint* MultiplyByScalar(llint* n, lint scalar);

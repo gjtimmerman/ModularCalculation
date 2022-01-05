@@ -75,13 +75,17 @@ void AddAssignScalar(lint* n, int lpos, lint scalar)
 	} while (((lint*) & res)[1] > 0 && lpos < COUNTL);
 }
 
-void MultiplyAssignByScalar(llint* n, lint scalar)
+llint *MultiplyByScalar(llint* n, lint scalar)
 {
 	lint* ln = (lint*)n;
+	llint* res = new llint[COUNTLL]{};
+	lint* lres = (lint*)res;
+
 	for (int i = 0; i < COUNTL; i++)
 	{
 		llint res = ((llint)ln[i]) * scalar;
-		ln[i] = ((lint*)&res)[0];
-//		AddAssignScalar(ln, i + 1, ((lint*)&res)[1]);
+		AddAssignScalar(lres,i, ((lint*)&res)[0]);
+		AddAssignScalar(lres, i + 1, ((lint*)&res)[1]);
 	}
+	return res;
 }

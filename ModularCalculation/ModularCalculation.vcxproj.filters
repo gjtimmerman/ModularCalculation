@@ -18,7 +18,7 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="pchmc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModularCalculation.h">
@@ -29,7 +29,7 @@
     <ClCompile Include="ModularCalculation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pch.cpp">
+    <ClCompile Include="pchmc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

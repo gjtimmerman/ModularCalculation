@@ -4,8 +4,8 @@
 // However, files listed here are ALL re-compiled if any one of them is updated between builds.
 // Do not add files here that you will be updating frequently as this negates the performance advantage.
 
-#ifndef PCH_H
-#define PCH_H
+#ifndef PCHMC_H
+#define PCHMC_H
 
 #include <iostream>
 
@@ -13,4 +13,4 @@
 #include "framework.h"
 
 
-#endif //PCH_H
+#endif //PCHMC_H

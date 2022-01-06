@@ -1,7 +1,7 @@
 // ModularCalculation.cpp : Defines the functions for the static library.
 //
 
-#include "pch.h"
+#include "pchmc.h"
 #include "framework.h"
 #include "ModularCalculation.h"
 
@@ -17,12 +17,12 @@ llint* CalcModulo(llint* n, llint *mod)
 	return nullptr;
 }
 
-llint *CalcSubtract(llint *l, llint *r)
+ModNumber operator-(const ModNumber& l, const ModNumber& r)
 {
-	llint* res = new llint[COUNTLL];
-	lint* ll = (lint*)l;
-	lint* rl = (lint*)r;
-	lint* resl = (lint*)res;
+	ModNumber res;
+	lint* ll = (lint*)l.num;
+	lint* rl = (lint*)r.num;
+	lint* resl = (lint*)res.num;
 	lint carry = 0;
 	for (int i = 0; i < COUNTL; i++)
 	{
@@ -40,23 +40,25 @@ llint *CalcSubtract(llint *l, llint *r)
 	return res;
 }
 
-bool CalcEqual(llint* l, llint* r)
+bool operator==(const ModNumber& l, const ModNumber& r)
 {
 	for (int i = 0; i < COUNTLL; i++)
-		if (l[i] != r[i])
+		if (l.num[i] != r.num[i])
 			return false;
 	return true;
 }
 
-void PrintLL(std::ostream out, llint* n)
+std::ostream& operator<<(std::ostream& out, ModNumber& n)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		out << std::hex << n[i];
+		out << std::hex << n.num[i];
+	return out;
 }
 
-void AddAssignScalar(lint* n, int lpos, lint scalar)
+ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 {
 	llint res = 0;
+	lint* n = (lint *)num;
 	do
 	{
 		int lposc = lpos;
@@ -73,19 +75,21 @@ void AddAssignScalar(lint* n, int lpos, lint scalar)
 		else
 			break;
 	} while (((lint*) & res)[1] > 0 && lpos < COUNTL);
+	return *this;
 }
 
-llint *MultiplyByScalar(llint* n, lint scalar)
+ModNumber &operator*=(ModNumber& n, lint scalar)
 {
-	lint* ln = (lint*)n;
-	llint* res = new llint[COUNTLL]{};
-	lint* lres = (lint*)res;
+	lint* ln = (lint*)n.num;
+	ModNumber mres;
+	lint* lres = (lint*)mres.num;
 
 	for (int i = 0; i < COUNTL; i++)
 	{
 		llint res = ((llint)ln[i]) * scalar;
-		AddAssignScalar(lres,i, ((lint*)&res)[0]);
-		AddAssignScalar(lres, i + 1, ((lint*)&res)[1]);
+		mres.AddAssignScalar(i, ((lint*)&res)[0]);
+		mres.AddAssignScalar(i + 1, ((lint*)&res)[1]);
 	}
-	return res;
+	n = mres;
+	return n;
 }

@@ -13,31 +13,35 @@ namespace ModularUnitTests
 		
 		TEST_METHOD(TestSubtractSimple)
 		{
-			llint l [COUNTLL];
-			llint r [COUNTLL];
+			llint l[COUNTLL];
+			llint r[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 			{
 				l[i] = 2ull;
 				r[i] = 1ull;
 			}
-			llint* res = CalcSubtract(l, r);
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber res = ml - mr;
 			
-			Assert::IsTrue(CalcEqual(r, res));
+			Assert::IsTrue(r == res);
 		}
 		TEST_METHOD(TestEqualTrue)
 		{
 			llint l[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = i;
-			Assert::IsTrue(CalcEqual(l, l));
+			ModNumber ml(l);
+			Assert::IsTrue(ml == ml);
 		}
 		TEST_METHOD(TestSubtractEqualNumbers)
 		{
 			llint l[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = i;
-			llint res[COUNTLL] = {};
-			Assert::IsTrue(CalcEqual(CalcSubtract(l, l), res));
+			ModNumber ml(l);
+			ModNumber res;
+			Assert::IsTrue(ml - ml == res);
 		}
 		TEST_METHOD(TestEqualNotTrue)
 		{
@@ -49,14 +53,18 @@ namespace ModularUnitTests
 				r[i] = i;
 			}
 			r[0] -= 1;
-			Assert::IsFalse(CalcEqual(l, r));
+			ModNumber ml(l);
+			ModNumber mr(r);
+			Assert::IsFalse(l == r);
 		}
 		TEST_METHOD(TestAddAssignOneToZero)
 		{
 			llint l[COUNTLL] = {};
 			llint res[COUNTLL] = { 1ull };
-			AddAssignScalar((lint*)l, 0, 1ul);
-			Assert::IsTrue(CalcEqual(l, res));
+			ModNumber ml(l);
+			ModNumber mres(res);
+			ml.AddAssignScalar(0, 1ul);
+			Assert::IsTrue(ml == mres);
 		}
 		TEST_METHOD(TestAddAssignOneToMax)
 		{
@@ -64,16 +72,42 @@ namespace ModularUnitTests
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = ~0ull;
 			llint res[COUNTLL] = {};
-			AddAssignScalar((lint*)l, 0, 1ul);
-			Assert::IsTrue(CalcEqual(l, res));
+			ModNumber ml(l);
+			ModNumber mres(res);
+			ml.AddAssignScalar(0, 1ul);
+			Assert::IsTrue(ml == mres);
 		}
 		TEST_METHOD(TestMultiplyByZero)
 		{
 			llint l[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = i;
-			llint r[COUNTLL] = {};
-			Assert::IsTrue(CalcEqual(MultiplyByScalar(l, 0ul), r));
+			ModNumber ml(l);
+			ModNumber mr;
+			Assert::IsTrue((ml *= 0ul) == mr);
 		}
+		TEST_METHOD(TestMultiplyByOne)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = i;
+			ModNumber ml(l);
+			ModNumber mr(l);
+			Assert::IsTrue((ml *= 1ul) == mr);
+		}
+		TEST_METHOD(TestMultiplyByTwo)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = i;
+				r[i] = i * 2;
+			}
+			ModNumber ml(l);
+			ModNumber mr(r);
+			Assert::IsTrue((ml *= 2ul) == mr);
+		}
+
 	};
 }

@@ -108,6 +108,24 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			Assert::IsTrue((ml *= 2ul) == mr);
 		}
-
+		TEST_METHOD(TestMultiplyAllNinesByTwo)
+		{
+			llint l[COUNTLL];
+			llint res[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				res[i] = ~0ull;
+			}
+			ModNumber ml(l);
+			res[0] ^= 1ull;
+			ModNumber mres(res);
+			Assert::IsTrue((ml *= 2ul) == mres);
+		}
+		TEST_METHOD(TestToStringForZero)
+		{
+			ModNumber ml;
+			std::string res;
+		}
 	};
 }

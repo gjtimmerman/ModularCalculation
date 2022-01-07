@@ -40,6 +40,10 @@ public:
 		num[0] = n;
 	}
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
+	std::string to_string_fixed_sized_base(const int base);
+	std::string to_string(const int base);
+
+
 private:
 	llint num[COUNTLL];
 
@@ -47,6 +51,7 @@ private:
 	friend bool operator==(const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator *=(ModNumber& n, lint scalar);
 	friend std::ostream& operator << (std::ostream& out, ModNumber& n);
+	friend std::string operator<<(std::string s, const ModNumber& n);
 
 };
 
@@ -54,5 +59,6 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
 ModNumber& operator *=(ModNumber& n, lint scalar);
 std::ostream& operator<<(std::ostream& out, ModNumber& n);
+std::string operator<<(std::string s, const ModNumber& n);
 
 

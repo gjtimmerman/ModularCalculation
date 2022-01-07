@@ -93,3 +93,45 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	n = mres;
 	return n;
 }
+
+std::string ModNumber::to_string_fixed_sized_base(const int base)
+{
+	if (!(base == 8 || base == 16))
+		throw std::invalid_argument("Only base 8 and 16 are valid");
+	std::string res;
+	const int buflen = NCOUNT * 4;
+	int width;
+	char formatchar;
+	switch (base)
+	{
+	case 8:
+		width = buflen;
+		formatchar = 'o';
+		break;
+	case 16:
+		width = buflen / 2;
+		formatchar = 'x';
+		break;
+	}
+	res.reserve(buflen * COUNTLL * 8 / base);
+	char buf[buflen];
+	const int formatlen = 10;
+	char format[formatlen];
+	sprintf_s(format, "%%0%dll%c", width,formatchar);
+	for (int i = 0; i < COUNTLL; i++)
+	{
+		sprintf_s(buf, format, num);
+		res.append(buf);
+	}
+	return res;
+}
+
+std::string ModNumber::to_string(const int base)
+{
+	if (!(base == 8 || base == 10 || base == 16))
+		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
+	if (base == 8 || base == 16)
+		return to_string_fixed_sized_base(base);
+	std::string res;
+	return res;
+}

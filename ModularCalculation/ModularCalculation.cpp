@@ -114,8 +114,8 @@ std::string ModNumber::to_string_fixed_sized_base(const int base)
 		break;
 	}
 	res.reserve(buflen * COUNTLL * 8 / base);
-	char buf[buflen];
-	const int formatlen = 10;
+	char buf[buflen+1];
+	const int formatlen = 8;
 	char format[formatlen];
 	sprintf_s(format, "%%0%dll%c", width,formatchar);
 	for (int i = 0; i < COUNTLL; i++)

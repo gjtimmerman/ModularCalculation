@@ -125,7 +125,12 @@ namespace ModularUnitTests
 		TEST_METHOD(TestToStringForZero)
 		{
 			ModNumber ml;
-			std::string res;
+			std::string res = ml.to_string(8);
+			std::string exp;
+			exp.reserve(NCOUNT * 4);
+			for (int i = 0; i < NCOUNT * 4; i++)
+				exp.append("0");
+			Assert::IsTrue(res == exp);
 		}
 	};
 }

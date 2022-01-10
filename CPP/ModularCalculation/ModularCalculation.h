@@ -40,7 +40,8 @@ public:
 		num[0] = n;
 	}
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
-	std::string to_string_fixed_sized_base(const int base);
+	std::string to_string_hex_base();
+	std::string to_string_octal_base();
 	std::string to_string(const int base);
 
 

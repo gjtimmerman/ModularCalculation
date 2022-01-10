@@ -94,34 +94,54 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	return n;
 }
 
-std::string ModNumber::to_string_fixed_sized_base(const int base)
+std::string ModNumber::to_string_hex_base()
 {
-	if (!(base == 8 || base == 16))
-		throw std::invalid_argument("Only base 8 and 16 are valid");
 	std::string res;
-	const int buflen = NCOUNT * 4;
+	const int buflen = LLSIZE * 2;
 	int width;
 	char formatchar;
-	switch (base)
-	{
-	case 8:
-		width = buflen;
-		formatchar = 'o';
-		break;
-	case 16:
-		width = buflen / 2;
-		formatchar = 'x';
-		break;
-	}
-	res.reserve(buflen * COUNTLL * 8 / base);
+	width = buflen;
+	formatchar = 'X';
+	res.reserve(buflen * COUNTLL);
 	char buf[buflen+1];
-	const int formatlen = 8;
-	char format[formatlen];
+	const int formatlen = 7;
+	char format[formatlen+1];
 	sprintf_s(format, "%%0%dll%c", width,formatchar);
-	for (int i = 0; i < COUNTLL; i++)
+	for (int i = COUNTLL-1; i >= 0; i--)
 	{
-		sprintf_s(buf, format, num);
+		sprintf_s(buf, format, num[i]);
 		res.append(buf);
+	}
+	return res;
+}
+
+std::string ModNumber::to_string_octal_base()
+{
+	std::string res;
+	res.reserve(NSIZE / 3 + 1);
+	res.assign(NSIZE / 3 + 1, ' ');
+	lint mask = 7;
+	lint* pLint = (lint*)num;
+	lint buf[2];
+	llint* shiftBuf = (llint*) & buf;
+	buf[0] = pLint[0];
+	int tripleCount = 0;
+	int wordCount = 0;
+	for (int i = 0; i < NSIZE; i++)
+	{
+		char strbuf[2];
+		if ((wordCount++ % (8 * LSIZE) ) == 0)
+		{
+			if (wordCount/(8 * LSIZE) + 1 < COUNTL)
+				buf[1] = pLint[wordCount / (8 * LSIZE) + 1];
+		}
+		if ((tripleCount++ % 3) == 0)
+		{
+			lint numToPrint = buf[0] & mask;
+			sprintf_s(strbuf, "%lo", numToPrint);
+			res[(NSIZE / 3 + 1) - (tripleCount / 3) - 1] = strbuf[0];
+		}
+		(*shiftBuf) >>= 1;
 	}
 	return res;
 }
@@ -130,8 +150,13 @@ std::string ModNumber::to_string(const int base)
 {
 	if (!(base == 8 || base == 10 || base == 16))
 		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
-	if (base == 8 || base == 16)
-		return to_string_fixed_sized_base(base);
+	switch (base)
+	{
+	case 16:
+		return to_string_hex_base();
+	case 8:
+		return to_string_octal_base();
+	}
 	std::string res;
 	return res;
 }

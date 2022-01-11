@@ -42,7 +42,8 @@ public:
 	{
 		num[0] = n;
 	}
-	std::string to_string(const int base) const;
+	std::string to_string(const int base = 10) const;
+	static ModNumber stomn(std::string s, int base = 10);
 
 
 private:
@@ -50,6 +51,7 @@ private:
 	std::string to_string_hex_base() const;
 	std::string to_string_octal_base() const;
 	std::string to_string_decimal_base() const;
+	static ModNumber stomn_hex_base(std::string s);
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
 	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
 

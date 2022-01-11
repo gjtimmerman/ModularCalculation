@@ -387,6 +387,19 @@ namespace ModularUnitTests
 			exp.append("4294967295");
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToModularNumberHexForEmptyString)
+		{
+			ModNumber mexp;
+			std::string s;
+			Assert::IsTrue(mexp == ModNumber::stomn(s, 16));
+		}
+		TEST_METHOD(TestToModularNumberHexForOne)
+		{
+			ModNumber mexp(1);
+			std::string s = "1";
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
 
 
 	};

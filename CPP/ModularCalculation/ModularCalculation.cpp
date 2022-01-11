@@ -226,3 +226,45 @@ std::string ModNumber::to_string(const int base) const
 	std::string res;
 	return res;
 }
+
+ModNumber ModNumber::stomn_hex_base(std::string s)
+{
+	llint n[COUNTLL] = {};
+	size_t len = s.length();
+	if (len > NCOUNT * 2)
+		throw std::domain_error("Value to large");
+	if (len < NCOUNT * 2)
+	{
+		std::string tmp(NCOUNT * 2 - len,'0');
+		s = tmp + s;
+	}
+	for (int i = 0; i < NCOUNT * 2; i += LLSIZE*2)
+	{
+		std::string tmp = s.substr(i, LLSIZE*2);
+		llint tmpll = std::stoull(tmp);
+		n[COUNTLL - (i / (LLSIZE * 2)) - 1] = tmpll;
+	}
+	return ModNumber(n);
+}
+
+ModNumber ModNumber::stomn(std::string s, int base)
+{
+	if (!(base == 8 || base == 10 || base == 16))
+		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
+	size_t len = s.length();
+	int i;
+	for (i = 0; i < len; i++)
+		if (!std::isspace(s[i]))
+			break;
+	if (i > 0)
+		s = s.substr(i);
+	if (s[0] == '-')
+		throw std::domain_error("Only positive numbers allowed");
+	if (s[0] == '+')
+		s = s.substr(1);
+	switch (base)
+	{
+	case 16:
+		return stomn_hex_base(s);
+	}
+}

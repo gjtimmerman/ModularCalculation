@@ -127,8 +127,8 @@ namespace ModularUnitTests
 			ModNumber ml;
 			std::string res = ml.to_string(8);
 			std::string exp;
-			exp.reserve(NSIZE / 3 + 1);
-			for (int i = 0; i < NSIZE / 3 + 1; i++)
+			exp.reserve(OctalStringLength);
+			for (int i = 0; i < OctalStringLength; i++)
 				exp.append("0");
 			Assert::IsTrue(res == exp);
 		}
@@ -137,8 +137,8 @@ namespace ModularUnitTests
 			ModNumber ml(1);
 			std::string res = ml.to_string(8);
 			std::string exp;
-			exp.reserve(NSIZE / 3 + 1);
-			for (int i = 0; i < NSIZE / 3; i++)
+			exp.reserve(OctalStringLength);
+			for (int i = 0; i < OctalStringLength - 1; i++)
 				exp.append("0");
 			exp.append("1");
 			Assert::IsTrue(res == exp);
@@ -148,8 +148,8 @@ namespace ModularUnitTests
 			ModNumber ml(8);
 			std::string res = ml.to_string(8);
 			std::string exp;
-			exp.reserve(NSIZE / 3 + 1);
-			for (int i = 0; i < NSIZE / 3 - 1; i++)
+			exp.reserve(OctalStringLength);
+			for (int i = 0; i < OctalStringLength - 2; i++)
 				exp.append("0");
 			exp.append("10");
 			Assert::IsTrue(res == exp);
@@ -162,38 +162,38 @@ namespace ModularUnitTests
 			ModNumber ml(l);
 			std::string res = ml.to_string(8);
 			std::string exp;
-			exp.reserve(NSIZE / 3 + 1);
-			exp.assign(NSIZE / 3 + 1, '7');
+			exp.reserve(OctalStringLength);
+			exp.assign(OctalStringLength, '7');
 			exp[0] = '1';
 			Assert::IsTrue(res == exp);
 		}
-		//TEST_METHOD(TestToStringOctalForMaxesAndZeros)
-		//{
-		//	llint l[COUNTLL];
-		//	for (int i = 0; i < COUNTLL - 4; i += 6)
-		//	{
-		//		for (int j = 0; j < 3; j++)
-		//			l[i + j] = ~0;
-		//		for (int j = 3; j < 6; j++)
-		//			l[i + j] = 0;
-		//	}
-		//	for (int i = COUNTLL - 4; i < COUNTLL; i++)
-		//		l[i] = 0;
-		//	ModNumber ml(l);
-		//	std::string res = ml.to_string(8);
-		//	std::string exp;
-		//	exp.reserve(NSIZE / 3 + 1);
-		//	for (int i = 0; i < 6; i++)
-		//		exp.append("0");
-		//	for (int i = 6; i < NSIZE / 3 + 1; i += 8)
-		//	{
-		//		for (int j = 0; j < 4; j++)
-		//			exp.append("0");
-		//		for (int j = 0; j < 4; j++)
-		//			exp.append("7");
-		//	}
-		//	Assert::IsTrue(res == exp);
-		//}
+		TEST_METHOD(TestToStringOctalForMaxesAndZeros)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL - 4; i += 6)
+			{
+				for (int j = 0; j < 3; j++)
+					l[i + j] = ~0;
+				for (int j = 3; j < 6; j++)
+					l[i + j] = 0;
+			}
+			for (int i = COUNTLL - 4; i < COUNTLL; i++)
+				l[i] = 0;
+			ModNumber ml(l);
+			std::string res = ml.to_string(8);
+			std::string exp;
+			exp.reserve(OctalStringLength);
+			for (int i = 0; i < 86; i++)
+				exp.append("0");
+			for (int i = 86; i < OctalStringLength; i += 128)
+			{
+				for (int j = 0; j < 64; j++)
+					exp.append("0");
+				for (int j = 0; j < 64; j++)
+					exp.append("7");
+			}
+			Assert::IsTrue(res == exp);
+		}
 		TEST_METHOD(TestToStringHexForZero)
 		{
 			ModNumber ml;

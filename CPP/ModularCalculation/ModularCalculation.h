@@ -23,6 +23,8 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 
 const llint	lintmask = ~0ul;
 
+const int OctalStringLength = NSIZE / 3 + 1;
+
 class ModNumber
 {
 public:

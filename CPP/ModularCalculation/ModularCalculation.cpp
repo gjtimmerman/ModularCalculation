@@ -118,8 +118,8 @@ std::string ModNumber::to_string_hex_base()
 std::string ModNumber::to_string_octal_base()
 {
 	std::string res;
-	res.reserve(NSIZE / 3 + 1);
-	res.assign(NSIZE / 3 + 1, ' ');
+	res.reserve(OctalStringLength);
+	res.assign(OctalStringLength, ' ');
 	lint mask = 7;
 	lint* pLint = (lint*)num;
 	lint buf[2];
@@ -139,7 +139,7 @@ std::string ModNumber::to_string_octal_base()
 		{
 			lint numToPrint = buf[0] & mask;
 			sprintf_s(strbuf, "%lo", numToPrint);
-			res[(NSIZE / 3 + 1) - (tripleCount / 3) - 1] = strbuf[0];
+			res[(OctalStringLength) - (tripleCount / 3) - 1] = strbuf[0];
 		}
 		(*shiftBuf) >>= 1;
 	}

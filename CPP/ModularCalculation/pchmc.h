@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <tuple>
 
 // add headers that you want to pre-compile here
 #include "framework.h"

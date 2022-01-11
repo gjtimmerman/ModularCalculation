@@ -83,7 +83,7 @@ ModNumber& operator+=(ModNumber& n, lint scalar)
 	return n.AddAssignScalar(0, scalar);
 }
 
-ModNumber &operator*=(ModNumber& n, lint scalar)
+ModNumber operator* (ModNumber& n, lint scalar)
 {
 	lint* ln = (lint*)n.num;
 	ModNumber mres;
@@ -95,29 +95,52 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 		mres.AddAssignScalar(i, ((lint*)&res)[0]);
 		mres.AddAssignScalar(i + 1, ((lint*)&res)[1]);
 	}
+	return mres;
+}
+
+ModNumber &operator*=(ModNumber& n, lint scalar)
+{
+	ModNumber mres = n * scalar;
 	n = mres;
 	return n;
 }
 
-ModNumber operator/ (const ModNumber& n, lint scalar)
+std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 {
 	if (scalar == 0)
 		throw std::domain_error("Division by zero not allowed!");
 	ModNumber res;
-	lint* nl = (lint *)n.num;
+	lint* nl = (lint*)num;
 	lint* resl = (lint*)res.num;
 	llint tmp = 0ull;
 	for (int i = COUNTL - 1; i >= 0; i--)
 	{
 		*((lint*)&tmp) = nl[i];
-		if (scalar < tmp)
+		if (scalar <= tmp)
 		{
-			*resl = tmp / scalar;
+			resl[i] = (lint)(tmp / scalar);
 			tmp %= scalar;
-			tmp <<= LSIZE;
 		}
+		tmp <<= LSIZE * 8;
+
 	}
-	return res;
+	return std::make_tuple(res, ((lint *) & tmp)[1]);
+}
+
+ModNumber operator/ (const ModNumber& n, lint scalar)
+{
+	return std::get<0>(n.DivideAndModulo(scalar));
+}
+
+ModNumber &operator/= (ModNumber& n, lint scalar)
+{
+	n = std::get<0>(n.DivideAndModulo(scalar));
+	return n;
+}
+
+lint operator% (const ModNumber& n, lint scalar)
+{
+	return std::get<1>(n.DivideAndModulo(scalar));
 }
 
 std::string ModNumber::to_string_hex_base() const
@@ -172,6 +195,21 @@ std::string ModNumber::to_string_octal_base() const
 	return res;
 }
 
+std::string ModNumber::to_string_decimal_base() const
+{
+	std::string res;
+	res.reserve(DecimalStringLength);
+	res.assign(DecimalStringLength, ' ');
+	ModNumber tmp(*this);
+	for (int i = 0; i < DecimalStringLength; i++)
+	{
+		lint digit = tmp % 10ul;
+		tmp /= 10ul;
+		res[DecimalStringLength - i - 1] = '0' + (char)digit;
+	}
+	return res;
+}
+
 std::string ModNumber::to_string(const int base) const
 {
 	if (!(base == 8 || base == 10 || base == 16))
@@ -180,6 +218,8 @@ std::string ModNumber::to_string(const int base) const
 	{
 	case 16:
 		return to_string_hex_base();
+	case 10:
+		return to_string_decimal_base();
 	case 8:
 		return to_string_octal_base();
 	}

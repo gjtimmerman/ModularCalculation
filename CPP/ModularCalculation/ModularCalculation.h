@@ -24,6 +24,7 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 const llint	lintmask = ~0ul;
 
 const int OctalStringLength = NSIZE / 3 + 1;
+const int DecimalStringLength = OctalStringLength;
 
 class ModNumber
 {
@@ -32,12 +33,12 @@ public:
 	{
 		memset(num, 0, NCOUNT);
 	}
-	ModNumber(llint* n)
+	explicit ModNumber(llint* n)
 	{
 		for (int i = 0; i < COUNTLL; i++)
 			num[i] = n[i];
 	}
-	ModNumber(llint n) : ModNumber()
+	explicit ModNumber(llint n) : ModNumber()
 	{
 		num[0] = n;
 	}
@@ -48,7 +49,9 @@ private:
 	llint num[COUNTLL];
 	std::string to_string_hex_base() const;
 	std::string to_string_octal_base() const;
+	std::string to_string_decimal_base() const;
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
+	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
 
 
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);
@@ -56,6 +59,9 @@ private:
 	friend ModNumber& operator *=(ModNumber& n, lint scalar);
 	friend ModNumber& operator+=(ModNumber& n, lint scalar);
 	friend ModNumber operator/ (const ModNumber& n, lint scalar);
+	friend ModNumber& operator/= (ModNumber& n, lint scalar);
+	friend ModNumber operator* (ModNumber& n, lint scalar);
+	friend lint operator% (const ModNumber& n, lint scalar);
 	friend std::ostream& operator << (std::ostream& out, ModNumber& n);
 
 };
@@ -65,6 +71,9 @@ bool operator==(const ModNumber& l, const ModNumber& r);
 ModNumber& operator *=(ModNumber& n, lint scalar);
 ModNumber& operator+=(ModNumber& n, lint scalar);
 ModNumber operator/ (const ModNumber& n, lint scalar);
+ModNumber& operator/= (ModNumber& n, lint scalar);
+ModNumber operator* (ModNumber& n, lint scalar);
+lint operator% (const ModNumber& n, lint scalar);
 std::ostream& operator<<(std::ostream& out, ModNumber& n);
 
 

@@ -24,7 +24,7 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			ModNumber res = ml - mr;
 			
-			Assert::IsTrue(r == res);
+			Assert::IsTrue(mr == res);
 		}
 		TEST_METHOD(TestEqualTrue)
 		{
@@ -133,6 +133,76 @@ namespace ModularUnitTests
 			ModNumber mres = ml / 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+		TEST_METHOD(TestDivisionNonZeroByOne)
+		{
+			ModNumber ml(123456ul);
+			ModNumber mres = ml / 1ul;
+			Assert::IsTrue(ml == mres);
+		}
+		TEST_METHOD(TestDivisionNonZeroByTwo)
+		{
+			ModNumber ml(24690ul);
+			ModNumber exp(12345ul);
+			ModNumber mres = ml / 2ul;
+			Assert::IsTrue(exp == mres);
+		}
+		TEST_METHOD(TestDivisionAllNinesByThree)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = 9999999999999999999ull;
+			}
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				exp[i] = 3333333333333333333ull;
+			}
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres = ml / 3ul;
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestDivisionAllNinesByTwoAndMultipliedByTwo)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = 9999999999999999999ull;
+			}
+			llint exp[COUNTLL];
+			exp[0] = 9999999999999999998ull;
+			for (int i = 1; i < COUNTLL; i++)
+			{
+				exp[i] = 9999999999999999999ull;
+			}
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres1 = ml / 2ul;
+			ModNumber mres2 = mres1 * 2ul;
+			Assert::IsTrue(mexp == mres2);
+		}
+		TEST_METHOD(TestDivisionMaxLintTimesTenByTwo)
+		{
+			llint l[COUNTLL];
+			l[0] = ~0ull;
+			l[1] = 1ull;
+			for (int i = 2; i < COUNTLL; i++)
+			{
+				l[i] = 0ull;
+			}
+			llint exp[COUNTLL];
+			exp[0] = ~0ull;
+			for (int i = 1; i < COUNTLL; i++)
+			{
+				exp[i] = 0ull;
+			}
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres = ml / 2ul;
+			Assert::IsTrue(mexp == mres);
+		}
+
 		TEST_METHOD(TestToStringIllegalBase)
 		{
 			ModNumber ml;
@@ -255,6 +325,69 @@ namespace ModularUnitTests
 				exp.append("F");
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToStringDecimalForZero)
+		{
+			ModNumber ml;
+			std::string res = ml.to_string(10);
+			std::string exp;
+			exp.reserve(DecimalStringLength);
+			for (int i = 0; i < DecimalStringLength; i++)
+				exp.append("0");
+			Assert::IsTrue(res == exp);
+		}
+		TEST_METHOD(TestToStringDecimalForOne)
+		{
+			ModNumber ml(1);
+			std::string res = ml.to_string(10);
+			std::string exp;
+			exp.reserve(DecimalStringLength);
+			for (int i = 0; i < DecimalStringLength - 1; i++)
+				exp.append("0");
+			exp.append("1");
+			Assert::IsTrue(res == exp);
+		}
+		TEST_METHOD(TestToStringDecimalForTen)
+		{
+			ModNumber ml(10);
+			std::string res = ml.to_string(10);
+			std::string exp;
+			exp.reserve(DecimalStringLength);
+			for (int i = 0; i < DecimalStringLength - 2; i++)
+				exp.append("0");
+			exp.append("10");
+			Assert::IsTrue(res == exp);
+		}
+		TEST_METHOD(TestToStringDecimalForMaxLongPlusOne)
+		{
+			llint l[COUNTLL];
+			l[0] = 1ull << LSIZE*8;
+			for (int i = 1; i < COUNTLL; i++)
+				l[i] = 0;
+			ModNumber ml(l);
+			std::string res = ml.to_string(10);
+			std::string exp;
+			exp.reserve(DecimalStringLength);
+			for (int i = 0; i < DecimalStringLength - 10; i++)
+				exp.append("0");
+			exp.append("4294967296");
+			Assert::IsTrue(res == exp);
+		}
+		TEST_METHOD(TestToStringDecimalForMaxLong)
+		{
+			llint l[COUNTLL];
+			l[0] = (llint)~0ul;
+			for (int i = 1; i < COUNTLL; i++)
+				l[i] = 0;
+			ModNumber ml(l);
+			std::string res = ml.to_string(10);
+			std::string exp;
+			exp.reserve(DecimalStringLength);
+			for (int i = 0; i < DecimalStringLength - 10; i++)
+				exp.append("0");
+			exp.append("4294967295");
+			Assert::IsTrue(res == exp);
+		}
+
 
 	};
 }

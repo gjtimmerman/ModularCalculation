@@ -78,6 +78,11 @@ ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 	return *this;
 }
 
+ModNumber& operator+=(ModNumber& n, lint scalar)
+{
+	return n.AddAssignScalar(0, scalar);
+}
+
 ModNumber &operator*=(ModNumber& n, lint scalar)
 {
 	lint* ln = (lint*)n.num;
@@ -94,7 +99,28 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	return n;
 }
 
-std::string ModNumber::to_string_hex_base()
+ModNumber operator/ (const ModNumber& n, lint scalar)
+{
+	if (scalar == 0)
+		throw std::domain_error("Division by zero not allowed!");
+	ModNumber res;
+	lint* nl = (lint *)n.num;
+	lint* resl = (lint*)res.num;
+	llint tmp = 0ull;
+	for (int i = COUNTL - 1; i >= 0; i--)
+	{
+		*((lint*)&tmp) = nl[i];
+		if (scalar < tmp)
+		{
+			*resl = tmp / scalar;
+			tmp %= scalar;
+			tmp <<= LSIZE;
+		}
+	}
+	return res;
+}
+
+std::string ModNumber::to_string_hex_base() const
 {
 	std::string res;
 	const int buflen = LLSIZE * 2;
@@ -115,7 +141,7 @@ std::string ModNumber::to_string_hex_base()
 	return res;
 }
 
-std::string ModNumber::to_string_octal_base()
+std::string ModNumber::to_string_octal_base() const
 {
 	std::string res;
 	res.reserve(OctalStringLength);
@@ -146,7 +172,7 @@ std::string ModNumber::to_string_octal_base()
 	return res;
 }
 
-std::string ModNumber::to_string(const int base)
+std::string ModNumber::to_string(const int base) const
 {
 	if (!(base == 8 || base == 10 || base == 16))
 		throw std::invalid_argument("Only base 8, 10 and 16 are valid");

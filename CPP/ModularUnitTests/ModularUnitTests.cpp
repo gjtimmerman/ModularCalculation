@@ -63,7 +63,7 @@ namespace ModularUnitTests
 			llint res[COUNTLL] = { 1ull };
 			ModNumber ml(l);
 			ModNumber mres(res);
-			ml.AddAssignScalar(0, 1ul);
+			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
 		TEST_METHOD(TestAddAssignOneToMax)
@@ -74,7 +74,7 @@ namespace ModularUnitTests
 			llint res[COUNTLL] = {};
 			ModNumber ml(l);
 			ModNumber mres(res);
-			ml.AddAssignScalar(0, 1ul);
+			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
 		TEST_METHOD(TestMultiplyByZero)
@@ -121,6 +121,22 @@ namespace ModularUnitTests
 			res[0] ^= 1ull;
 			ModNumber mres(res);
 			Assert::IsTrue((ml *= 2ul) == mres);
+		}
+		TEST_METHOD(TestDivisionByZero)
+		{
+			ModNumber ml;
+			Assert::ExpectException<std::domain_error>([ml]() {ModNumber res = ml / 0ul; });
+		}
+		TEST_METHOD(TestDivisionZeroByOne)
+		{
+			ModNumber ml;
+			ModNumber mres = ml / 1ul;
+			Assert::IsTrue(ml == mres);
+		}
+		TEST_METHOD(TestToStringIllegalBase)
+		{
+			ModNumber ml;
+			Assert::ExpectException<std::invalid_argument>([ml]() {ml.to_string(11); });
 		}
 		TEST_METHOD(TestToStringOctalForZero)
 		{

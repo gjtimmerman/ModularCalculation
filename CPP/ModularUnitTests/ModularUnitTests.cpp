@@ -400,6 +400,20 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestToModularNumberHexForSixteen)
+		{
+			ModNumber mexp(16);
+			std::string s = "10";
+			ModNumber mres = ModNumber::stomn(s, 16);
+ 			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberHexForSixteenWithLeadingZeros)
+		{
+			ModNumber mexp(16);
+			std::string s = "0000000000000000000010";
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
 
 
 	};

@@ -241,7 +241,7 @@ ModNumber ModNumber::stomn_hex_base(std::string s)
 	for (int i = 0; i < NCOUNT * 2; i += LLSIZE*2)
 	{
 		std::string tmp = s.substr(i, LLSIZE*2);
-		llint tmpll = std::stoull(tmp);
+		llint tmpll = std::stoull(tmp,nullptr,16);
 		n[COUNTLL - (i / (LLSIZE * 2)) - 1] = tmpll;
 	}
 	return ModNumber(n);

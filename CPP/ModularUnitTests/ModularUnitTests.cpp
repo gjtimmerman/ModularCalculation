@@ -235,8 +235,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(8);
 			std::string exp;
 			exp.reserve(OctalStringLength);
-			for (int i = 0; i < OctalStringLength - 2; i++)
-				exp.append("0");
+			exp.assign(OctalStringLength - 2,'0');
 			exp.append("10");
 			Assert::IsTrue(res == exp);
 		}
@@ -269,14 +268,11 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(8);
 			std::string exp;
 			exp.reserve(OctalStringLength);
-			for (int i = 0; i < 86; i++)
-				exp.append("0");
+			exp.assign(86,'0');
 			for (int i = 86; i < OctalStringLength; i += 128)
 			{
-				for (int j = 0; j < 64; j++)
-					exp.append("0");
-				for (int j = 0; j < 64; j++)
-					exp.append("7");
+				exp.append(64,'0');
+				exp.append(64,'7');
 			}
 			Assert::IsTrue(res == exp);
 		}
@@ -285,9 +281,8 @@ namespace ModularUnitTests
 			ModNumber ml;
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(NCOUNT * 2);
-			for (int i = 0; i < NCOUNT * 2; i++)
-				exp.append("0");
+			exp.reserve(HexStringLenght);
+			exp.assign(HexStringLenght,'0');
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringHexForOne)
@@ -295,9 +290,8 @@ namespace ModularUnitTests
 			ModNumber ml(1);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(NCOUNT * 2);
-			for (int i = 0; i < NCOUNT * 2 - 1; i++)
-				exp.append("0");
+			exp.reserve(HexStringLenght);
+			exp.assign(HexStringLenght-1,'0');
 			exp.append("1");
 			Assert::IsTrue(res == exp);
 		}
@@ -306,9 +300,8 @@ namespace ModularUnitTests
 			ModNumber ml(16);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(NCOUNT * 2);
-			for (int i = 0; i < NCOUNT * 2 - 2; i++)
-				exp.append("0");
+			exp.reserve(HexStringLenght);
+			exp.assign(HexStringLenght-2,'0');
 			exp.append("10");
 			Assert::IsTrue(res == exp);
 		}
@@ -320,9 +313,8 @@ namespace ModularUnitTests
 			ModNumber ml(l);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(NCOUNT * 2);
-			for (int i = 0; i < NCOUNT * 2; i++)
-				exp.append("F");
+			exp.reserve(HexStringLenght);
+			exp.assign(HexStringLenght,'F');
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringDecimalForZero)
@@ -331,8 +323,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(10);
 			std::string exp;
 			exp.reserve(DecimalStringLength);
-			for (int i = 0; i < DecimalStringLength; i++)
-				exp.append("0");
+			exp.assign(DecimalStringLength,'0');
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringDecimalForOne)
@@ -341,8 +332,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(10);
 			std::string exp;
 			exp.reserve(DecimalStringLength);
-			for (int i = 0; i < DecimalStringLength - 1; i++)
-				exp.append("0");
+			exp.assign(DecimalStringLength - 1,'0');
 			exp.append("1");
 			Assert::IsTrue(res == exp);
 		}
@@ -352,8 +342,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(10);
 			std::string exp;
 			exp.reserve(DecimalStringLength);
-			for (int i = 0; i < DecimalStringLength - 2; i++)
-				exp.append("0");
+			exp.assign(DecimalStringLength - 2,'0');
 			exp.append("10");
 			Assert::IsTrue(res == exp);
 		}
@@ -367,8 +356,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(10);
 			std::string exp;
 			exp.reserve(DecimalStringLength);
-			for (int i = 0; i < DecimalStringLength - 10; i++)
-				exp.append("0");
+			exp.assign(DecimalStringLength - 10,'0');
 			exp.append("4294967296");
 			Assert::IsTrue(res == exp);
 		}
@@ -382,8 +370,7 @@ namespace ModularUnitTests
 			std::string res = ml.to_string(10);
 			std::string exp;
 			exp.reserve(DecimalStringLength);
-			for (int i = 0; i < DecimalStringLength - 10; i++)
-				exp.append("0");
+			exp.assign(DecimalStringLength - 10,'0');
 			exp.append("4294967295");
 			Assert::IsTrue(res == exp);
 		}
@@ -411,6 +398,30 @@ namespace ModularUnitTests
 		{
 			ModNumber mexp(16);
 			std::string s = "0000000000000000000010";
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberHexForSixteenWithLeadingMinusSign)
+		{
+			std::string s = "-10";
+			Assert::ExpectException<std::domain_error>([s]() {ModNumber::stomn(s, 16); });
+		}
+		TEST_METHOD(TestToModularNumberHexForSixteenWithLeadingPlusSign)
+		{
+			ModNumber mexp(16);
+			std::string s = "+10";
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberHexForMAX)
+		{
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				exp[i] = ~0ull;
+			ModNumber mexp(exp);
+			std::string s;
+			s.reserve(HexStringLenght);
+			s.assign(HexStringLenght, 'F');
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}

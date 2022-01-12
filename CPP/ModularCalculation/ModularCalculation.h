@@ -25,6 +25,7 @@ const llint	lintmask = ~0ul;
 
 const int OctalStringLength = NSIZE / 3 + 1;
 const int DecimalStringLength = OctalStringLength;
+const int HexStringLenght = NCOUNT * 2;
 
 class ModNumber
 {

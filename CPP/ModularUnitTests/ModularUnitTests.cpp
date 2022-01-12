@@ -374,6 +374,12 @@ namespace ModularUnitTests
 			exp.append("4294967295");
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToModularNumberIllegalBase)
+		{
+			std::string s;
+			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s,11); });
+		}
+
 		TEST_METHOD(TestToModularNumberHexForEmptyString)
 		{
 			ModNumber mexp;
@@ -422,6 +428,22 @@ namespace ModularUnitTests
 			std::string s;
 			s.reserve(HexStringLenght);
 			s.assign(HexStringLenght, 'F');
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberHexIncreasingSequence)
+		{
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i += 2)
+			{
+				exp[i] = 0x08090A0B0C0D0E0Full;
+				exp[i + 1] = 0x0001020304050607ull;
+			}
+			ModNumber mexp(exp);
+			std::string s;
+			s.reserve(HexStringLenght);
+			for (int i = 0; i < HexStringLenght; i += 32)
+				s.append("000102030405060708090A0B0C0D0E0F");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}

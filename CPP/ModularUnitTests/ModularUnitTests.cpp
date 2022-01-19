@@ -431,7 +431,39 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestToModularNumberHexIncreasingSequenceByteInput)
+		{
+			unsigned char cexp[NCOUNT];
+			for (int i = 0; i < NCOUNT; i++)
+			{
+				cexp[i] = (unsigned char)i % 16;
+			}
+			llint* exp = (llint*)cexp;
+			ModNumber mexp(exp);
+			std::string s;
+			s.reserve(HexStringLenght);
+			for (int i = 0; i < HexStringLenght; i += 32)
+				s.append("0F0E0D0C0B0A09080706050403020100");
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
 		TEST_METHOD(TestToModularNumberHexIncreasingSequence)
+		{
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i += 2)
+			{
+				exp[i] = 0x0706050403020100ull;
+				exp[i + 1] = 0x0F0E0D0C0B0A0908ull;
+			}
+			ModNumber mexp(exp);
+			std::string s;
+			s.reserve(HexStringLenght);
+			for (int i = 0; i < HexStringLenght; i += 32)
+				s.append("0F0E0D0C0B0A09080706050403020100");
+			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberHexIncreasingSequenceSwitched)
 		{
 			llint exp[COUNTLL];
 			for (int i = 0; i < COUNTLL; i += 2)
@@ -447,7 +479,5 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
-
-
 	};
 }

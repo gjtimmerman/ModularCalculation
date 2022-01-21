@@ -1,9 +1,45 @@
 #include "pch.h"
-#include "CppUnitTest.h"
+#ifdef __WIN32
+	#include "CppUnitTest.h"
+	using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+#else
+	#define TEST_CLASS(name) class name
+	#define TEST_METHOD(name) bool name (void)
+	#include <functional>
+	class Assert
+	{
+	public:
+		static int IsTrue(bool condition)
+		{
+			return (int)!condition;
+		}
+		static int IsFalse(bool condition)
+		{
+			return (int)condition;
+		}
+		template<typename T>
+		static int ExpectException(std::function<void()> f)
+		{
+			try
+			{
+				f();
+			}
+			catch (T t)
+			{
+				return 0;
+			}
+			catch (...)
+			{
+				return 1;
+			}
+			return 1;
+		}
+
+	};
+#endif
 
 #include "..\ModularCalculation\ModularCalculation.h"
 
-using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace ModularUnitTests
 {

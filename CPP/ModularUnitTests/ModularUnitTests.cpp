@@ -2,10 +2,16 @@
 #ifdef __WIN32
 	#include "CppUnitTest.h"
 	using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+#define BEGIN_TEST_CLASS
+#define END_TEST_CLASS
 #else
+
 	#define TEST_CLASS(name) class name
-	#define TEST_METHOD(name) bool name (void)
+	#define BEGIN_TEST_CLASS std::vector<std::function<bool()>>funcarray={[]()->bool{}
+	#define END_TEST_CLASS };
+	#define TEST_METHOD(name) ,[]()->bool
 	#include <functional>
+	#include <vector>
 	class Assert
 	{
 	public:
@@ -46,7 +52,7 @@ namespace ModularUnitTests
 	TEST_CLASS(ModularUnitTests)
 	{
 	public:
-		
+		BEGIN_TEST_CLASS
 		TEST_METHOD(TestSubtractSimple)
 		{
 			llint l[COUNTLL];
@@ -516,4 +522,5 @@ namespace ModularUnitTests
 			Assert::IsTrue(mexp == mres);
 		}
 	};
+	END_TEST_CLASS
 }

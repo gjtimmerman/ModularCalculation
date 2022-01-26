@@ -148,18 +148,16 @@ std::string ModNumber::to_string_hex_base() const
 	std::string res;
 	const int buflen = LLSIZE * 2;
 	int width;
-	char formatchar;
 	width = buflen;
-	formatchar = 'X';
 	res.reserve(buflen * COUNTLL);
-	char buf[buflen+1];
-	const int formatlen = 7;
-	char format[formatlen+1];
-	sprintf_s(format, "%%0%dll%c", width,formatchar);
 	for (int i = COUNTLL-1; i >= 0; i--)
 	{
-		sprintf_s(buf, format, num[i]);
-		res.append(buf);
+		std::stringstream mystrstr;
+		mystrstr.setf(std::ios_base::right | std::ios_base::uppercase);
+		mystrstr.fill('0');
+		mystrstr.width(width);
+		mystrstr <<std::hex << num[i];
+		res.append(mystrstr.str());
 	}
 	return res;
 }
@@ -187,8 +185,9 @@ std::string ModNumber::to_string_octal_base() const
 		if ((tripleCount++ % 3) == 0)
 		{
 			lint numToPrint = buf[0] & mask;
-			sprintf_s(strbuf, "%lo", numToPrint);
-			res[(OctalStringLength) - (tripleCount / 3) - 1] = strbuf[0];
+			std::stringstream mystrstr;
+			mystrstr << std::oct << numToPrint;
+			res[(OctalStringLength) - (tripleCount / 3) - 1] = mystrstr.str()[0];
 		}
 		(*shiftBuf) >>= 1;
 	}

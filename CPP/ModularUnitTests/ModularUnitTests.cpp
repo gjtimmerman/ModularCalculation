@@ -1,6 +1,6 @@
 #include "pch.h"
-#ifdef __WIN32
-	#include "CppUnitTest.h"
+#ifdef _WIN32
+	#include <CppUnitTest.h>
 	using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #define BEGIN_TEST_CLASS
 #define END_TEST_CLASS
@@ -49,7 +49,7 @@
 	bool Assert::Condition = false;
 #endif
 
-#include "..\ModularCalculation\ModularCalculation.h"
+#include "../ModularCalculation/ModularCalculation.h"
 
 
 namespace ModularUnitTests
@@ -102,7 +102,7 @@ namespace ModularUnitTests
 			r[0] -= 1;
 			ModNumber ml(l);
 			ModNumber mr(r);
-			Assert::IsFalse(l == r);
+			Assert::IsFalse(ml == mr);
 		}
 		TEST_METHOD(TestAddAssignOneToZero)
 		{

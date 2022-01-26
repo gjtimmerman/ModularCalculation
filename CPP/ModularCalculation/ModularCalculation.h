@@ -1,7 +1,12 @@
 #pragma once
 
+
 typedef unsigned long long int llint;
+#ifdef _WIN32
 typedef unsigned long int lint;
+#else
+typedef unsigned int lint;
+#endif
 
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)

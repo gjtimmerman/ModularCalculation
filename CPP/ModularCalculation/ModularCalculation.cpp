@@ -176,7 +176,6 @@ std::string ModNumber::to_string_octal_base() const
 	int wordCount = 0;
 	for (int i = 0; i < NSIZE; i++)
 	{
-		char strbuf[2];
 		if ((wordCount++ % (8 * LSIZE) ) == 0)
 		{
 			if (wordCount/(8 * LSIZE) + 1 < COUNTL)
@@ -230,20 +229,48 @@ ModNumber ModNumber::stomn_hex_base(std::string s)
 {
 	llint n[COUNTLL] = {};
 	size_t len = s.length();
-	if (len > NCOUNT * 2)
+	if (len > HexStringLenght)
 		throw std::domain_error("Value to large");
-	if (len < NCOUNT * 2)
+	if (len < HexStringLenght)
 	{
-		std::string tmp(NCOUNT * 2 - len,'0');
+		std::string tmp(HexStringLenght - len,'0');
 		s = tmp + s;
 	}
-	for (int i = 0; i < NCOUNT * 2; i += LLSIZE*2)
+	for (char c : s)
+	{
+		if (!std::isxdigit(c))
+			throw std::invalid_argument("Only hex digits allowed");
+
+	}
+	for (int i = 0; i < HexStringLenght; i += LLSIZE*2)
 	{
 		std::string tmp = s.substr(i, LLSIZE*2);
 		llint tmpll = std::stoull(tmp,nullptr,16);
 		n[COUNTLL - (i / (LLSIZE * 2)) - 1] = tmpll;
 	}
 	return ModNumber(n);
+}
+
+ModNumber ModNumber::stomn_decimal_base(std::string s)
+{
+	ModNumber n;
+	size_t len = s.length();
+	if (len > DecimalStringLength)
+		throw std::domain_error("Value to large");
+	if (len < DecimalStringLength)
+	{
+		std::string tmp(DecimalStringLength - len, '0');
+		s = tmp + s;
+	}
+	for (int i = 0; i < DecimalStringLength; i++)
+	{
+		if (!std::isdigit(s[i]))
+			throw std::invalid_argument("Only digits allowed");
+		lint digit = s[i] - '0';
+		n *= (lint)10u;
+		n += digit;
+	}
+	return n;
 }
 
 ModNumber ModNumber::stomn(std::string s, int base)
@@ -265,5 +292,8 @@ ModNumber ModNumber::stomn(std::string s, int base)
 	{
 	case 16:
 		return stomn_hex_base(s);
+	case 10:
+		return stomn_decimal_base(s);
 	}
+	throw std::invalid_argument("Invalid argument passed");
 }

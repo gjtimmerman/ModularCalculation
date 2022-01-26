@@ -421,10 +421,25 @@ namespace ModularUnitTests
 			exp.append("4294967295");
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToStringDecimalForMax)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = (llint)~0ull;
+			ModNumber ml(l);
+			std::string res = ml.to_string(10);
+			ModNumber exp = ModNumber::stomn(res, 10);
+			Assert::IsTrue(ml == exp);
+		}
 		TEST_METHOD(TestToModularNumberIllegalBase)
 		{
 			std::string s;
 			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s,11); });
+		}
+		TEST_METHOD(TestToModularNumberHexIllegalChar)
+		{
+			std::string s("123456789ABCDEFG");
+			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s, 16); });
 		}
 
 		TEST_METHOD(TestToModularNumberHexForEmptyString)
@@ -524,6 +539,71 @@ namespace ModularUnitTests
 			for (int i = 0; i < HexStringLenght; i += 32)
 				s.append("000102030405060708090A0B0C0D0E0F");
 			ModNumber mres = ModNumber::stomn(s, 16);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForEmptyString)
+		{
+			ModNumber mexp;
+			std::string s;
+			Assert::IsTrue(mexp == ModNumber::stomn(s, 10));
+		}
+		TEST_METHOD(TestToModularNumberDecimalIllegalChar)
+		{
+			std::string s("123456789A");
+			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s, 10); });
+		}
+
+		TEST_METHOD(TestToModularNumberDecimalForOne)
+		{
+			ModNumber mexp(1);
+			std::string s = "1";
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForTen)
+		{
+			ModNumber mexp(10);
+			std::string s = "10";
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForTenWithLeadingZeros)
+		{
+			ModNumber mexp(10);
+			std::string s = "0000000000000000000010";
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForTenWithLeadingMinusSign)
+		{
+			std::string s = "-10";
+			Assert::ExpectException<std::domain_error>([s]() {ModNumber::stomn(s, 10); });
+		}
+		TEST_METHOD(TestToModularNumberHexForTenWithLeadingPlusSign)
+		{
+			ModNumber mexp(10);
+			std::string s = "+10";
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForTenNines)
+		{
+			ModNumber mexp(0x2540BE3FF);
+			std::string s;
+			s.reserve(DecimalStringLength);
+			s.assign(DecimalStringLength-10, '0');
+			s.append(10, '9');
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberDecimalForEighteenNines)
+		{
+			ModNumber mexp(0xDE0B6B3A763FFFF);
+			std::string s;
+			s.reserve(DecimalStringLength);
+			s.assign(DecimalStringLength - 18, '0');
+			s.append(18, '9');
+			ModNumber mres = ModNumber::stomn(s, 10);
 			Assert::IsTrue(mexp == mres);
 		}
 	};

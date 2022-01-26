@@ -21,6 +21,7 @@ int main()
 		else
 			fail++;
 	}
+	std::cout << "Pass: " << pass << std::endl << "Fail: " << fail << std::endl;
 	if (fail > 0)
 		return 1;
 	else

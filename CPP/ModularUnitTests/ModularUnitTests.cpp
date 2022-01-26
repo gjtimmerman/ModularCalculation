@@ -410,7 +410,7 @@ namespace ModularUnitTests
 		TEST_METHOD(TestToStringDecimalForMaxLong)
 		{
 			llint l[COUNTLL];
-			l[0] = (llint)~0ul;
+			l[0] = (lint)~0ul;
 			for (int i = 1; i < COUNTLL; i++)
 				l[i] = 0;
 			ModNumber ml(l);

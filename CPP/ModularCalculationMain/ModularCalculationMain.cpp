@@ -19,7 +19,10 @@ int main()
 		if (Assert::Condition)
 			pass++;
 		else
+		{ 
 			fail++;
+			std::cout << "Failed Test, Pass: " << pass << " Fail: " << fail << std::endl;
+		}
 	}
 	std::cout << "Pass: " << pass << std::endl << "Fail: " << fail << std::endl;
 	if (fail > 0)

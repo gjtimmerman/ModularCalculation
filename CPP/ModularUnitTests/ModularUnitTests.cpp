@@ -392,8 +392,6 @@ namespace ModularUnitTests
 			exp.assign(DecimalStringLength - 2,'0');
 			exp.append("10");
 			Assert::IsTrue(res == exp);
-			std::cout << exp << std::endl;
-			std::cout << res << std::endl;
 		}
 		TEST_METHOD(TestToStringDecimalForMaxLongPlusOne)
 		{

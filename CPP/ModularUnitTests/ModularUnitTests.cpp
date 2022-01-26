@@ -7,24 +7,25 @@
 #else
 
 	#define TEST_CLASS(name) class name
-	#define BEGIN_TEST_CLASS std::vector<std::function<bool()>>funcarray={[]()->bool{}
+	#define BEGIN_TEST_CLASS std::vector<std::function<void()>>funcarray={[]()->void{Assert::IsTrue(true);}
 	#define END_TEST_CLASS };
-	#define TEST_METHOD(name) ,[]()->bool
+	#define TEST_METHOD(name) ,[]()->void
 	#include <functional>
 	#include <vector>
 	class Assert
 	{
 	public:
-		static int IsTrue(bool condition)
+		static bool Condition;
+		static void IsTrue(bool condition)
 		{
-			return (int)!condition;
+			Condition = condition;
 		}
-		static int IsFalse(bool condition)
+		static void IsFalse(bool condition)
 		{
-			return (int)condition;
+			Condition = !condition;
 		}
 		template<typename T>
-		static int ExpectException(std::function<void()> f)
+		static void  ExpectException(std::function<void()> f)
 		{
 			try
 			{
@@ -32,16 +33,20 @@
 			}
 			catch (T t)
 			{
-				return 0;
+				Condition = true;
+				return;
 			}
 			catch (...)
 			{
-				return 1;
+				Condition = false;
+				return;
 			}
-			return 1;
+			return;
 		}
 
 	};
+
+	bool Assert::Condition = false;
 #endif
 
 #include "..\ModularCalculation\ModularCalculation.h"

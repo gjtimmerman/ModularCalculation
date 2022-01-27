@@ -225,17 +225,23 @@ std::string ModNumber::to_string(const int base) const
 	return res;
 }
 
+std::string ModNumber::AdjustStringLength(std::string s,size_t desiredLength)
+{
+	size_t len = s.length();
+	if (len > desiredLength)
+		throw std::domain_error("Value to large");
+	if (len < desiredLength)
+	{
+		std::string tmp(desiredLength - len, '0');
+		s = tmp + s;
+	}
+	return s;
+}
+
 ModNumber ModNumber::stomn_hex_base(std::string s)
 {
 	llint n[COUNTLL] = {};
-	size_t len = s.length();
-	if (len > HexStringLenght)
-		throw std::domain_error("Value to large");
-	if (len < HexStringLenght)
-	{
-		std::string tmp(HexStringLenght - len,'0');
-		s = tmp + s;
-	}
+	s = AdjustStringLength(s, HexStringLenght);
 	for (char c : s)
 	{
 		if (!std::isxdigit(c))
@@ -254,14 +260,7 @@ ModNumber ModNumber::stomn_hex_base(std::string s)
 ModNumber ModNumber::stomn_decimal_base(std::string s)
 {
 	ModNumber n;
-	size_t len = s.length();
-	if (len > DecimalStringLength)
-		throw std::domain_error("Value to large");
-	if (len < DecimalStringLength)
-	{
-		std::string tmp(DecimalStringLength - len, '0');
-		s = tmp + s;
-	}
+	s = AdjustStringLength(s, DecimalStringLength);
 	for (int i = 0; i < DecimalStringLength; i++)
 	{
 		if (!std::isdigit(s[i]))
@@ -272,6 +271,43 @@ ModNumber ModNumber::stomn_decimal_base(std::string s)
 	}
 	return n;
 }
+
+ModNumber ModNumber::stomn_octal_base(std::string s)
+{
+	llint n[COUNTLL] = {};
+	llint buf = 0u;
+	int bitCount = 0;
+	int firstbits = 2;
+	const llint mask = 4u;
+	s = AdjustStringLength(s, OctalStringLength);
+	for (int i = 0; i < OctalStringLength; i++)
+	{
+		if (!std::isdigit(s[i]) || s[i] == '8' || s[i] == '9')
+			throw std::invalid_argument("Only octal digits allowed");
+		llint digit = s[i] - '0';
+		for (int j = 0; j < 3; j++)
+		{
+			buf <<= 1;
+			llint res = digit & mask;
+			res >>= 2;
+			buf |= res;
+			digit <<= 1;
+			if (firstbits != 0)
+			{
+				firstbits--;
+				continue;
+			}
+			bitCount++;
+			if ((bitCount % (8 * LLSIZE) == 0))
+			{
+				n[COUNTLL - (bitCount / (8 * LLSIZE))] = buf;
+				buf = 0u;
+			}
+		}
+	}
+	return ModNumber(n);
+}
+
 
 ModNumber ModNumber::stomn(std::string s, int base)
 {
@@ -294,6 +330,8 @@ ModNumber ModNumber::stomn(std::string s, int base)
 		return stomn_hex_base(s);
 	case 10:
 		return stomn_decimal_base(s);
+	case 8:
+		return stomn_octal_base(s);
 	}
 	throw std::invalid_argument("Invalid argument passed");
 }

@@ -57,6 +57,8 @@ private:
 	std::string to_string_decimal_base() const;
 	static ModNumber stomn_hex_base(std::string s);
 	static ModNumber stomn_decimal_base(std::string s);
+	static ModNumber stomn_octal_base(std::string s);
+	static std::string AdjustStringLength(std::string s, size_t desiredLength);
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
 	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
 

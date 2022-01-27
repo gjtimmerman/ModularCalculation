@@ -606,6 +606,52 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 10);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestToModularNumberOctalForEmptyString)
+		{
+			ModNumber mexp;
+			std::string s;
+			Assert::IsTrue(mexp == ModNumber::stomn(s, 8));
+		}
+		TEST_METHOD(TestToModularNumberOctalIllegalChar)
+		{
+			std::string s("123456789A");
+			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s, 8); });
+		}
+		TEST_METHOD(TestToModularNumberOctalForOne)
+		{
+			ModNumber mexp(1);
+			std::string s = "1";
+			ModNumber mres = ModNumber::stomn(s, 8);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberOctalForSixteen)
+		{
+			ModNumber mexp(16);
+			std::string s = "20";
+			ModNumber mres = ModNumber::stomn(s, 8);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberOctalForEightWithLeadingZeros)
+		{
+			ModNumber mexp(8);
+			std::string s = "0000000000000000000010";
+			ModNumber mres = ModNumber::stomn(s, 8);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestToModularNumberOctalForMAX)
+		{
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				exp[i] = ~0ull;
+			ModNumber mexp(exp);
+			std::string s;
+			s.reserve(OctalStringLength);
+			s.assign(OctalStringLength, '7');
+			s[0] = '3';
+			ModNumber mres = ModNumber::stomn(s, 8);
+			Assert::IsTrue(mexp == mres);
+		}
+
 	};
 	END_TEST_CLASS
 }

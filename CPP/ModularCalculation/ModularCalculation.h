@@ -35,10 +35,8 @@ const int HexStringLenght = NCOUNT * 2;
 class ModNumber
 {
 public:
-	ModNumber()
-	{
-		memset(num, 0, NCOUNT);
-	}
+	ModNumber() = default;
+	
 	explicit ModNumber(llint* n)
 	{
 		for (int i = 0; i < COUNTLL; i++)
@@ -53,7 +51,7 @@ public:
 
 
 private:
-	llint num[COUNTLL];
+	llint num[COUNTLL] = {};
 	std::string to_string_hex_base() const;
 	std::string to_string_octal_base() const;
 	std::string to_string_decimal_base() const;

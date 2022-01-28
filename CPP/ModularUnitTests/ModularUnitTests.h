@@ -1,17 +1,18 @@
 #pragma once
+
 #ifdef _WIN32
 #include <CppUnitTest.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #define BEGIN_TEST_CLASS
 #define END_TEST_CLASS
 #else
-
 #define TEST_CLASS(name) class name
 #define BEGIN_TEST_CLASS std::vector<std::function<void()>>funcarray={[]()->void{Assert::IsTrue(true);}
 #define END_TEST_CLASS };
 #define TEST_METHOD(name) ,[]()->void
 #include <functional>
 #include <vector>
+
 class Assert
 {
 public:
@@ -655,3 +656,4 @@ namespace ModularUnitTests
 	};
 	END_TEST_CLASS
 }
+#endif

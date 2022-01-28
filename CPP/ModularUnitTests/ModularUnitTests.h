@@ -651,6 +651,27 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 8);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestToModularNumberOctalStringTooLarge)
+		{
+			std::string s;
+			s.reserve(OctalStringLength);
+			for (int i = 0; i < OctalStringLength; i += 16)
+				s.append("0706050403020100");
+			Assert::ExpectException<std::domain_error>([s]() {ModNumber::stomn(s, 8); });
+
+		}
+		TEST_METHOD(TestToModularNumberOctalIncreasingSequenceByteInput)
+		{
+			std::string s;
+			s.reserve(OctalStringLength);
+			s.assign(6,'0');
+			for (int i = 0; i < OctalStringLength-6; i += 16)
+				s.append("0001020304050607");
+			ModNumber mres = ModNumber::stomn(s, 8);
+			std::string exp = mres.to_string(8);
+			Assert::IsTrue(exp == s);
+		}
+
 
 	};
 	END_TEST_CLASS

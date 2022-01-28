@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef _WIN32
-#include <CppUnitTest.h>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #define BEGIN_TEST_CLASS
 #define END_TEST_CLASS
@@ -656,4 +655,3 @@ namespace ModularUnitTests
 	};
 	END_TEST_CLASS
 }
-#endif

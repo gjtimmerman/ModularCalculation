@@ -181,6 +181,20 @@ namespace ModularUnitTests
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+		TEST_METHOD(TestAddAssignOneToFirstSectionMax)
+		{
+			llint l[COUNTLL];
+			l[0] = ~0ull;
+			for (int i = 1; i < COUNTLL; i++)
+				l[i] = 0ull;
+			llint res[COUNTLL] = {};
+			res[1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mres(res);
+			ml += 1ul;
+			Assert::IsTrue(ml == mres);
+		}
+
 		TEST_METHOD(TestAddAssignOneToMax)
 		{
 			llint l[COUNTLL];
@@ -223,7 +237,7 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			Assert::IsTrue((ml *= 2ul) == mr);
 		}
-		TEST_METHOD(TestMultiplyAllNinesByTwo)
+		TEST_METHOD(TestMultiplyAllFFFFByTwo)
 		{
 			llint l[COUNTLL];
 			llint res[COUNTLL];

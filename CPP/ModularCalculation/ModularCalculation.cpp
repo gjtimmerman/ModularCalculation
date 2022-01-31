@@ -55,24 +55,18 @@ std::ostream& operator<<(std::ostream& out, ModNumber& n)
 
 ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 {
+	if (lpos >= COUNTL)
+		return *this;
 	llint res = 0;
 	lint* n = (lint *)num;
-	do
+	res = ((llint)n[lpos]) + scalar;
+	n[lpos++] = ((lint*)&res)[0];
+	while (((lint*)&res)[1] > 0ul && lpos < COUNTL)
 	{
-		int lposc = lpos;
-		while (((lint *) &res)[1] > 0ul && lposc < COUNTL)
-		{
-			res = ((llint)n[lposc]) + ((lint*)&res)[1];
-			n[lposc++] = ((lint *) &res)[0];
-		}
-		if (lposc < COUNTL)
-		{
-			res = ((llint)n[lpos]) + scalar;
-			n[lpos++] = ((lint*)&res)[0];
-		}
-		else
-			break;
-	} while (((lint*) & res)[1] > 0 && lpos < COUNTL);
+		res = ((llint)n[lpos]) + ((lint*)&res)[1];
+		n[lpos++] = ((lint*)&res)[0];
+	}
+
 	return *this;
 }
 

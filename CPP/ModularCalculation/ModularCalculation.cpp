@@ -8,14 +8,6 @@
 
 
 
-llint* CalcModulo(llint* n, llint *mod)
-{
-	for (int i = COUNTLL - 1; i >= 0; i--)
-	{
-
-	}
-	return nullptr;
-}
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r)
 {
@@ -29,8 +21,12 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 		lint ltmp = ll[i];
 		lint rtmp = rl[i];
 		if (ltmp >= carry)
+		{
+			ltmp -= carry;
 			carry = 0;
-		ltmp -= carry;
+		}
+		else
+			ltmp -= carry;
 		if (ltmp < rtmp)
 		{
 			carry = 1; 

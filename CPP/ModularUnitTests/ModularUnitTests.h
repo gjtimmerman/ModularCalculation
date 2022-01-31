@@ -58,7 +58,7 @@ namespace ModularUnitTests
 	{
 	public:
 		BEGIN_TEST_CLASS
-			TEST_METHOD(TestSubtractSimple)
+		TEST_METHOD(TestSubtractSimple)
 		{
 			llint l[COUNTLL];
 			llint r[COUNTLL];
@@ -72,6 +72,60 @@ namespace ModularUnitTests
 			ModNumber res = ml - mr;
 
 			Assert::IsTrue(mr == res);
+		}
+		TEST_METHOD(TestSubtractWithCarry)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			l[0] = 0ul;
+			l[1] = 1ul;
+			r[0] = 1ul;
+			r[1] = 0ul;
+			for (int i = 2; i < COUNTLL; i++)
+			{
+				l[i] = 0ull;
+				r[i] = 0ull;
+			}
+			llint exp[COUNTLL];
+			exp[0] = ~0ull;
+			for (int i = 1; i < COUNTLL; i++)
+			{
+				exp[i] = 0ul;
+			}
+
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber res = ml - mr;
+
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSubtractWithCarryAcrossMultipleSections)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			l[0] = 0ul;
+			l[COUNTLL-1] = 1ul;
+			r[0] = 1ul;
+			r[COUNTLL-1] = 0ul;
+			for (int i = 1; i < COUNTLL-1; i++)
+			{
+				l[i] = 0ull;
+				r[i] = 0ull;
+			}
+			llint exp[COUNTLL];
+			exp[COUNTLL-1] = 0ull;
+			for (int i = 0; i < COUNTLL-1; i++)
+			{
+				exp[i] = ~0ull;
+			}
+
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber res = ml - mr;
+
+			Assert::IsTrue(mexp == res);
 		}
 		TEST_METHOD(TestEqualTrue)
 		{

@@ -41,6 +41,8 @@ bool operator==(const ModNumber& l, const ModNumber& r)
 	for (int i = 0; i < COUNTLL; i++)
 		if (l.num[i] != r.num[i])
 			return false;
+		else
+			;
 	return true;
 }
 

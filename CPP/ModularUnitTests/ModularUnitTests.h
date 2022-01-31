@@ -144,7 +144,7 @@ namespace ModularUnitTests
 			ModNumber res;
 			Assert::IsTrue(ml - ml == res);
 		}
-		TEST_METHOD(TestEqualNotTrue)
+		TEST_METHOD(TestEqualNotTrueFirstSection)
 		{
 			llint l[COUNTLL];
 			llint r[COUNTLL];
@@ -154,6 +154,20 @@ namespace ModularUnitTests
 				r[i] = i;
 			}
 			r[0] -= 1;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			Assert::IsFalse(ml == mr);
+		}
+		TEST_METHOD(TestEqualNotTrueLastSection)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = i;
+				r[i] = i;
+			}
+			r[COUNTLL-1] -= 1;
 			ModNumber ml(l);
 			ModNumber mr(r);
 			Assert::IsFalse(ml == mr);

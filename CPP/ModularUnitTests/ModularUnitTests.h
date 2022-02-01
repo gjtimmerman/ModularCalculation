@@ -668,6 +668,14 @@ namespace ModularUnitTests
 			std::string s("123456789A");
 			Assert::ExpectException<std::invalid_argument>([s]() {ModNumber::stomn(s, 10); });
 		}
+		TEST_METHOD(TestToModularNumberDecimalWithLeadingSpaces)
+		{
+			ModNumber mexp(9);
+			std::string s("     9");
+			ModNumber mres = ModNumber::stomn(s, 10);
+			Assert::IsTrue(mexp == mres);
+
+		}
 
 		TEST_METHOD(TestToModularNumberDecimalForOne)
 		{

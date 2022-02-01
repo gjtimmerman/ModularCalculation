@@ -828,6 +828,27 @@ namespace ModularUnitTests
 			inf.close();
 			Assert::IsTrue(mexp == mAllff);
 		}
+		TEST_METHOD(TestSerializationForIncreasingSequence)
+		{
+			char n[NCOUNT];
+			for (int i = 0; i < NCOUNT; i++)
+				n[i] = i;
+			ModNumber mn((llint*)n);
+			ModNumber mexp;
+			std::string fname("TestSerializationForIncreasingSequence.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << mn;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mn);
+		}
 
 
 	};

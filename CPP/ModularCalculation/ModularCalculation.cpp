@@ -46,11 +46,28 @@ bool operator==(const ModNumber& l, const ModNumber& r)
 	return true;
 }
 
-std::ostream& operator<<(std::ostream& out, ModNumber& n)
+std::ostream& operator<<(std::ostream& out,const ModNumber& n)
 {
+	out.setf(std::ios_base::right | std::ios_base::uppercase);
 	for (int i = COUNTLL - 1; i >= 0; i--)
+	{
+		out.fill('0');
+		out.width(LLSIZE*2);
 		out << std::hex << n.num[i];
+	}
 	return out;
+}
+
+std::istream& operator>>(std::istream& in, ModNumber& n)
+{
+	char buf[LLSIZE * 2 + 1] = {};
+	for (int i = COUNTLL - 1; i >= 0; i--)
+	{
+		in.width(LLSIZE * 2 + 1);
+		in >> buf;
+		n.num[i] = std::stoull(buf, nullptr, 16);
+	}
+	return in;
 }
 
 ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
@@ -233,14 +250,14 @@ std::string ModNumber::AdjustStringLength(std::string s,size_t desiredLength)
 ModNumber ModNumber::stomn_hex_base(std::string s)
 {
 	llint n[COUNTLL] = {};
-	s = AdjustStringLength(s, HexStringLenght);
+	s = AdjustStringLength(s, HexStringLength);
 	for (char c : s)
 	{
 		if (!std::isxdigit(c))
 			throw std::invalid_argument("Only hex digits allowed");
 
 	}
-	for (int i = 0; i < HexStringLenght; i += LLSIZE*2)
+	for (int i = 0; i < HexStringLength; i += LLSIZE*2)
 	{
 		std::string tmp = s.substr(i, LLSIZE*2);
 		llint tmpll = std::stoull(tmp,nullptr,16);

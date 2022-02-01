@@ -410,8 +410,8 @@ namespace ModularUnitTests
 			ModNumber ml;
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(HexStringLenght);
-			exp.assign(HexStringLenght, '0');
+			exp.reserve(HexStringLength);
+			exp.assign(HexStringLength, '0');
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringHexForOne)
@@ -419,8 +419,8 @@ namespace ModularUnitTests
 			ModNumber ml(1);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(HexStringLenght);
-			exp.assign(HexStringLenght - 1, '0');
+			exp.reserve(HexStringLength);
+			exp.assign(HexStringLength - 1, '0');
 			exp.append("1");
 			Assert::IsTrue(res == exp);
 		}
@@ -429,8 +429,8 @@ namespace ModularUnitTests
 			ModNumber ml(16);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(HexStringLenght);
-			exp.assign(HexStringLenght - 2, '0');
+			exp.reserve(HexStringLength);
+			exp.assign(HexStringLength - 2, '0');
 			exp.append("10");
 			Assert::IsTrue(res == exp);
 		}
@@ -442,8 +442,8 @@ namespace ModularUnitTests
 			ModNumber ml(l);
 			std::string res = ml.to_string(16);
 			std::string exp;
-			exp.reserve(HexStringLenght);
-			exp.assign(HexStringLenght, 'F');
+			exp.reserve(HexStringLength);
+			exp.assign(HexStringLength, 'F');
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringDecimalForZero)
@@ -570,8 +570,8 @@ namespace ModularUnitTests
 				exp[i] = ~0ull;
 			ModNumber mexp(exp);
 			std::string s;
-			s.reserve(HexStringLenght);
-			s.assign(HexStringLenght, 'F');
+			s.reserve(HexStringLength);
+			s.assign(HexStringLength, 'F');
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
@@ -585,8 +585,8 @@ namespace ModularUnitTests
 			llint* exp = (llint*)cexp;
 			ModNumber mexp(exp);
 			std::string s;
-			s.reserve(HexStringLenght);
-			for (int i = 0; i < HexStringLenght; i += 32)
+			s.reserve(HexStringLength);
+			for (int i = 0; i < HexStringLength; i += 32)
 				s.append("0F0E0D0C0B0A09080706050403020100");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
@@ -601,8 +601,8 @@ namespace ModularUnitTests
 			}
 			ModNumber mexp(exp);
 			std::string s;
-			s.reserve(HexStringLenght);
-			for (int i = 0; i < HexStringLenght; i += 32)
+			s.reserve(HexStringLength);
+			for (int i = 0; i < HexStringLength; i += 32)
 				s.append("0F0E0D0C0B0A09080706050403020100");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
@@ -617,8 +617,8 @@ namespace ModularUnitTests
 			}
 			ModNumber mexp(exp);
 			std::string s;
-			s.reserve(HexStringLenght);
-			for (int i = 0; i < HexStringLenght; i += 32)
+			s.reserve(HexStringLength);
+			for (int i = 0; i < HexStringLength; i += 32)
 				s.append("000102030405060708090A0B0C0D0E0F");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
@@ -752,6 +752,81 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::stomn(s, 8);
 			std::string exp = mres.to_string(8);
 			Assert::IsTrue(exp == s);
+		}
+		TEST_METHOD(TestSerializationForZero)
+		{
+			ModNumber mempty;
+			ModNumber mexp;
+			std::string fname("TestSerializationForZero.txt");
+			std::ofstream outf;
+			outf.open(fname,std::ios::out);
+			outf << mempty;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mempty == mexp);
+		}
+		TEST_METHOD(TestSerializationForOne)
+		{
+			ModNumber mone(1);
+			ModNumber mexp;
+			std::string fname("TestSerializationForOne.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mone);
+		}
+		TEST_METHOD(TestSerializationForSixteen)
+		{
+			ModNumber mone(16);
+			ModNumber mexp;
+			std::string fname("TestSerializationForSixteen.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mone);
+		}
+		TEST_METHOD(TestSerializationForAllFFFF)
+		{
+			llint allff[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				allff[i] = ~0ull;
+			ModNumber mAllff(allff);
+			ModNumber mexp;
+			std::string fname("TestSerializationForAllFF.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << mAllff;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mAllff);
 		}
 
 

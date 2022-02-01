@@ -30,7 +30,7 @@ const llint	lintmask = ~0ul;
 
 const int OctalStringLength = NSIZE / 3 + 1;
 const int DecimalStringLength = OctalStringLength;
-const int HexStringLenght = NCOUNT * 2;
+const int HexStringLength = NCOUNT * 2;
 
 class ModNumber
 {
@@ -71,7 +71,8 @@ private:
 	friend ModNumber& operator/= (ModNumber& n, lint scalar);
 	friend ModNumber operator* (ModNumber& n, lint scalar);
 	friend lint operator% (const ModNumber& n, lint scalar);
-	friend std::ostream& operator << (std::ostream& out, ModNumber& n);
+	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
+	friend std::istream& operator>>(std::istream& in, ModNumber& n);
 
 };
 
@@ -83,6 +84,7 @@ ModNumber operator/ (const ModNumber& n, lint scalar);
 ModNumber& operator/= (ModNumber& n, lint scalar);
 ModNumber operator* (ModNumber& n, lint scalar);
 lint operator% (const ModNumber& n, lint scalar);
-std::ostream& operator<<(std::ostream& out, ModNumber& n);
+std::ostream& operator<<(std::ostream& out,const ModNumber& n);
+std::istream& operator>>(std::istream& in, ModNumber& n);
 
 

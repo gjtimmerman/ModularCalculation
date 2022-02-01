@@ -70,6 +70,14 @@ std::istream& operator>>(std::istream& in, ModNumber& n)
 	return in;
 }
 
+ModNumber operator+(const ModNumber &n, lint scalar)
+{
+	ModNumber mres(n);
+	mres.AddAssignScalar(0, scalar);
+	return mres;
+
+}
+
 ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 {
 	llint res = 0;
@@ -90,7 +98,7 @@ ModNumber& operator+=(ModNumber& n, lint scalar)
 	return n.AddAssignScalar(0, scalar);
 }
 
-ModNumber operator* (ModNumber& n, lint scalar)
+ModNumber operator* (const ModNumber& n, lint scalar)
 {
 	lint* ln = (lint*)n.num;
 	ModNumber mres;

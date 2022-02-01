@@ -127,6 +127,24 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSubtractOneFromZero)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			r[0] = 1ull;
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				exp[i] = ~0ull;
+			}
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber res = ml - mr;
+
+			Assert::IsTrue(mexp == res);
+		}
+
 		TEST_METHOD(TestEqualTrue)
 		{
 			llint l[COUNTLL];
@@ -205,6 +223,22 @@ namespace ModularUnitTests
 			ModNumber mres(res);
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
+		}
+		TEST_METHOD(TestAddAssignMaxToMax)
+		{
+			llint l[COUNTLL];
+			lint r = 0xFFul;
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+			}
+			exp[0] = 0xFEull;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres;
+			mres = ml + r;
+			Assert::IsTrue(mexp == mres);
 		}
 		TEST_METHOD(TestMultiplyByZero)
 		{

@@ -72,8 +72,6 @@ std::istream& operator>>(std::istream& in, ModNumber& n)
 
 ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 {
-	if (lpos >= COUNTL)
-		return *this;
 	llint res = 0;
 	lint* n = (lint *)num;
 	res = ((llint)n[lpos]) + scalar;
@@ -102,7 +100,8 @@ ModNumber operator* (ModNumber& n, lint scalar)
 	{
 		llint res = ((llint)ln[i]) * scalar;
 		mres.AddAssignScalar(i, ((lint*)&res)[0]);
-		mres.AddAssignScalar(i + 1, ((lint*)&res)[1]);
+		if (i < COUNTL - 1)
+			mres.AddAssignScalar(i + 1, ((lint*)&res)[1]);
 	}
 	return mres;
 }

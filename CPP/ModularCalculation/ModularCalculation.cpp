@@ -48,12 +48,15 @@ bool operator==(const ModNumber& l, const ModNumber& r)
 
 std::ostream& operator<<(std::ostream& out,const ModNumber& n)
 {
-	out.setf(std::ios_base::right | std::ios_base::uppercase);
+	std::ios_base::fmtflags flags = out.flags();
+	flags |= std::ios_base::right;
+	flags |= std::ios_base::uppercase;
+	out.setf(flags);
 	for (int i = COUNTLL - 1; i >= 0; i--)
 	{
 		out.fill('0');
 		out.width(LLSIZE*2);
-		out << std::hex << n.num[i];
+		out << n.num[i];
 	}
 	return out;
 }

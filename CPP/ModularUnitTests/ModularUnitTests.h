@@ -802,7 +802,7 @@ namespace ModularUnitTests
 			std::string fname("TestSerializationForZero.txt");
 			std::ofstream outf;
 			outf.open(fname,std::ios::out);
-			outf << mempty;
+			outf << std::hex << mempty;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
@@ -820,7 +820,7 @@ namespace ModularUnitTests
 			std::string fname("TestSerializationForOne.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
-			outf << mone;
+			outf << std::hex << mone;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
@@ -838,7 +838,7 @@ namespace ModularUnitTests
 			std::string fname("TestSerializationForSixteen.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
-			outf << mone;
+			outf << std::hex << mone;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
@@ -859,7 +859,7 @@ namespace ModularUnitTests
 			std::string fname("TestSerializationForAllFF.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
-			outf << mAllff;
+			outf << std::hex << mAllff;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
@@ -880,7 +880,7 @@ namespace ModularUnitTests
 			std::string fname("TestSerializationForIncreasingSequence.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
-			outf << mn;
+			outf << std::hex << mn;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);

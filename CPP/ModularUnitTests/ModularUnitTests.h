@@ -795,96 +795,288 @@ namespace ModularUnitTests
 			std::string exp = mres.to_string(8);
 			Assert::IsTrue(exp == s);
 		}
-		TEST_METHOD(TestSerializationForZero)
+		TEST_METHOD(TestSerializationHexForZero)
 		{
 			ModNumber mempty;
 			ModNumber mexp;
-			std::string fname("TestSerializationForZero.txt");
+			std::string fname("TestSerializationHexForZero.txt");
 			std::ofstream outf;
 			outf.open(fname,std::ios::out);
 			outf << std::hex << mempty;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
-			inf >> mexp;
+			inf >> std::hex >> mexp;
 			char c;
 			inf >> c;
 			Assert::IsTrue(inf.eof());
 			inf.close();
 			Assert::IsTrue(mempty == mexp);
 		}
-		TEST_METHOD(TestSerializationForOne)
+		TEST_METHOD(TestSerializationHexForOne)
 		{
 			ModNumber mone(1);
 			ModNumber mexp;
-			std::string fname("TestSerializationForOne.txt");
+			std::string fname("TestSerializationHexForOne.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
 			outf << std::hex << mone;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
-			inf >> mexp;
+			inf >> std::hex >> mexp;
 			char c;
 			inf >> c;
 			Assert::IsTrue(inf.eof());
 			inf.close();
 			Assert::IsTrue(mexp == mone);
 		}
-		TEST_METHOD(TestSerializationForSixteen)
+		TEST_METHOD(TestSerializationHexForSixteen)
 		{
 			ModNumber mone(16);
 			ModNumber mexp;
-			std::string fname("TestSerializationForSixteen.txt");
+			std::string fname("TestSerializationHexForSixteen.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
 			outf << std::hex << mone;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
-			inf >> mexp;
+			inf >> std::hex >> mexp;
 			char c;
 			inf >> c;
 			Assert::IsTrue(inf.eof());
 			inf.close();
 			Assert::IsTrue(mexp == mone);
 		}
-		TEST_METHOD(TestSerializationForAllFFFF)
+		TEST_METHOD(TestSerializationHexForAllFFFF)
 		{
 			llint allff[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 				allff[i] = ~0ull;
 			ModNumber mAllff(allff);
 			ModNumber mexp;
-			std::string fname("TestSerializationForAllFF.txt");
+			std::string fname("TestSerializationHexForAllFF.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
 			outf << std::hex << mAllff;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
-			inf >> mexp;
+			inf >> std::hex >> mexp;
 			char c;
 			inf >> c;
 			Assert::IsTrue(inf.eof());
 			inf.close();
 			Assert::IsTrue(mexp == mAllff);
 		}
-		TEST_METHOD(TestSerializationForIncreasingSequence)
+		TEST_METHOD(TestSerializationHexForIncreasingSequence)
 		{
 			char n[NCOUNT];
 			for (int i = 0; i < NCOUNT; i++)
 				n[i] = i;
 			ModNumber mn((llint*)n);
 			ModNumber mexp;
-			std::string fname("TestSerializationForIncreasingSequence.txt");
+			std::string fname("TestSerializationHexForIncreasingSequence.txt");
 			std::ofstream outf;
 			outf.open(fname, std::ios::out);
 			outf << std::hex << mn;
 			outf.close();
 			std::ifstream inf;
 			inf.open(fname, std::ios::in);
-			inf >> mexp;
+			inf >> std::hex >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mn);
+		}
+		TEST_METHOD(TestSerializationOctForZero)
+		{
+			ModNumber mempty;
+			ModNumber mexp;
+			std::string fname("TestSerializationOctForZero.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::oct << mempty;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::oct >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mempty == mexp);
+		}
+		TEST_METHOD(TestSerializationOctForOne)
+		{
+			ModNumber mone(1);
+			ModNumber mres;
+			std::string fname("TestSerializationOctForOne.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::oct << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::oct >> mres;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mres == mone);
+		}
+		TEST_METHOD(TestSerializationOctForSixteen)
+		{
+			ModNumber mone(16);
+			ModNumber mexp;
+			std::string fname("TestSerializationOctForSixteen.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::oct << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::oct >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mone);
+		}
+		TEST_METHOD(TestSerializationOctForAllFFFF)
+		{
+			llint allff[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				allff[i] = ~0ull;
+			ModNumber mAllff(allff);
+			ModNumber mexp;
+			std::string fname("TestSerializationOctForAllFF.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::oct << mAllff;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::oct >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mAllff);
+		}
+		TEST_METHOD(TestSerializationOctForIncreasingSequence)
+		{
+			char n[NCOUNT];
+			for (int i = 0; i < NCOUNT; i++)
+				n[i] = i;
+			ModNumber mn((llint*)n);
+			ModNumber mexp;
+			std::string fname("TestSerializationOctForIncreasingSequence.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::oct << mn;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::oct >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mn);
+		}
+		TEST_METHOD(TestSerializationDecForZero)
+		{
+			ModNumber mempty;
+			ModNumber mexp;
+			std::string fname("TestSerializationDecForZero.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::dec << mempty;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::dec >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mempty == mexp);
+		}
+		TEST_METHOD(TestSerializationDecForOne)
+		{
+			ModNumber mone(1);
+			ModNumber mexp;
+			std::string fname("TestSerializationDecForOne.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::dec << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::dec >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mone);
+		}
+		TEST_METHOD(TestSerializationDecForTen)
+		{
+			ModNumber mone(10);
+			ModNumber mexp;
+			std::string fname("TestSerializationDecForTen.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::dec << mone;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::dec >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mone);
+		}
+		TEST_METHOD(TestSerializationDecForAllFFFF)
+		{
+			llint allff[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				allff[i] = ~0ull;
+			ModNumber mAllff(allff);
+			ModNumber mexp;
+			std::string fname("TestSerializationDecForAllFF.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::dec << mAllff;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::dec >> mexp;
+			char c;
+			inf >> c;
+			Assert::IsTrue(inf.eof());
+			inf.close();
+			Assert::IsTrue(mexp == mAllff);
+		}
+		TEST_METHOD(TestSerializationDecForIncreasingSequence)
+		{
+			char n[NCOUNT];
+			for (int i = 0; i < NCOUNT; i++)
+				n[i] = i;
+			ModNumber mn((llint*)n);
+			ModNumber mexp;
+			std::string fname("TestSerializationDecForIncreasingSequence.txt");
+			std::ofstream outf;
+			outf.open(fname, std::ios::out);
+			outf << std::dec << mn;
+			outf.close();
+			std::ifstream inf;
+			inf.open(fname, std::ios::in);
+			inf >> std::dec >> mexp;
 			char c;
 			inf >> c;
 			Assert::IsTrue(inf.eof());

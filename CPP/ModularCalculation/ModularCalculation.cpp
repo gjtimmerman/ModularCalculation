@@ -52,24 +52,57 @@ std::ostream& operator<<(std::ostream& out,const ModNumber& n)
 	flags |= std::ios_base::right;
 	flags |= std::ios_base::uppercase;
 	out.setf(flags);
-	for (int i = COUNTLL - 1; i >= 0; i--)
+	if (flags & std::ios_base::hex)
+		for (int i = COUNTLL - 1; i >= 0; i--)
+		{
+			out.fill('0');
+			out.width(LLSIZE*2);
+			out << n.num[i];
+		}
+	else if (flags & std::ios_base::oct)
 	{
-		out.fill('0');
-		out.width(LLSIZE*2);
-		out << n.num[i];
+		llint mask = ~(~0ull >> 1);
+		int count = COUNTLL - 1;
+		int bitcounter = 0;
+		int initial = 2;
+		llint tmp = n.num[count];
+		for (int i = 0; i < OctalStringLength; i++)
+		{
+			int digit = 0;
+			for (int j = initial; j < 3; j++)
+			{
+				llint bits = tmp & mask;
+				bits >>= (LLSIZE*8 - 3) + j;
+				tmp <<= 1;
+				digit |= bits;
+				if (++bitcounter % (LLSIZE*8) == 0)
+					tmp = n.num[--count];
+			}
+			initial = 0;
+			out << digit;
+		}
+	}
+	else if (flags & std::ios_base::dec)
+	{
+		std::string s = n.to_string_decimal_base();
+		out << s;
 	}
 	return out;
 }
 
 std::istream& operator>>(std::istream& in, ModNumber& n)
 {
-	char buf[LLSIZE * 2 + 1] = {};
-	for (int i = COUNTLL - 1; i >= 0; i--)
-	{
-		in.width(LLSIZE * 2 + 1);
-		in >> buf;
-		n.num[i] = std::stoull(buf, nullptr, 16);
-	}
+	int base = 0;
+	std::ios_base::fmtflags flags = in.flags();
+	if (flags & std::ios_base::hex)
+		base = 16;
+	else if (flags & std::ios_base::oct)
+		base = 8;
+	else if (flags & std::ios_base::dec)
+		base = 10;
+	std::string s;
+	in >> s;
+	n = ModNumber::stomn(s, base);
 	return in;
 }
 

@@ -202,6 +202,26 @@ namespace ModularUnitTests
 			ModNumber mr(2);
 			Assert::IsFalse(mr < ml);
 		}
+		TEST_METHOD(TestGreaterThanTrueForLargeDifference)
+		{
+			llint l[COUNTLL] = {};
+			l[COUNTLL - 1] = 1ull;
+			llint r[COUNTLL] = {};
+			r[0] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			Assert::IsTrue(ml > mr);
+		}
+		TEST_METHOD(TestLessThanFalseForLargeDifference)
+		{
+			llint l[COUNTLL] = {};
+			l[COUNTLL - 1] = 1ull;
+			llint r[COUNTLL] = {};
+			r[0] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			Assert::IsFalse(ml < mr);
+		}
 		TEST_METHOD(TestLessThanFalseForEquality)
 		{
 			ModNumber ml(1234);

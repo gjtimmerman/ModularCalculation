@@ -75,6 +75,8 @@ private:
 	friend lint operator% (const ModNumber& n, lint scalar);
 	friend bool operator < (const ModNumber& l, const ModNumber& r);
 	friend bool operator > (const ModNumber& l, const ModNumber& r);
+	friend bool operator <= (const ModNumber& l, const ModNumber& r);
+	friend bool operator >= (const ModNumber& l, const ModNumber& r);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
 
@@ -91,6 +93,8 @@ ModNumber operator+ (const ModNumber& n, lint scalar);
 lint operator% (const ModNumber& n, lint scalar);
 bool operator < (const ModNumber& l, const ModNumber& r);
 bool operator > (const ModNumber& l, const ModNumber& r);
+bool operator <= (const ModNumber& l, const ModNumber& r);
+bool operator >= (const ModNumber& l, const ModNumber& r);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
 

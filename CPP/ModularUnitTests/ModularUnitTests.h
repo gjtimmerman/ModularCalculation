@@ -212,6 +212,29 @@ namespace ModularUnitTests
 			ModNumber ml;
 			Assert::IsFalse(ml < ml);
 		}
+		TEST_METHOD(TestLessOrEqualTrueForLessThan)
+		{
+			ModNumber ml(1);
+			ModNumber mr(2);
+			Assert::IsTrue(ml <= mr);
+		}
+		TEST_METHOD(TestLessOrEqualFalseForGreaterThan)
+		{
+			ModNumber ml(1);
+			ModNumber mr(2);
+			Assert::IsFalse(mr <= ml);
+		}
+		TEST_METHOD(TestLessOrEqualTrueForEquality)
+		{
+			ModNumber ml(1234);
+			Assert::IsTrue(ml <= ml);
+		}
+		TEST_METHOD(TestLessOrEqualTrueForEqualityOfZero)
+		{
+			ModNumber ml;
+			Assert::IsTrue(ml <= ml);
+		}
+
 		TEST_METHOD(TestGreaterThanTrue)
 		{
 			ModNumber ml(2);
@@ -233,6 +256,28 @@ namespace ModularUnitTests
 		{
 			ModNumber ml;
 			Assert::IsFalse(ml > ml);
+		}
+		TEST_METHOD(TestGreaterOrEqualTrueForGreaterThan)
+		{
+			ModNumber ml(2);
+			ModNumber mr(1);
+			Assert::IsTrue(ml >= mr);
+		}
+		TEST_METHOD(TestGreaterOrEqualFalseForGreaterThan)
+		{
+			ModNumber ml(2);
+			ModNumber mr(1);
+			Assert::IsFalse(mr >= ml);
+		}
+		TEST_METHOD(TestGreaterOrEqualTrueForEquality)
+		{
+			ModNumber ml(1234);
+			Assert::IsTrue(ml >= ml);
+		}
+		TEST_METHOD(TestGreaterOrEqualTrueForEqualityOfZero)
+		{
+			ModNumber ml;
+			Assert::IsTrue(ml >= ml);
 		}
 
 

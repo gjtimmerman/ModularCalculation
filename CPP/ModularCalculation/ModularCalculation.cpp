@@ -53,6 +53,17 @@ bool operator < (const ModNumber& l, const ModNumber& r)
 			return l.num[i] < r.num[i];
 	return false;
 }
+
+bool operator <= (const ModNumber& l, const ModNumber& r)
+{
+	return l < r || l == r;
+}
+
+bool operator >= (const ModNumber& l, const ModNumber& r)
+{
+	return l > r || l == r;
+}
+
 bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)

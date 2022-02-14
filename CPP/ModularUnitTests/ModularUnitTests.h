@@ -190,6 +190,52 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			Assert::IsFalse(ml == mr);
 		}
+		TEST_METHOD(TestLessThanTrue)
+		{
+			ModNumber ml(1);
+			ModNumber mr(2);
+			Assert::IsTrue(ml < mr);
+		}
+		TEST_METHOD(TestLessThanFalse)
+		{
+			ModNumber ml(1);
+			ModNumber mr(2);
+			Assert::IsFalse(mr < ml);
+		}
+		TEST_METHOD(TestLessThanFalseForEquality)
+		{
+			ModNumber ml(1234);
+			Assert::IsFalse(ml < ml);
+		}
+		TEST_METHOD(TestLessThanFalseForEqualityOfZero)
+		{
+			ModNumber ml;
+			Assert::IsFalse(ml < ml);
+		}
+		TEST_METHOD(TestGreaterThanTrue)
+		{
+			ModNumber ml(2);
+			ModNumber mr(1);
+			Assert::IsTrue(ml > mr);
+		}
+		TEST_METHOD(TestGreaterThanFalse)
+		{
+			ModNumber ml(1);
+			ModNumber mr(2);
+			Assert::IsFalse(ml > mr);
+		}
+		TEST_METHOD(TestGreaterThanFalseForEquality)
+		{
+			ModNumber ml(1234);
+			Assert::IsFalse(ml > ml);
+		}
+		TEST_METHOD(TestGreaterThanFalseForEqualityOfZero)
+		{
+			ModNumber ml;
+			Assert::IsFalse(ml > ml);
+		}
+
+
 		TEST_METHOD(TestAddAssignOneToZero)
 		{
 			llint l[COUNTLL] = {};

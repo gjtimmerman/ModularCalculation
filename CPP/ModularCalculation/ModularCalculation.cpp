@@ -46,6 +46,21 @@ bool operator==(const ModNumber& l, const ModNumber& r)
 	return true;
 }
 
+bool operator < (const ModNumber& l, const ModNumber& r)
+{
+	for (int i = COUNTLL - 1; i >= 0; i--)
+		if (l.num[i] || r.num[i])
+			return l.num[i] < r.num[i];
+	return false;
+}
+bool operator > (const ModNumber& l, const ModNumber& r)
+{
+	for (int i = COUNTLL - 1; i >= 0; i--)
+		if (l.num[i] || r.num[i])
+			return l.num[i] > r.num[i];
+	return false;
+}
+
 std::ostream& operator<<(std::ostream& out,const ModNumber& n)
 {
 	std::ios_base::fmtflags flags = out.flags();

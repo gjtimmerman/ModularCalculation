@@ -12,4 +12,5 @@
 #include <fstream>
 #include <string>
 #include <stdexcept>
+#include <cmath>
 #endif //PCH_H

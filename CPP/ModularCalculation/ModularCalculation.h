@@ -26,10 +26,11 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 //static_assert(COUNTL == 128, "COUNTL is not 128");
 //static_assert(COUNTLL == 64, "COUNTLL is not 64");
 
+
 const llint	lintmask = ~0ul;
 
 const int OctalStringLength = NSIZE / 3 + 1;
-const int DecimalStringLength = OctalStringLength;
+const int DecimalStringLength = static_cast<int>(std::ceil(NSIZE * 0.30102999566398119521373889472449)); // log(2)
 const int HexStringLength = NCOUNT * 2;
 
 class ModNumber

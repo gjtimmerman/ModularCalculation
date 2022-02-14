@@ -36,6 +36,46 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 	return res;
 }
 
+ModNumber operator%(const ModNumber& l, const ModNumber& r)
+{
+	if (l < r)
+	{
+		return l;
+	}
+	if (l == r)
+		return ModNumber(0ull);
+	int li;
+	int ri;
+	for (int i = COUNTLL - 1; i >= 0; i--)
+		if (l.num[i])
+		{
+			li = i;
+			break;
+		}
+	for (int i = li; i >= 0; i--)
+		if (r.num[i])
+		{
+			ri = i;
+			break;
+		}
+	int diff = li - ri;
+	ModNumber mres(l);
+	for (int i = 0; i <= diff; i++)
+	{
+		llint tmp[COUNTLL] = {};
+		for (int j = 0; j < ri; j++)
+		{
+			tmp[j + diff - i] = r.num[j];
+		}
+		ModNumber mtmp(tmp);
+		while(mres > mtmp)
+		{
+			mres = mres - mtmp;
+		}
+	}
+	return mres;
+}
+
 bool operator==(const ModNumber& l, const ModNumber& r)
 {
 	for (int i = 0; i < COUNTLL; i++)

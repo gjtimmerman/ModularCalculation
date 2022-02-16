@@ -44,8 +44,8 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 	}
 	if (l == r)
 		return ModNumber(0ull);
-	int li;
-	int ri;
+	int li = 0;
+	int ri = 0;
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i])
 		{

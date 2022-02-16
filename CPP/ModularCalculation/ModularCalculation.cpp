@@ -38,6 +38,20 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
+	ModNumber mzero;
+	if (r == mzero)
+		throw std::domain_error("Division by Zero");
+	ModNumber mone(1ull);
+	if (r == mone)		// Just optimization
+		return mzero;
+	ModNumber mtwo(2ull);
+	if (r == mtwo)		// Just optimization
+	{
+		if (l.num[0] & 0x1ull)
+			return mone;
+		else
+			return mzero;
+	}
 	if (l < r)
 	{
 		return l;

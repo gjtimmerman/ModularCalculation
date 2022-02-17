@@ -52,7 +52,9 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 			carry = 0;
 		}
 		else
+		{
 			ltmp -= carry;
+		}
 		if (ltmp < rtmp)
 		{
 			carry = 1; 
@@ -67,7 +69,9 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 				break;
 			}
 			else
+			{
 				resl[j] -= carry;
+			}
 	return res;
 }
 
@@ -111,7 +115,9 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 			carry = 0;
 		}
 		else
+		{
 			ltmp -= carry;
+		}
 		if (ltmp < rtmp)
 		{
 			carry = 1;
@@ -126,7 +132,9 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 				break;
 			}
 			else
+			{
 				ll[j] -= carry;
+			}
 	return l;
 }
 

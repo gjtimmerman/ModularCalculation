@@ -381,15 +381,16 @@ namespace ModularUnitTests
 			ModNumber exp(1);
 			Assert::IsTrue(exp == l % r);
 		}
-		//TEST_METHOD(TestModuloDivide2Pow65ByEight)
-		//{
-		//	llint l[COUNTLL] = {};
-		//	l[1] = 1ull;
-		//	ModNumber ml(l);
-		//	ModNumber mr(8ull);
-		//	ModNumber exp;
-		//	Assert::IsTrue(exp == ml % mr);
-		//}
+		TEST_METHOD(TestModuloDivide2Pow65ByEight)
+		{
+			llint l[COUNTLL] = {};
+			l[1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mr(8ull);
+			ModNumber exp;
+			ModNumber mres = ml % mr;
+			Assert::IsTrue(exp == mres);
+		}
 
 
 		TEST_METHOD(TestEqualTrue)

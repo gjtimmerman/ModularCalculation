@@ -62,6 +62,7 @@ private:
 	static std::string AdjustStringLength(std::string s, size_t desiredLength);
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
 	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
+	unsigned int FindFirstNonZeroBitInWord(unsigned int word) const;
 
 
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);

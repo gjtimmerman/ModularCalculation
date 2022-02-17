@@ -148,6 +148,19 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 	return l;
 }
 
+unsigned int ModNumber::FindFirstNonZeroBitInWord(unsigned int word) const
+{
+	llint mask = 01ull << (LLSIZE*8 - 1);
+	for (int i = 0; i < LLSIZE*8; i++)
+	{
+		if (num[word] & mask)
+			return i;
+		mask >>= 1;
+	}
+	return LLSIZE*8;
+}
+
+
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
 	ModNumber mzero;
@@ -194,9 +207,17 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 			tmp[j + diff - i] = r.num[j];
 		}
 		ModNumber mtmp(tmp);
-		while(mres > mtmp)
+		unsigned int bl = (LLSIZE*8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE*8;
+		unsigned int br = (LLSIZE*8 - mtmp.FindFirstNonZeroBitInWord(diff+ri-i)) + (diff + ri - i) * LLSIZE * 8;
+		int bdiff = bl - br;
+		for (int j = 0; j <= bdiff; j++)
 		{
-			mres -= mtmp;
+			ModNumber mtmp2(mtmp);
+			mtmp2 <<= bdiff - j;
+			while (mres >= mtmp2)
+			{
+				mres -= mtmp2; 
+			}
 		}
 	}
 	return mres;

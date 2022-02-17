@@ -65,6 +65,7 @@ private:
 
 
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);
+	friend ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 	friend bool operator==(const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator *=(ModNumber& n, lint scalar);
 	friend ModNumber& operator+=(ModNumber& n, lint scalar);
@@ -78,12 +79,15 @@ private:
 	friend bool operator <= (const ModNumber& l, const ModNumber& r);
 	friend bool operator >= (const ModNumber& l, const ModNumber& r);
 	friend ModNumber operator%(const ModNumber& l, const ModNumber& r);
+	friend ModNumber operator<<(const ModNumber& n, const unsigned int i);
+	friend ModNumber& operator <<= (ModNumber& n, unsigned int i);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
 
 };
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
+ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
 ModNumber& operator *=(ModNumber& n, lint scalar);
 ModNumber& operator+=(ModNumber& n, lint scalar);
@@ -97,6 +101,8 @@ bool operator > (const ModNumber& l, const ModNumber& r);
 bool operator <= (const ModNumber& l, const ModNumber& r);
 bool operator >= (const ModNumber& l, const ModNumber& r);
 ModNumber operator%(const ModNumber& l, const ModNumber& r);
+ModNumber operator<<(const ModNumber& n, const unsigned int i);
+ModNumber& operator <<= (ModNumber& n, unsigned int i);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
 

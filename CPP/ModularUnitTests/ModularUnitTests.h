@@ -73,25 +73,31 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mr == res);
 		}
-		TEST_METHOD(TestSubtractWithCarry)
+		TEST_METHOD(TestSubtractAssignSimple)
 		{
 			llint l[COUNTLL];
 			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = 2ull;
+				r[i] = 1ull;
+			}
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ml -= mr;
+
+			Assert::IsTrue(mr == ml);
+		}
+		TEST_METHOD(TestSubtractWithCarry)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
 			l[0] = 0ul;
 			l[1] = 1ul;
 			r[0] = 1ul;
 			r[1] = 0ul;
-			for (int i = 2; i < COUNTLL; i++)
-			{
-				l[i] = 0ull;
-				r[i] = 0ull;
-			}
-			llint exp[COUNTLL];
+			llint exp[COUNTLL] = {};
 			exp[0] = ~0ull;
-			for (int i = 1; i < COUNTLL; i++)
-			{
-				exp[i] = 0ul;
-			}
 
 			ModNumber ml(l);
 			ModNumber mr(r);
@@ -100,22 +106,35 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSubtractAssignWithCarry)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			l[0] = 0ul;
+			l[1] = 1ul;
+			r[0] = 1ul;
+			r[1] = 0ul;
+			llint exp[COUNTLL] = {};
+			exp[0] = ~0ull;
+
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
 		TEST_METHOD(TestSubtractWithCarryAcrossMultipleSections)
 		{
-			llint l[COUNTLL];
-			llint r[COUNTLL];
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
 			l[0] = 0ul;
-			l[COUNTLL-1] = 1ul;
+			l[COUNTLL - 1] = 1ul;
 			r[0] = 1ul;
-			r[COUNTLL-1] = 0ul;
-			for (int i = 1; i < COUNTLL-1; i++)
-			{
-				l[i] = 0ull;
-				r[i] = 0ull;
-			}
+			r[COUNTLL - 1] = 0ul;
 			llint exp[COUNTLL];
-			exp[COUNTLL-1] = 0ull;
-			for (int i = 0; i < COUNTLL-1; i++)
+			exp[COUNTLL - 1] = 0ull;
+			for (int i = 0; i < COUNTLL - 1; i++)
 			{
 				exp[i] = ~0ull;
 			}
@@ -127,6 +146,28 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSubtractAssignWithCarryAcrossMultipleSections)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			l[0] = 0ul;
+			l[COUNTLL - 1] = 1ul;
+			r[0] = 1ul;
+			r[COUNTLL - 1] = 0ul;
+			llint exp[COUNTLL];
+			exp[COUNTLL - 1] = 0ull;
+			for (int i = 0; i < COUNTLL - 1; i++)
+			{
+				exp[i] = ~0ull;
+			}
+
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ml -= mr;
+			Assert::IsTrue(mexp == ml);
+		}
+
 		TEST_METHOD(TestSubtractOneFromZero)
 		{
 			llint l[COUNTLL] = {};
@@ -144,6 +185,161 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSubtractAssignOneFromZero)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			r[0] = 1ull;
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				exp[i] = ~0ull;
+			}
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestShiftLeftZero)
+		{
+			ModNumber ml(12345678ull);
+			Assert::IsTrue(ml == ml << 0);
+		}
+		TEST_METHOD(TestShiftLeftAssignZero)
+		{
+			ModNumber ml(12345678ull);
+			ModNumber exp(ml);
+			Assert::IsTrue(exp == (ml <<= 0));
+		}
+		TEST_METHOD(TestShiftLeftOne)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x2468aull);
+			Assert::IsTrue(mexp == ml << 1);
+		}
+		TEST_METHOD(TestShiftLeftAssignOne)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x2468aull);
+			Assert::IsTrue(mexp == (ml <<= 1));
+		}
+		TEST_METHOD(TestShiftLeft32)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x1234500000000ull);
+			Assert::IsTrue(mexp == ml << 32);
+		}
+		TEST_METHOD(TestShiftLeftAssign32)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x1234500000000ull);
+			Assert::IsTrue(mexp == (ml <<= 32));
+		}
+		TEST_METHOD(TestShiftLeft65)
+		{
+			ModNumber ml(0x12345ull);
+			llint exp[COUNTLL] = {};
+			exp[1] = 0x2468aull;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == ml << 65);
+		}
+		TEST_METHOD(TestShiftLeftAssign65)
+		{
+			ModNumber ml(0x12345ull);
+			llint exp[COUNTLL] = {};
+			exp[1] = 0x2468aull;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == (ml <<= 65));
+		}
+		TEST_METHOD(TestShiftLeftNSIZEMinus32)
+		{
+			ModNumber ml(0x12345ull);
+			lint exp[COUNTL] = {};
+			exp[COUNTL-1] = 0x12345ul;
+			ModNumber mexp((llint *)exp);
+			Assert::IsTrue(mexp == ml << NSIZE-32);
+		}
+		TEST_METHOD(TestShiftLeftAssignNSIZEMinus32)
+		{
+			ModNumber ml(0x12345ull);
+			lint exp[COUNTL] = {};
+			exp[COUNTL-1] = 0x12345ul;
+			ModNumber mexp((llint*)exp);
+			Assert::IsTrue(mexp == (ml <<= NSIZE-32 ));
+		}
+		TEST_METHOD(TestShiftLeftNSIZE)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp;
+			ModNumber mres = ml << NSIZE;
+			Assert::IsTrue(mexp == ml << NSIZE);
+		}
+		TEST_METHOD(TestShiftLeftAssignNSIZE)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp;
+			Assert::IsTrue(mexp == (ml <<= NSIZE));
+		}
+
+		TEST_METHOD(TestModuloDivideByZero)
+		{
+			ModNumber l(1ull);
+			ModNumber r;
+			Assert::ExpectException<std::domain_error>([l, r]() {ModNumber res = l % r; });
+		}
+		TEST_METHOD(TestModuloDivideByOne)
+		{
+			ModNumber l(1000ull);
+			ModNumber r(1ull);
+			ModNumber exp;
+			Assert::IsTrue(exp == l % r);
+		}
+		TEST_METHOD(TestModuloDivideEvenByTwo)
+		{
+			ModNumber l(1000ull);
+			ModNumber r(2ull);
+			ModNumber exp;
+			Assert::IsTrue(exp == l % r);
+		}
+		TEST_METHOD(TestModuloDivideOddByTwo)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(2ull);
+			ModNumber exp(1);
+			Assert::IsTrue(exp == l % r);
+		}
+		TEST_METHOD(TestModuloDivideSmallByLarge)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(2001ull);
+			Assert::IsTrue(l == l % r);
+		}
+		TEST_METHOD(TestModuloDivideEquals)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(1001ull);
+			ModNumber mexp;
+			Assert::IsTrue(mexp == l % r);
+		}
+		TEST_METHOD(TestModuloDividePrimeByFive)
+		{
+			ModNumber l(101ull);
+			ModNumber r(5ull);
+			ModNumber exp(1);
+			Assert::IsTrue(exp == l % r);
+		}
+		//TEST_METHOD(TestModuloDivide2Pow65ByEight)
+		//{
+		//	llint l[COUNTLL] = {};
+		//	l[1] = 1ull;
+		//	ModNumber ml(l);
+		//	ModNumber mr(8ull);
+		//	ModNumber exp;
+		//	Assert::IsTrue(exp == ml % mr);
+		//}
+
 
 		TEST_METHOD(TestEqualTrue)
 		{

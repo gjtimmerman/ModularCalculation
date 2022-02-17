@@ -36,6 +36,31 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 	return res;
 }
 
+ModNumber &operator-=(ModNumber& l, const ModNumber& r)
+{
+	lint* ll = (lint*)l.num;
+	lint* rl = (lint*)r.num;
+	lint carry = 0;
+	for (int i = 0; i < COUNTL; i++)
+	{
+		lint ltmp = ll[i];
+		lint rtmp = rl[i];
+		if (ltmp >= carry)
+		{
+			ltmp -= carry;
+			carry = 0;
+		}
+		else
+			ltmp -= carry;
+		if (ltmp < rtmp)
+		{
+			carry = 1;
+		}
+		ll[i] = ltmp - rtmp;
+	}
+	return l;
+}
+
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
 	ModNumber mzero;
@@ -77,17 +102,62 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 	for (int i = 0; i <= diff; i++)
 	{
 		llint tmp[COUNTLL] = {};
-		for (int j = 0; j < ri; j++)
+		for (int j = 0; j <= ri; j++)
 		{
 			tmp[j + diff - i] = r.num[j];
 		}
 		ModNumber mtmp(tmp);
 		while(mres > mtmp)
 		{
-			mres = mres - mtmp;
+			mres -= mtmp;
 		}
 	}
 	return mres;
+}
+
+ModNumber operator << (const ModNumber& n, unsigned int i)
+{
+	int words = 0;
+	if (i >= LSIZE*8)
+	{
+		if (i >= NSIZE)
+			return ModNumber();
+		words = i / (LSIZE*8);
+		i %= (LSIZE*8);
+	}
+	lint* pn = (lint*)n.num;
+	lint pres[COUNTL] = {};
+	pres[COUNTL - 1] = pn[COUNTL - words - 1] << i;
+	for (int j = COUNTL - 2; j >= words; j--)
+	{
+		llint tmp = ((llint)pn[j-words]) << i;
+		pres[j + 1] |= ((lint*)(&tmp))[1];
+		pres[j] = ((lint*)(&tmp))[0];
+	}
+	return ModNumber((llint *)pres);
+}
+
+ModNumber& operator <<= (ModNumber& n, unsigned int i)
+{
+	int words = 0;
+	if (i >= LSIZE*8)
+	{
+		if (i >= NSIZE)
+			return n = ModNumber();
+		words = i / (LSIZE*8);
+		i %= (LSIZE*8);
+	}
+	lint* pn = (lint*)n.num;
+	pn[COUNTL - 1] = pn[COUNTL - words - 1] << i;
+	for (int j = COUNTL - 2; j >= words; j--)
+	{
+		llint tmp = ((llint)pn[j-words]) << i;
+		pn[j + 1] |= ((lint*)(&tmp))[1]; 
+		pn[j] = ((lint*)(&tmp))[0];
+	}
+	for (int j = 0; j < words; j++)
+		pn[j] = 0ull;
+	return n;
 }
 
 bool operator==(const ModNumber& l, const ModNumber& r)

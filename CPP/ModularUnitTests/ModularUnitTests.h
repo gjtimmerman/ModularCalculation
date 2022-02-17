@@ -202,6 +202,57 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mexp == ml);
 		}
+		TEST_METHOD(TestSubtractLeftFsFromZero)
+		{
+			llint r[COUNTLL] = {};
+			r[COUNTLL-1] = ~0ull;
+			llint exp[COUNTLL] = {};
+			exp[COUNTLL - 1] = 1ull;
+			ModNumber ml;
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber res = ml - mr;
+
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSubtractAssignLeftFsFromZero)
+		{
+			llint r[COUNTLL] = {};
+			r[COUNTLL - 1] = ~0ull;
+			llint exp[COUNTLL] = {};
+			exp[COUNTLL - 1] = 1ull;
+			ModNumber ml;
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestSubtractAllFsFromZero)
+		{
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				r[i] = ~0ull;
+			ModNumber ml;
+			ModNumber mr(r);
+			ModNumber mexp(1ull);
+			ModNumber res = ml - mr;
+
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSubtractAssignAllFsFromZero)
+		{
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				r[i] = ~0ull;
+			ModNumber ml;
+			ModNumber mr(r);
+			ModNumber mexp(1ull);
+			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+
 		TEST_METHOD(TestShiftLeftZero)
 		{
 			ModNumber ml(12345678ull);

@@ -64,7 +64,9 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 		resl[i] = ltmp - rtmp;
 	}
 	if (carry && limit < COUNTL)
+	{
 		for (int j = limit; j < COUNTL; j++)
+		{
 			if (resl[j] >= carry)
 			{
 				resl[j] -= carry;
@@ -74,6 +76,8 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 			{
 				resl[j] -= carry;
 			}
+		}
+	}
 	return res;
 }
 
@@ -129,6 +133,7 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 		ll[i] = ltmp - rtmp;
 	}
 	if (carry && limit < COUNTL)
+	{
 		for (int j = limit; j < COUNTL; j++)
 			if (ll[j] >= carry)
 			{
@@ -139,6 +144,7 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 			{
 				ll[j] -= carry;
 			}
+	}
 	return l;
 }
 

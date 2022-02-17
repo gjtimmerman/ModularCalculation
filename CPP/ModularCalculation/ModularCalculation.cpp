@@ -37,7 +37,9 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 
 	}
 	else
+	{
 		limit = COUNTL;
+	}
 	lint* ll = (lint*)l.num;
 	lint* rl = (lint*)r.num;
 	lint* resl = (lint*)res.num;
@@ -100,7 +102,9 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 
 	}
 	else
+	{
 		limit = COUNTL;
+	}
 
 	lint* ll = (lint*)l.num;
 	lint* rl = (lint*)r.num;

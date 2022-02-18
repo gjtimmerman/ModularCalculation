@@ -391,6 +391,45 @@ namespace ModularUnitTests
 			ModNumber mres = ml % mr;
 			Assert::IsTrue(exp == mres);
 		}
+		TEST_METHOD(TestModuloDivideAllFsBy2Pow64)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(65536ull);
+			ModNumber exp(65535ull);
+			ModNumber mres = ml % mr;
+			Assert::IsTrue(exp == mres);
+		}
+		TEST_METHOD(TestModuloDivideAllFsByAlllFs)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = ~0ull;
+			ModNumber ml(l);
+			ModNumber exp;
+			ModNumber mres = ml % ml;
+			Assert::IsTrue(exp == mres);
+		}
+		TEST_METHOD(TestModuloDivideAllFsByAlllFsAndZeroLowWord)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				r[i] = ~0ull;
+			}
+			r[0] = 0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			llint exp[COUNTLL] = {};
+			exp[0] = ~0ull;
+			ModNumber mexp(exp);
+			ModNumber mres = ml % mr;
+			Assert::IsTrue(mexp == mres);
+		}
 
 
 		TEST_METHOD(TestEqualTrue)

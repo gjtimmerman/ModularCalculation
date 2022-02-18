@@ -85,30 +85,6 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 {
 	if (l == r)					// Optimization
 		return l = ModNumber();
-	int li = 0;
-	int ri = 0;
-	int limit = 0;
-	if (l > r)					// Optimization
-	{
-		for (int j = COUNTLL - 1; j >= 0; j--)
-			if (l.num[j])
-			{
-				li = j;
-				break;
-			}
-		for (int j = li; j >= 0; j--)
-			if (r.num[j])
-			{
-				ri = j;
-				break;
-			}
-		limit = (ri + 1) * 2;
-
-	}
-	else
-	{
-		limit = COUNTL;
-	}
 
 	lint* ll = (lint*)l.num;
 	lint* rl = (lint*)r.num;
@@ -131,19 +107,6 @@ ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 			carry = 1;
 		}
 		ll[i] = ltmp - rtmp;
-	}
-	if (carry && limit < COUNTL)
-	{
-		for (int j = limit; j < COUNTL; j++)
-			if (ll[j] >= carry)
-			{
-				ll[j] -= carry;
-				break;
-			}
-			else
-			{
-				ll[j] -= carry;
-			}
 	}
 	return l;
 }
@@ -300,7 +263,10 @@ bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
-			return l.num[i] > r.num[i];
+			if (l.num[i] > r.num[i])
+				return true;
+			else if (l.num[i] < r.num[i])
+				return false;
 	return false;
 }
 

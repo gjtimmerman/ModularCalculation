@@ -347,6 +347,13 @@ namespace ModularUnitTests
 			ModNumber exp;
 			Assert::IsTrue(exp == l % r);
 		}
+		TEST_METHOD(TestModuloDivideZeroByOne)
+		{
+			ModNumber l(0ull);
+			ModNumber r(1ull);
+			ModNumber exp;
+			Assert::IsTrue(exp == l % r);
+		}
 		TEST_METHOD(TestModuloDivideEvenByTwo)
 		{
 			ModNumber l(1000ull);

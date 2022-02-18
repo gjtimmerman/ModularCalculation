@@ -14,37 +14,12 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 	ModNumber res;
 	if (l == r)					// Optimization
 		return res;
-	int li = 0;
-	int ri = 0;
-	int limit = 0;
-	if (l > r)					// Optimization
-	{
-		for (int j = COUNTLL - 1; j >= 0; j--)
-			if (l.num[j])
-			{
-				li = j;
-				break;
-			}
-		for (int j = li; j >= 0; j--)
-			if (r.num[j])
-			{
-				ri = j;
-				break;
-			}
-		for (int j = li; j > ri; j--)
-			res.num[j] = l.num[j];
-		limit = (ri + 1) * 2;
 
-	}
-	else
-	{
-		limit = COUNTL;
-	}
 	lint* ll = (lint*)l.num;
 	lint* rl = (lint*)r.num;
 	lint* resl = (lint*)res.num;
 	lint carry = 0;
-	for (int i = 0; i < limit; i++)
+	for (int i = 0; i < COUNTL; i++)
 	{
 		lint ltmp = ll[i];
 		lint rtmp = rl[i];
@@ -62,21 +37,6 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 			carry = 1; 
 		}
 		resl[i] = ltmp - rtmp;
-	}
-	if (carry && limit < COUNTL)
-	{
-		for (int j = limit; j < COUNTL; j++)
-		{
-			if (resl[j] >= carry)
-			{
-				resl[j] -= carry;
-				break;
-			}
-			else
-			{
-				resl[j] -= carry;
-			}
-		}
 	}
 	return res;
 }

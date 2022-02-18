@@ -223,10 +223,12 @@ bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
+		{
 			if (l.num[i] > r.num[i])
 				return true;
 			else if (l.num[i] < r.num[i])
 				return false;
+		}
 	return false;
 }
 

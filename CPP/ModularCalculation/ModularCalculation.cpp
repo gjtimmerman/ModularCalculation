@@ -15,8 +15,8 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 	if (l == r)					// Optimization
 		return res;
 
-	lint* ll = (lint*)l.num;
-	lint* rl = (lint*)r.num;
+	const lint* ll = (const lint*)l.num;
+	const lint* rl = (const lint*)r.num;
 	lint* resl = (lint*)res.num;
 	lint carry = 0;
 	for (int i = 0; i < COUNTL; i++)
@@ -105,7 +105,7 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 		return l;
 	}
 	if (l == r)
-		return ModNumber(0ull);
+		return ModNumber();
 	int li = 0;
 	int ri = 0;
 	for (int i = COUNTLL - 1; i >= 0; i--)
@@ -136,8 +136,8 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 		for (int j = 0; j <= bdiff; j++)
 		{
 			ModNumber mtmp2(mtmp);
-			mtmp2 <<= bdiff - j;
-			while (mres >= mtmp2)
+			mtmp2 <<= bdiff -j;
+			if (mres >= mtmp2)
 			{
 				mres -= mtmp2; 
 			}
@@ -156,7 +156,7 @@ ModNumber operator << (const ModNumber& n, unsigned int i)
 		words = i / (LSIZE*8);
 		i %= (LSIZE*8);
 	}
-	lint* pn = (lint*)n.num;
+	const lint* pn = (const lint*)n.num;
 	lint pres[COUNTL] = {};
 	pres[COUNTL - 1] = pn[COUNTL - words - 1] << i;
 	for (int j = COUNTL - 2; j >= words; j--)
@@ -348,7 +348,7 @@ std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 	if (scalar == 0)
 		throw std::domain_error("Division by zero not allowed!");
 	ModNumber res;
-	lint* nl = (lint*)num;
+	const lint* nl = (const lint*)num;
 	lint* resl = (lint*)res.num;
 	llint tmp = 0ull;
 	for (int i = COUNTL - 1; i >= 0; i--)

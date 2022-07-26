@@ -304,34 +304,34 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			Assert::IsTrue(mexp == (ml <<= 65));
 		}
-		TEST_METHOD(TestShiftLeftNSIZEMinus32)
+		TEST_METHOD(TestShiftLeftNSIZEMinusLSIZETimes8)
 		{
 			ModNumber ml(0x12345ull);
 			lint exp[COUNTL] = {};
 			exp[COUNTL-1] = 0x12345ul;
 			ModNumber mexp((llint *)exp);
-			Assert::IsTrue(mexp == ml << NSIZE-32);
+			Assert::IsTrue(mexp == ml << NSIZE-(LSIZE*8));
 		}
-		TEST_METHOD(TestShiftLeftAssignNSIZEMinus32)
+		TEST_METHOD(TestShiftLeftAssignNSIZEMinusLSIZETimes8)
 		{
 			ModNumber ml(0x12345ull);
 			lint exp[COUNTL] = {};
 			exp[COUNTL-1] = 0x12345ul;
 			ModNumber mexp((llint*)exp);
-			Assert::IsTrue(mexp == (ml <<= NSIZE-32 ));
+			Assert::IsTrue(mexp == (ml <<= NSIZE-(LSIZE*8) ));
 		}
 		TEST_METHOD(TestShiftLeftNSIZE)
 		{
 			ModNumber ml(0x12345ull);
 			ModNumber mexp;
-			ModNumber mres = ml << NSIZE;
 			Assert::IsTrue(mexp == ml << NSIZE);
 		}
 		TEST_METHOD(TestShiftLeftAssignNSIZE)
 		{
 			ModNumber ml(0x12345ull);
 			ModNumber mexp;
-			Assert::IsTrue(mexp == (ml <<= NSIZE));
+			ml <<= NSIZE;
+			Assert::IsTrue(mexp == ml);
 		}
 
 		TEST_METHOD(TestModuloDivideByZero)
@@ -436,6 +436,28 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			ModNumber mres = ml % mr;
 			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestModuloDivideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne)
+		{
+			ModNumber mnprime1(355687428095999);
+			lint prime2(39916799ul);
+			ModNumber mnprime2(prime2);
+			ModNumber product = mnprime1 * prime2;
+			ModNumber res1 = product % mnprime1;
+			ModNumber res2 = product % mnprime2;
+			ModNumber mexp1;
+			Assert::IsTrue(res1 == mexp1);
+			Assert::IsTrue(res2 == mexp1);
+			ModNumber mone(1ull);
+			ModNumber mnprime1MinusOne = mnprime1 - mone;
+			ModNumber mnprime2MinusOne = mnprime2 - mone;
+			ModNumber productMinusPrime1 = product - mnprime1;
+			ModNumber productMinusPrime2 = product - mnprime2;
+			ModNumber res3 = productMinusPrime1 % mnprime2MinusOne;
+			ModNumber res4 = productMinusPrime2 % mnprime1MinusOne;
+			Assert::IsTrue(res3 == mexp1);
+			Assert::IsTrue(res4 == mexp1);
+
 		}
 
 
@@ -577,7 +599,7 @@ namespace ModularUnitTests
 			ModNumber mr(1);
 			Assert::IsTrue(ml >= mr);
 		}
-		TEST_METHOD(TestGreaterOrEqualFalseForGreaterThan)
+		TEST_METHOD(TestGreaterOrEqualFalseForLessThan)
 		{
 			ModNumber ml(2);
 			ModNumber mr(1);
@@ -604,6 +626,18 @@ namespace ModularUnitTests
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+		TEST_METHOD(TestAddOneToZero)
+		{
+			llint l[COUNTLL] = {};
+			llint exp[COUNTLL] = { 1ull };
+			ModNumber ml(l);
+			ModNumber morig(ml);
+			ModNumber mexp(exp);
+			ModNumber mres = ml + 1ul;
+			Assert::IsTrue(mexp == mres);
+			Assert::IsTrue(ml == morig);
+
+		}
 		TEST_METHOD(TestAddAssignOneToFirstSectionMax)
 		{
 			llint l[COUNTLL];
@@ -617,6 +651,19 @@ namespace ModularUnitTests
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+		TEST_METHOD(TestAddOneToFirstSectionMax)
+		{
+			llint l[COUNTLL];
+			l[0] = ~0ull;
+			for (int i = 1; i < COUNTLL; i++)
+				l[i] = 0ull;
+			llint exp[COUNTLL] = {};
+			exp[1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres = ml + 1ul;
+			Assert::IsTrue(mexp == mres);
+		}
 
 		TEST_METHOD(TestAddAssignOneToMax)
 		{
@@ -629,7 +676,33 @@ namespace ModularUnitTests
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+		TEST_METHOD(TestAddOneToMax)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = ~0ull;
+			llint exp[COUNTLL] = {};
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres = ml + 1ul;
+			Assert::IsTrue(mexp == mres);
+		}
 		TEST_METHOD(TestAddAssignMaxToMax)
+		{
+			llint l[COUNTLL];
+			lint r = 0xFFul;
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+			}
+			exp[0] = 0xFEull;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml += r;
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestAddMaxToMax)
 		{
 			llint l[COUNTLL];
 			lint r = 0xFFul;
@@ -645,14 +718,37 @@ namespace ModularUnitTests
 			mres = ml + r;
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestMultiplyAssignByZero)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = i;
+			ModNumber ml(l);
+			ModNumber mexp;
+			ml *= 0ul;
+			Assert::IsTrue(ml == mexp);
+		}
 		TEST_METHOD(TestMultiplyByZero)
 		{
 			llint l[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = i;
 			ModNumber ml(l);
-			ModNumber mr;
-			Assert::IsTrue((ml *= 0ul) == mr);
+			ModNumber morig(ml);
+			ModNumber mexp;
+			ModNumber mres = ml * 0ul;
+			Assert::IsTrue(mres == mexp);
+			Assert::IsTrue(morig == ml);
+		}
+		TEST_METHOD(TestMultiplyAssignByOne)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = i;
+			ModNumber ml(l);
+			ModNumber mexp(l);
+			ml *= 1ul;
+			Assert::IsTrue(ml == mexp);
 		}
 		TEST_METHOD(TestMultiplyByOne)
 		{
@@ -660,35 +756,126 @@ namespace ModularUnitTests
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = i;
 			ModNumber ml(l);
-			ModNumber mr(l);
-			Assert::IsTrue((ml *= 1ul) == mr);
+			ModNumber mexp(l);
+			ModNumber mres = ml * 1ul;
+			Assert::IsTrue(mres == mexp);
+		}
+		TEST_METHOD(TestMultiplyAssignByTwo)
+		{
+			llint l[COUNTLL];
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = i;
+				exp[i] = i * 2;
+			}
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml *= 2ul;
+			Assert::IsTrue(ml == mexp);
 		}
 		TEST_METHOD(TestMultiplyByTwo)
 		{
 			llint l[COUNTLL];
-			llint r[COUNTLL];
+			llint exp[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 			{
 				l[i] = i;
-				r[i] = i * 2;
+				exp[i] = i * 2;
 			}
 			ModNumber ml(l);
-			ModNumber mr(r);
-			Assert::IsTrue((ml *= 2ul) == mr);
+			ModNumber mexp(exp);
+			ModNumber mres = ml * 2ul;
+			Assert::IsTrue(mres == mexp);
+		}
+		TEST_METHOD(TestMultiplyAssignAllFFFFByTwo)
+		{
+			llint l[COUNTLL];
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				exp[i] = ~0ull;
+			}
+			ModNumber ml(l);
+			exp[0] ^= 1ull;
+			ModNumber mexp(exp);
+			ml *= 2ul;
+			Assert::IsTrue(ml == mexp);
 		}
 		TEST_METHOD(TestMultiplyAllFFFFByTwo)
 		{
 			llint l[COUNTLL];
-			llint res[COUNTLL];
+			llint exp[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 			{
 				l[i] = ~0ull;
-				res[i] = ~0ull;
+				exp[i] = ~0ull;
 			}
 			ModNumber ml(l);
-			res[0] ^= 1ull;
-			ModNumber mres(res);
-			Assert::IsTrue((ml *= 2ul) == mres);
+			exp[0] ^= 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = ml * 2ul;
+			Assert::IsTrue(mres == mexp);
+		}
+		TEST_METHOD(TestMultiplyAssignFsBy2Pow16)
+		{
+			llint l[COUNTLL] = {};
+			l[0] = ~0ull;
+			llint exp[COUNTLL] = {};
+			exp[1] = ~0ull >> (LLSIZE * 8 - 16);
+			exp[0] = ~0ull << 16;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml *= 65536ul;
+			Assert::IsTrue(mexp == ml);
+		}
+
+		TEST_METHOD(TestMultiplyFsBy2Pow16)
+		{
+			llint l[COUNTLL] = {};
+			l[0] = ~0ull;
+			llint exp[COUNTLL] = {};
+			exp[1] = ~0ull >> (LLSIZE*8 - 16);
+			exp[0] = ~0ull << 16;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ModNumber mres = ml * 65536ul;
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestMultiplyAssignAllAsBy2)
+		{
+			llint tmp1 = 0xaaaaaaaaaaaaaaaaull;
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = tmp1;
+			ModNumber ml(l);
+			tmp1 <<= 1;
+			llint tmp2 = tmp1 + 1;
+			llint exp[COUNTLL];
+			for (int i = 1; i < COUNTLL; i++)
+				exp[i] = tmp2;
+			exp[0] = tmp1;
+			ModNumber mexp(exp);
+			ml *= 2ull;
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestMultiplyAllAsBy2)
+		{
+			llint tmp1 = 0xaaaaaaaaaaaaaaaaull;
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = tmp1;
+			ModNumber ml(l);
+			tmp1 <<= 1;
+			llint tmp2 = tmp1 + 1;
+			llint exp[COUNTLL];
+			for (int i = 1; i < COUNTLL; i++)
+				exp[i] = tmp2;
+			exp[0] = tmp1;
+			ModNumber mexp(exp);
+			ModNumber mres = ml * 2ull;
+			Assert::IsTrue(mexp == mres);
 		}
 		TEST_METHOD(TestDivisionByZero)
 		{
@@ -750,7 +937,7 @@ namespace ModularUnitTests
 			ModNumber mres2 = mres1 * 2ul;
 			Assert::IsTrue(mexp == mres2);
 		}
-		TEST_METHOD(TestDivisionMaxLintTimesTenByTwo)
+		TEST_METHOD(TestDivisionMaxLintTimesTwoByTwo)
 		{
 			llint l[COUNTLL];
 			l[0] = ~0ull;
@@ -770,7 +957,22 @@ namespace ModularUnitTests
 			ModNumber mres = ml / 2ul;
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestDivisionAllAsByTwo)
+		{
+			llint tmp = 0xaaaaaaaaaaaaaaaaull;
+			llint ll[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				ll[i] = tmp;
+			tmp >>= 1;
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				exp[i] = tmp;
+			ModNumber ml(ll);
+			ModNumber mexp(exp);
+			ModNumber mres = ml / 2ull;
+			Assert::IsTrue(mexp == mres);
 
+		}
 		TEST_METHOD(TestToStringIllegalBase)
 		{
 			ModNumber ml;

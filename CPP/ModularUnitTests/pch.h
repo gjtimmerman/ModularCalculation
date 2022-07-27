@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <stdexcept>
 #include <cmath>
 #endif //PCH_H

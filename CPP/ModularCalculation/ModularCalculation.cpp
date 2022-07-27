@@ -43,7 +43,7 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 
 ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 {
-	if (l == r)					// Optimization
+	if (l == r)					// Optimization and prevent selfassignment
 		return l = ModNumber();
 
 	lint* ll = (lint*)l.num;
@@ -144,6 +144,71 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 		}
 	}
 	return mres;
+}
+
+ModNumber& operator%=(ModNumber& l, const ModNumber& r)
+{
+	if (&l == &r)				// Just optimization
+		return l = ModNumber();
+	ModNumber mzero;
+	if (r == mzero)
+		throw std::domain_error("Division by Zero");
+	ModNumber mone(1ull);
+	if (r == mone)		// Just optimization
+		return l = ModNumber();
+	ModNumber mtwo(2ull);
+	if (r == mtwo)		// Just optimization
+	{
+		if (l.num[0] & 0x1ull)
+			return l = mone;
+		else
+			return l = ModNumber();
+	}
+	if (l < r)
+	{
+		return l;
+	}
+	if (l == r)
+		return l = ModNumber();
+	int li = 0;
+	int ri = 0;
+	for (int i = COUNTLL - 1; i >= 0; i--)
+		if (l.num[i])
+		{
+			li = i;
+			break;
+		}
+	for (int i = li; i >= 0; i--)
+		if (r.num[i])
+		{
+			ri = i;
+			break;
+		}
+	int diff = li - ri;
+
+	for (int i = 0; i <= diff; i++)
+	{
+		llint tmp[COUNTLL] = {};
+		for (int j = 0; j <= ri; j++)
+		{
+			tmp[j + diff - i] = r.num[j];
+		}
+		ModNumber mtmp(tmp);
+		unsigned int bl = (LLSIZE * 8 - l.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
+		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
+		int bdiff = bl - br;
+		for (int j = 0; j <= bdiff; j++)
+		{
+			ModNumber mtmp2(mtmp);
+			mtmp2 <<= bdiff - j;
+			if (l >= mtmp2)
+			{
+				l -= mtmp2;
+			}
+		}
+	}
+	return l;
+
 }
 
 ModNumber operator << (const ModNumber& n, unsigned int i)
@@ -300,8 +365,36 @@ ModNumber operator+(const ModNumber &n, lint scalar)
 
 }
 
+ModNumber operator+ (const ModNumber& l, const ModNumber& r)
+{
+	ModNumber mres(l);
+	lint* n = (lint*)r.num;
+	for (int i = 0; i < COUNTL; i++)
+		mres.AddAssignScalar(i, n[i]);
+	return mres;
+}
+
+ModNumber &operator+= (ModNumber& l, const ModNumber& r)
+{
+	lint* n;
+	ModNumber tmp;
+	if (&l == &r) // Watch out for self-assignment
+	{
+		tmp = r;
+		n = (lint*)tmp.num;
+	}
+	else
+		n = (lint*)r.num;
+	for (int i = 0; i < COUNTL; i++)
+		l.AddAssignScalar(i, n[i]);
+	return l;
+}
+
+
 ModNumber& ModNumber::AddAssignScalar(int lpos, lint scalar)
 {
+	if (lpos >= COUNTL)
+		throw std::out_of_range("lpos out of range");
 	llint res = 0;
 	lint* n = (lint *)num;
 	res = ((llint)n[lpos]) + scalar;
@@ -572,4 +665,25 @@ ModNumber ModNumber::stomn(std::string s, int base)
 		return stomn_octal_base(s);
 	}
 	throw std::invalid_argument("Invalid argument passed");
+}
+
+ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
+{
+	ModNumber res;
+	ModNumber lMod = l % n;
+	ModNumber rMod = r % n;
+	lint* rlint = (lint*)rMod.num;
+	for (int i = 0; i < COUNTL; i++)
+	{
+		ModNumber tmp = lMod * rlint[i];
+		for (int j = 0; j < i; j++)
+		{
+			tmp %= n;
+			tmp <<= LSIZE * 8;
+		}
+		tmp %= n;
+		res += tmp;
+	}
+	res %= n;
+	return res;
 }

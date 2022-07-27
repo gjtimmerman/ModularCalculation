@@ -11,9 +11,11 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-#define NSIZE (4096 + LLSIZE*8)
+#define MAXMOD (4096/8)
 
-#define NCOUNT NSIZE/8
+#define NSIZE (NCOUNT*8)
+
+#define NCOUNT (MAXMOD + LLSIZE)
 
 static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 
@@ -22,6 +24,7 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 
 #define COUNTL NCOUNT/LSIZE
 #define COUNTLL NCOUNT/LLSIZE
+#define COUNTMOD MAXMOD/LLSIZE
 
 //static_assert(COUNTL == 128, "COUNTL is not 128");
 //static_assert(COUNTLL == 64, "COUNTLL is not 64");
@@ -63,7 +66,12 @@ private:
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
 	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
 	unsigned int FindFirstNonZeroBitInWord(unsigned int word) const;
-
+	void checkMax(int size)
+	{
+		for (int i = size; i < COUNTLL; i++)
+			if (num[i] != 0ull)
+				throw std::domain_error("Number is above maximum.");
+	}
 
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator-=(ModNumber& l, const ModNumber& r);
@@ -74,16 +82,20 @@ private:
 	friend ModNumber& operator/= (ModNumber& n, lint scalar);
 	friend ModNumber operator* (const ModNumber& n, lint scalar);
 	friend ModNumber operator+ (const ModNumber& n, lint scalar);
+	friend ModNumber operator+ (const ModNumber& l, const ModNumber &r);
+	friend ModNumber& operator+= (ModNumber& l, const ModNumber& r);
 	friend lint operator% (const ModNumber& n, lint scalar);
 	friend bool operator < (const ModNumber& l, const ModNumber& r);
 	friend bool operator > (const ModNumber& l, const ModNumber& r);
 	friend bool operator <= (const ModNumber& l, const ModNumber& r);
 	friend bool operator >= (const ModNumber& l, const ModNumber& r);
 	friend ModNumber operator%(const ModNumber& l, const ModNumber& r);
+	friend ModNumber& operator%=(ModNumber& l, const ModNumber& r);
 	friend ModNumber operator<<(const ModNumber& n, const unsigned int i);
 	friend ModNumber& operator <<= (ModNumber& n, unsigned int i);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
+	friend class MultGroupMod;
 
 };
 
@@ -92,15 +104,10 @@ class MultGroupMod
 public:
 	MultGroupMod(ModNumber n) : n(n)
 	{
+		n.checkMax(COUNTMOD);
+	}
+	ModNumber Mult(const ModNumber l, const ModNumber r);
 
-	}
-	ModNumber Mult(const ModNumber l,const ModNumber r)
-	{
-		ModNumber res;
-		ModNumber lMod = l % n;
-		ModNumber rMod = r % n;
-		return res;
-	}
 private:
 	ModNumber n;
 };

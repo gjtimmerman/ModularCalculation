@@ -99,7 +99,7 @@ public:
 		ModNumber res;
 		ModNumber lMod = l % n;
 		ModNumber rMod = r % n;
-
+		return res;
 	}
 private:
 	ModNumber n;

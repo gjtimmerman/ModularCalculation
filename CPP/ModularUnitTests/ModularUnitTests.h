@@ -1022,30 +1022,31 @@ namespace ModularUnitTests
 			std::string exp;
 			exp.reserve(OctalStringLength);
 			exp.assign(OctalStringLength, '7');
-			exp[0] = '1';
+			exp[0] = ((3 - LLSIZE * 8 % 3) << 1) - 1 + '0';
 			Assert::IsTrue(res == exp);
 		}
 		TEST_METHOD(TestToStringOctalForMaxesAndZeros)
 		{
 			llint l[COUNTLL];
-			for (int i = 0; i < COUNTLL - 4; i += 6)
+			for (int i = 0; i + 6 < COUNTLL; i += 6)
 			{
 				for (int j = 0; j < 3; j++)
 					l[i + j] = ~0;
 				for (int j = 3; j < 6; j++)
 					l[i + j] = 0;
 			}
-			for (int i = COUNTLL - 4; i < COUNTLL; i++)
+			for (int i = COUNTLL - (COUNTLL % 6); i < COUNTLL; i++)
 				l[i] = 0;
 			ModNumber ml(l);
 			std::string res = ml.to_string(8);
 			std::string exp;
 			exp.reserve(OctalStringLength);
-			exp.assign(86, '0');
-			for (int i = 86; i < OctalStringLength; i += 128)
+			exp.assign(OctalStringLength % 128, '0');
+			int startvalue = OctalStringLength % 128;
+			for (int i = startvalue; i < OctalStringLength; i += 128)
 			{
-				exp.append(64, '0');
-				exp.append(64, '7');
+				exp.append(64, (((OctalStringLength % 2)+ 7) % 8) * 7 + '0');
+				exp.append(64, (OctalStringLength % 2) * 7 + '0');
 			}
 			Assert::IsTrue(res == exp);
 		}
@@ -1230,15 +1231,25 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			std::string s;
 			s.reserve(HexStringLength);
-			for (int i = 0; i < HexStringLength; i += 32)
+			std::stringstream tmpstr;
+
+			for (int i = 0; i * 2 < HexStringLength % 32; i++)
+			{
+				tmpstr.setf(std::ios_base::right | std::ios_base::uppercase);
+				tmpstr.fill('0');
+				tmpstr.width(2);
+				tmpstr << std::hex << ((HexStringLength % 32)/2 - i - 1);
+			}
+			s.append(tmpstr.str());
+			for (int i = HexStringLength % 32; i < HexStringLength; i += 32)
 				s.append("0F0E0D0C0B0A09080706050403020100");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
 		TEST_METHOD(TestToModularNumberHexIncreasingSequence)
 		{
-			llint exp[COUNTLL];
-			for (int i = 0; i < COUNTLL; i += 2)
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i + 1 < COUNTLL; i += 2)
 			{
 				exp[i] = 0x0706050403020100ull;
 				exp[i + 1] = 0x0F0E0D0C0B0A0908ull;
@@ -1246,15 +1257,17 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			std::string s;
 			s.reserve(HexStringLength);
-			for (int i = 0; i < HexStringLength; i += 32)
+			for (int i = 0; i < HexStringLength % 32; i++)
+				s.append("0");
+			for (int i = HexStringLength % 32; i < HexStringLength; i += 32)
 				s.append("0F0E0D0C0B0A09080706050403020100");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
 		}
 		TEST_METHOD(TestToModularNumberHexIncreasingSequenceSwitched)
 		{
-			llint exp[COUNTLL];
-			for (int i = 0; i < COUNTLL; i += 2)
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i + 1 < COUNTLL; i += 2)
 			{
 				exp[i] = 0x08090A0B0C0D0E0Full;
 				exp[i + 1] = 0x0001020304050607ull;
@@ -1262,7 +1275,9 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			std::string s;
 			s.reserve(HexStringLength);
-			for (int i = 0; i < HexStringLength; i += 32)
+			for (int i = 0; i < HexStringLength % 32; i++)
+				s.append("0");
+			for (int i = HexStringLength % 32; i < HexStringLength; i += 32)
 				s.append("000102030405060708090A0B0C0D0E0F");
 			ModNumber mres = ModNumber::stomn(s, 16);
 			Assert::IsTrue(mexp == mres);
@@ -1398,8 +1413,8 @@ namespace ModularUnitTests
 		{
 			std::string s;
 			s.reserve(OctalStringLength);
-			s.assign(6,'0');
-			for (int i = 0; i < OctalStringLength-6; i += 16)
+			s.assign(OctalStringLength % 16,'0');
+			for (int i = (OctalStringLength % 16); i < OctalStringLength; i += 16)
 				s.append("0001020304050607");
 			ModNumber mres = ModNumber::stomn(s, 8);
 			std::string exp = mres.to_string(8);

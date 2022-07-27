@@ -11,7 +11,7 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-#define NSIZE 4096
+#define NSIZE (4096 + LLSIZE*8)
 
 #define NCOUNT NSIZE/8
 
@@ -85,6 +85,24 @@ private:
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
 
+};
+
+class MultGroupMod
+{
+public:
+	MultGroupMod(ModNumber n) : n(n)
+	{
+
+	}
+	ModNumber Mult(const ModNumber l,const ModNumber r)
+	{
+		ModNumber res;
+		ModNumber lMod = l % n;
+		ModNumber rMod = r % n;
+
+	}
+private:
+	ModNumber n;
 };
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);

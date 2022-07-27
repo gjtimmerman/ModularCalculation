@@ -250,7 +250,7 @@ std::ostream& operator<<(std::ostream& out,const ModNumber& n)
 		llint mask = ~(~0ull >> 1);
 		int count = COUNTLL - 1;
 		int bitcounter = 0;
-		int initial = 2;
+		int initial = 3-(NSIZE % 3);
 		llint tmp = n.num[count];
 		for (int i = 0; i < OctalStringLength; i++)
 		{
@@ -515,7 +515,7 @@ ModNumber ModNumber::stomn_octal_base(std::string s)
 	llint n[COUNTLL] = {};
 	llint buf = 0u;
 	int bitCount = 0;
-	int firstbits = 2;
+	int firstbits = 3 - (NSIZE %3);
 	const llint mask = 4u;
 	s = AdjustStringLength(s, OctalStringLength);
 	for (int i = 0; i < OctalStringLength; i++)

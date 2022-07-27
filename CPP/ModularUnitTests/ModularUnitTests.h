@@ -455,9 +455,12 @@ namespace ModularUnitTests
 			ModNumber productMinusPrime2 = product - mnprime2;
 			ModNumber res3 = productMinusPrime1 % mnprime2MinusOne;
 			ModNumber res4 = productMinusPrime2 % mnprime1MinusOne;
+			ModNumber res5 = productMinusPrime1 % mnprime1;
+			ModNumber res6 = productMinusPrime2 % mnprime2;
 			Assert::IsTrue(res3 == mexp1);
 			Assert::IsTrue(res4 == mexp1);
-
+			Assert::IsTrue(res5 == mexp1);
+			Assert::IsTrue(res6 == mexp1);
 		}
 
 

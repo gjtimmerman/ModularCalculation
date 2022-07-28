@@ -288,6 +288,28 @@ namespace ModularUnitTests
 			ModNumber mexp(0x1234500000000ull);
 			Assert::IsTrue(mexp == (ml <<= 32));
 		}
+
+		TEST_METHOD(TestShiftLeft60)
+		{
+			ModNumber ml(0x0102030405060708ull);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x8000000000000000ull;
+			exp[1] = 0x0010203040506070ull;
+			ModNumber mexp(exp);
+			ModNumber mres = ml << 60;
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestShiftLeftAssign60)
+		{
+			ModNumber ml(0x0102030405060708ull);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x8000000000000000ull;
+			exp[1] = 0x0010203040506070ull;
+			ModNumber mexp(exp);
+			ml <<= 60;
+			Assert::IsTrue(mexp == ml);
+		}
+
 		TEST_METHOD(TestShiftLeft65)
 		{
 			ModNumber ml(0x12345ull);
@@ -791,6 +813,7 @@ namespace ModularUnitTests
 			ml += 1ul;
 			Assert::IsTrue(ml == mres);
 		}
+
 		TEST_METHOD(TestAddScalarOneToMax)
 		{
 			llint l[COUNTLL];
@@ -895,6 +918,22 @@ namespace ModularUnitTests
 			ModNumber mr(1ull);
 			ModNumber mres(res);
 			ml += mr;
+			Assert::IsTrue(ml == mres);
+		}
+
+		TEST_METHOD(TestAddSelfAssignMax)
+		{
+			llint l[COUNTLL];
+			llint res[COUNTLL] = {};
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				res[i] = ~0ull;
+			}
+			res[0] -= 1ull;
+			ModNumber ml(l);
+			ModNumber mres(res);
+			ml += ml;
 			Assert::IsTrue(ml == mres);
 		}
 		TEST_METHOD(TestAddOneToMax)
@@ -2008,7 +2047,7 @@ namespace ModularUnitTests
 		TEST_METHOD(TestMultGroupModAboveMAX)
 		{
 			llint n[COUNTLL] = {};
-			n[MAXMOD/LLSIZE] = 1ull;
+			n[COUNTMOD] = 1ull;
 			ModNumber mn(n);
 			Assert::ExpectException<std::domain_error>([mn] {MultGroupMod g(mn); });			
 		}

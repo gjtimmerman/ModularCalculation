@@ -30,6 +30,7 @@ public:
 		try
 		{
 			f();
+			Condition = false;
 		}
 		catch (T t)
 		{

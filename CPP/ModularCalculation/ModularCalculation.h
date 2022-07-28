@@ -71,6 +71,7 @@ private:
 		for (int i = size; i < COUNTLL; i++)
 			if (num[i] != 0ull)
 				throw std::domain_error("Number is above maximum.");
+
 	}
 
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);

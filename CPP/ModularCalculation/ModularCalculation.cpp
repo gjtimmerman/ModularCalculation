@@ -667,6 +667,36 @@ ModNumber ModNumber::stomn(std::string s, int base)
 	throw std::invalid_argument("Invalid argument passed");
 }
 
+ModNumber ModNumber::ggd(const ModNumber l,const ModNumber r)
+{
+	ModNumber mzero;
+	ModNumber mone(1ull);
+	if (l == mzero || r == mzero)
+		throw std::domain_error("Division by zero not allowed");
+	if (l == mone)
+		return mone;
+	if (r == mone)
+		return mone;
+	if (l == r)
+		return ModNumber(l);
+	ModNumber lcopy = l;
+	ModNumber rcopy = r;
+	if (lcopy < rcopy)
+		std::swap(lcopy, rcopy);
+	ModNumber tmp = lcopy % rcopy;
+	while (!(tmp == mone))
+	{
+		if (tmp == mzero)
+			return ModNumber(rcopy);
+		lcopy = rcopy;
+		rcopy = tmp;
+		tmp = lcopy % rcopy;
+	}
+	return ModNumber(tmp);
+
+}
+
+
 ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
 {
 	ModNumber res;

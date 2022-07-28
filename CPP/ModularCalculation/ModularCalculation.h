@@ -52,6 +52,7 @@ public:
 	}
 	std::string to_string(const int base = 10) const;
 	static ModNumber stomn(std::string s, int base = 10);
+	static ModNumber ggd(ModNumber l, ModNumber r);
 
 
 private:

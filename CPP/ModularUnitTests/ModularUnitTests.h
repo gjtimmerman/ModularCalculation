@@ -2626,6 +2626,136 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 
+		TEST_METHOD(TestGGDOfOneAndZero)
+		{
+			ModNumber mzero;
+			ModNumber mone(1ull);
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([&mres, mzero, mone] {mres = ModNumber::ggd(mone, mzero); });
+		}
+
+		TEST_METHOD(TestGGDOfZeroAndOne)
+		{
+			ModNumber mzero;
+			ModNumber mone(1ull);
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([&mres, mzero, mone] {mres = ModNumber::ggd(mzero, mone); });
+		}
+
+		TEST_METHOD(TestGGDOf100and1)
+		{
+			ModNumber mone(1ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp = mone;
+			ModNumber mres = ModNumber::ggd(monehundred, mone);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOf1and100)
+		{
+			ModNumber mone(1ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp = mone;
+			ModNumber mres = ModNumber::ggd(mone,monehundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOf101and100)
+		{
+			ModNumber monehundredone(101ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(1ull);
+			ModNumber mres = ModNumber::ggd(monehundredone, monehundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOf102and100)
+		{
+			ModNumber monehundredtwo(102ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(2ull);
+			ModNumber mres = ModNumber::ggd(monehundredtwo, monehundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOf100and102)
+		{
+			ModNumber monehundredtwo(102ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(2ull);
+			ModNumber mres = ModNumber::ggd(monehundred, monehundredtwo);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOf400and600)
+		{
+			ModNumber mfourhundred(400ull);
+			ModNumber msixhundred(600ull);
+			ModNumber exp(200ull);
+			ModNumber mres = ModNumber::ggd(mfourhundred, msixhundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestGGDOfAllFin2ndBlockAndAllFin1thBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[1] = ~0ull;
+			r[0] = ~0ull;
+			exp[0] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::ggd(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestGGDOfAllFinlastBlockAndAllFin2ndBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL-1] = ~0ull;
+			r[1] = ~0ull;
+			exp[1] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::ggd(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestGGDOfAllFinlastBlockAndAllAin3rdBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL - 1] = ~0ull;
+			r[2] = 0xaaaaaaaaaaaaaaaaull;
+			exp[2] = r[2];
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::ggd(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestGGDOfAllFinlastBlockAndAllBin3rdBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL - 1] = ~0ull;
+			r[2] = 0xbbbbbbbbbbbbbbbbull;
+			exp[2] = 0x1111111111111111ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::ggd(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
 
 	};
 	END_TEST_CLASS

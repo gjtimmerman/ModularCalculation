@@ -1004,24 +1004,6 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 			Assert::IsTrue(morig == ml);
 		}
-		TEST_METHOD(TestMultiplyMultGroupModByZero)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD; i++)
-			{
-				l[i] = i;
-				n[i] = i;
-			}
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr;
-			ModNumber mexp;
-			ModNumber mres = mgm.Mult(ml,mr);
-			Assert::IsTrue(mres == mexp);
-		}
 
 		TEST_METHOD(TestMultiplyAssignByOne)
 		{
@@ -1041,25 +1023,6 @@ namespace ModularUnitTests
 			ModNumber ml(l);
 			ModNumber mexp(l);
 			ModNumber mres = ml * 1ul;
-			Assert::IsTrue(mres == mexp);
-		}
-		TEST_METHOD(TestMultiplyMultGroupModByOne)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD; i++)
-			{
-				l[i] = i;
-				n[i] = i;
-			}
-			n[0] += 1;
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(1ull);
-			ModNumber mexp(ml);
-			ModNumber mres = mgm.Mult(ml, mr);
 			Assert::IsTrue(mres == mexp);
 		}
 
@@ -1092,46 +1055,6 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 
-		TEST_METHOD(TestMultiplyMultGroupModByTwoResultEqMod)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD; i++)
-			{
-				l[i] = i;
-				n[i] = i * 2;
-			}
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(2ull);
-			ModNumber mexp;
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
-
-		TEST_METHOD(TestMultiplyMultGroupModByTwoResultLessMod)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			llint exp[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD; i++)
-			{
-				l[i] = i;
-				n[i] = i * 2;
-				exp[i] = i * 2;
-			}
-			n[0] += 1ull;
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(2ull);
-			ModNumber mexp(exp);
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
 
 		TEST_METHOD(TestMultiplyAssignAllFFFFByTwo)
 		{
@@ -1163,47 +1086,6 @@ namespace ModularUnitTests
 			ModNumber mres = ml * 2ul;
 			Assert::IsTrue(mres == mexp);
 		}
-		TEST_METHOD(TestMultiplyMultGroupModAllFFFFByTwoResultEqMod)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD; i++)
-			{
-				l[i] = ~0ull;
-				n[i] = ~0ull;
-			}
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(2ull);
-			ModNumber mexp;
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
-		TEST_METHOD(TestMultiplyMultGroupModAllFFFFByTwoResultLessMod)
-		{
-			llint l[COUNTLL] = {};
-			llint n[COUNTLL] = {};
-			llint exp[COUNTLL] = {};
-			for (int i = 0; i < COUNTMOD-1; i++)
-			{
-				l[i] = ~0ull;
-				n[i] = ~0ull;
-				exp[i] = ~0ull;
-			}
-			n[COUNTMOD - 1] = 1ull;
-			exp[COUNTMOD - 1] = 1ull;
-			exp[0] -= 1ull;
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(2ull);
-			ModNumber mexp(exp);
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
 
 
 		TEST_METHOD(TestMultiplyAssignFsBy2Pow16)
@@ -1232,45 +1114,6 @@ namespace ModularUnitTests
 			Assert::IsTrue(mexp == mres);
 		}
 
-		TEST_METHOD(TestMultiplyMultGroupModFsByPow16ResultLessMod)
-		{
-			llint l[COUNTLL] = {};
-			l[0] = ~0ull;
-			llint n[COUNTLL] = {};
-			n[2] = 1ull;
-			llint exp[COUNTLL] = {};
-			exp[1] = ~0ull >> (LLSIZE * 8 - 16);
-			exp[0] = ~0ull << 16;
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(65536ull);
-			ModNumber mexp(exp);
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
-
-		TEST_METHOD(TestMultiplyMultGroupModFsByFsResultLessMod)
-		{
-			llint l[COUNTLL] = {};
-			llint r[COUNTLL] = {};
-			l[0] = ~0ull;
-			r[0] = ~0ull;
-			llint n[COUNTLL] = {};
-			n[2] = 1ull;
-			llint exp[COUNTLL] = {};
-			exp[1] = ~0ull - 1ull;
-			exp[0] = 1ull;
-			ModNumber mn(n);
-			MultGroupMod mgm(mn);
-
-			ModNumber ml(l);
-			ModNumber mr(r);
-			ModNumber mexp(exp);
-			ModNumber mres = mgm.Mult(ml, mr);
-			Assert::IsTrue(mres == mexp);
-		}
 
 		TEST_METHOD(TestMultiplyAssignAllAsBy2)
 		{
@@ -2141,6 +1984,170 @@ namespace ModularUnitTests
 			ModNumber mn(n);
 			Assert::ExpectException<std::domain_error>([mn] {MultGroupMod g(mn); });			
 		}
+
+		TEST_METHOD(TestMultiplyMultGroupModByZero)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = i;
+				n[i] = i;
+			}
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr;
+			ModNumber mexp;
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyMultGroupModByOne)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = i;
+				n[i] = i;
+			}
+			n[0] += 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(1ull);
+			ModNumber mexp(ml);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyMultGroupModByTwoResultEqMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = i;
+				n[i] = i * 2;
+			}
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(2ull);
+			ModNumber mexp;
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyMultGroupModByTwoResultLessMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = i;
+				n[i] = i * 2;
+				exp[i] = i * 2;
+			}
+			n[0] += 1ull;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(2ull);
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyMultGroupModAllFFFFByTwoResultEqMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = ~0ull;
+				n[i] = ~0ull;
+			}
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(2ull);
+			ModNumber mexp;
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+		TEST_METHOD(TestMultiplyMultGroupModAllFFFFByTwoResultLessMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD - 1; i++)
+			{
+				l[i] = ~0ull;
+				n[i] = ~0ull;
+				exp[i] = ~0ull;
+			}
+			n[COUNTMOD - 1] = 1ull;
+			exp[COUNTMOD - 1] = 1ull;
+			exp[0] -= 1ull;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(2ull);
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+
+		TEST_METHOD(TestMultiplyMultGroupModFsByPow16ResultLessMod)
+		{
+			llint l[COUNTLL] = {};
+			l[0] = ~0ull;
+			llint n[COUNTLL] = {};
+			n[2] = 1ull;
+			llint exp[COUNTLL] = {};
+			exp[1] = ~0ull >> (LLSIZE * 8 - 16);
+			exp[0] = ~0ull << 16;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(65536ull);
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyMultGroupModFsByFsResultLessMod)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			l[0] = ~0ull;
+			r[0] = ~0ull;
+			llint n[COUNTLL] = {};
+			n[2] = 1ull;
+			llint exp[COUNTLL] = {};
+			exp[1] = ~0ull - 1ull;
+			exp[0] = 1ull;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
 
 	};
 	END_TEST_CLASS

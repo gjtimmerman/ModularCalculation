@@ -724,3 +724,28 @@ ModNumber MultGroupMod::Kwad(const ModNumber x)
 	ModNumber r = x;
 	return Mult(l, r);
 }
+
+ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e)
+{
+	ModNumber res(1ull);
+	ModNumber xMod = x % n;
+	int top;
+	for (top = COUNTLL - 1; top >= 0; top--)
+		if (e.num[top])
+			break;
+	for (int i = 0; i <= top; i++)
+	{
+		llint mask = 1ull;
+		for (int j = 0; j < LLSIZE * 8; j++)
+		{
+			if (e.num[i] & mask)
+			{
+				res = Mult(res, xMod);
+			}
+			xMod = Kwad(xMod);
+			mask <<= 1;
+		}
+	}
+	return res;
+}
+

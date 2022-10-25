@@ -109,7 +109,8 @@ public:
 		n.checkMax(COUNTMOD);
 	}
 	ModNumber Mult(const ModNumber l, const ModNumber r);
-	ModNumber Kwad(const ModNumber x); 
+	ModNumber Kwad(const ModNumber x);
+	ModNumber Exp(const ModNumber x, const ModNumber e);
 
 private:
 	ModNumber n;

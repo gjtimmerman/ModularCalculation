@@ -3413,6 +3413,37 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 
+		TEST_METHOD(TestExpMultGroupModTwoPowerThirteenModTenThousand)
+		{
+			ModNumber ml(2ull);
+			ModNumber mn(10000ull);
+			MultGroupMod mgm(mn);
+			ModNumber me(13ull);
+
+			ModNumber mexp(8192ull);
+			ModNumber mres = mgm.Exp(ml, me);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestExpMultGroupModFirstBlockAllOnesPowerTwoLessMod)
+		{
+			llint l[COUNTLL]={};
+			llint n[COUNTLL]={};
+			llint exp[COUNTLL]={};
+			l[0] = ~0ull;
+			n[2] = 1ull;
+			exp[0] = 1ull;
+			exp[1] = ~0ull - 1ull;
+			ModNumber ml(l);
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+			ModNumber me(2ull);
+
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Exp(ml, me);
+			Assert::IsTrue(mres == mexp);
+		}
+
 
 	};
 	END_TEST_CLASS

@@ -2551,7 +2551,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 
-		TEST_METHOD(TestMultiplyMultGroupModThirthOneBlock9sDecByThirtyOneBlock9sDecResultLessMod)
+		TEST_METHOD(TestMultiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultLessMod)
 		{
 			std::string lstr = "9999999999999999";
 			lstr.append(lstr);
@@ -2755,6 +2755,298 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::ggd(ml, mr);
 			Assert::IsTrue(mexp == mres);
 		}
+
+		TEST_METHOD(TestKwadMultGroupEqualMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			for (int i = 0; i < COUNTMOD; i++)
+			{
+				l[i] = i;
+				n[i] = i;
+			}
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mexp;
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadOneMultGroupLessMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			l[0] = 1ull;
+			n[0] = 2ull;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			ModNumber mexp(ml);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+		TEST_METHOD(TestKwadMultGroupMod9sDecResultLessMod)
+		{
+			llint l[COUNTLL] = {};
+			l[0] = 9999999999999999ull;
+			llint n[COUNTLL] = {};
+			n[4] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			ModNumber ml(l);
+			std::string exp = "99999999999999980000000000000001";
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModTwoBlock9sDecResultLessMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			llint n[COUNTLL] = {};
+			n[4] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			std::string exp = "9999999999999999";
+			exp.append("9999999999999998");
+			exp.append("0000000000000000");
+			exp.append("0000000000000001");
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModTwoBlock9sDecResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModFourBlock9sDecResultLessMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			llint n[COUNTLL] = {};
+			n[8] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			std::string exp = "9999999999999999";
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999998");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000001");
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModFourBlock9sDecResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			std::string rstr = lstr;
+			ModNumber ml = ModNumber::stomn(lstr);
+			ModNumber mr = ModNumber::stomn(rstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Mult(ml, mr);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModEightBlock9sDecResultLessMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			llint n[COUNTLL] = {};
+			n[16] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			std::string exp = "9999999999999999";
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999999");
+			exp.append("9999999999999998");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000000");
+			exp.append("0000000000000001");
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModEightBlock9sDecResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModSixteenBlock9sDecResultLessMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			llint n[COUNTLL] = {};
+			n[32] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			std::string exp = "";
+			for (int i = 0; i < 15; i++)
+				exp.append("9999999999999999");
+
+			exp.append("9999999999999998");
+			for (int i = 0; i < 15; i++)
+				exp.append("0000000000000000");
+			exp.append("0000000000000001");
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModSixteenBlock9sDecResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModThirtyOneBlock9sDecResultLessMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr = lstr.substr(0, 496);
+			ModNumber ml = ModNumber::stomn(lstr);
+			llint n[COUNTLL] = {};
+			n[62] = 1;
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+
+			std::string exp = "";
+			for (int i = 0; i < 30; i++)
+				exp.append("9999999999999999");
+
+			exp.append("9999999999999998");
+			for (int i = 0; i < 30; i++)
+				exp.append("0000000000000000");
+			exp.append("0000000000000001");
+			ModNumber mexp = ModNumber::stomn(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestKwadMultGroupModThirtyOneBlock9sDecResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr = lstr.substr(0, 496);
+			ModNumber ml = ModNumber::stomn(lstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestMultiplyKwadGroupModThirtyTwoBlock9sResultGreaterMod)
+		{
+			std::string lstr = "9999999999999999";
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			lstr.append(lstr);
+			ModNumber ml = ModNumber::stomn(lstr);
+			std::string nstr = "10000000000000000";
+			ModNumber mn = ModNumber::stomn(nstr);
+			MultGroupMod mgm(mn);
+
+			llint exp[COUNTLL] = {};
+			exp[0] = 1ull;
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Kwad(ml);
+			Assert::IsTrue(mres == mexp);
+		}
+
 
 
 	};

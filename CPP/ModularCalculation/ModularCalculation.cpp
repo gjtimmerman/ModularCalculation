@@ -717,3 +717,10 @@ ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
 	res %= n;
 	return res;
 }
+
+ModNumber MultGroupMod::Kwad(const ModNumber x)
+{
+	ModNumber l = x;
+	ModNumber r = x;
+	return Mult(l, r);
+}

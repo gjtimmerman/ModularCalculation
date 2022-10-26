@@ -66,6 +66,7 @@ private:
 	static std::string AdjustStringLength(std::string s, size_t desiredLength);
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
 	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
+
 	unsigned int FindFirstNonZeroBitInWord(unsigned int word) const;
 	void checkMax(int size)
 	{
@@ -95,8 +96,12 @@ private:
 	friend ModNumber& operator%=(ModNumber& l, const ModNumber& r);
 	friend ModNumber operator<<(const ModNumber& n, const unsigned int i);
 	friend ModNumber& operator <<= (ModNumber& n, unsigned int i);
+	friend ModNumber operator>>(const ModNumber& n, const unsigned int i);
+	friend ModNumber& operator >>= (ModNumber& n, unsigned int i);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
+	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
+
 	friend class MultGroupMod;
 
 };
@@ -106,11 +111,19 @@ class MultGroupMod
 public:
 	MultGroupMod(ModNumber n) : n(n)
 	{
+		ModNumber mzero;
+		if (n == mzero)
+			throw std::domain_error("Group modulo zero is not allowed");
+		ModNumber mone(1ull);
+		if (n == mone)
+			throw std::domain_error("Group modulo one is not allowed");
 		n.checkMax(COUNTMOD);
 	}
 	ModNumber Mult(const ModNumber l, const ModNumber r);
 	ModNumber Kwad(const ModNumber x);
 	ModNumber Exp(const ModNumber x, const ModNumber e);
+	ModNumber Diff(const ModNumber l, const ModNumber r);
+	ModNumber Inverse(const ModNumber x);
 
 private:
 	ModNumber n;
@@ -133,7 +146,10 @@ bool operator >= (const ModNumber& l, const ModNumber& r);
 ModNumber operator%(const ModNumber& l, const ModNumber& r);
 ModNumber operator<<(const ModNumber& n, const unsigned int i);
 ModNumber& operator <<= (ModNumber& n, unsigned int i);
+ModNumber operator>>(const ModNumber& n, const unsigned int i);
+ModNumber& operator >>= (ModNumber& n, unsigned int i);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
+std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 
 

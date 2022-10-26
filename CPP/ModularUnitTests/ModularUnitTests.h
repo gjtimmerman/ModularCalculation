@@ -3704,7 +3704,46 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Exp(mx, me);
 			Assert::IsTrue(mexp == mres);
 		}
-
+		TEST_METHOD(TestDiffLgreaterRLessMod)
+		{
+			ModNumber ml(100ull);
+			ModNumber mr(90ull);
+			ModNumber mn(110ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(10ull);
+			ModNumber mres = mgm.Diff(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestDiffLgreaterRGreaterMod)
+		{
+			ModNumber ml(100ull);
+			ModNumber mr(90ull);
+			ModNumber mn(60ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(10ull);
+			ModNumber mres = mgm.Diff(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestDiffLlessRLessMod)
+		{
+			ModNumber ml(90ull);
+			ModNumber mr(100ull);
+			ModNumber mn(110ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(100ull);
+			ModNumber mres = mgm.Diff(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestDiffLlessRGreaterMod)
+		{
+			ModNumber ml(90ull);
+			ModNumber mr(100ull);
+			ModNumber mn(60ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(50ull);
+			ModNumber mres = mgm.Diff(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
 
 	};
 	END_TEST_CLASS

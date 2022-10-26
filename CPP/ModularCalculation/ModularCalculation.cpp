@@ -83,6 +83,75 @@ unsigned int ModNumber::FindFirstNonZeroBitInWord(unsigned int word) const
 	return LLSIZE*8;
 }
 
+std::tuple<ModNumber,ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r)
+{
+	ModNumber divRes;
+	ModNumber mzero;
+	if (r == mzero)
+		throw std::domain_error("Division by Zero");
+	ModNumber mone(1ull);
+	if (r == mone)		// Just optimization
+		return std::make_tuple(l,mzero);
+	ModNumber mtwo(2ull);
+	if (r == mtwo)		// Just optimization
+	{
+		divRes = l >> 1;
+		if (l.num[0] & 0x1ull)
+			return std::make_tuple(divRes,mone);
+		else
+			return std::make_tuple(divRes,mzero);
+	}
+	if (l < r)
+		return std::make_tuple(ModNumber(),l);
+	if (l == r)
+		return std::make_tuple(mone,mzero);
+	int li = 0;
+	int ri = 0;
+	for (int i = COUNTLL - 1; i >= 0; i--)
+		if (l.num[i])
+		{
+			li = i;
+			break;
+		}
+	for (int i = li; i >= 0; i--)
+		if (r.num[i])
+		{
+			ri = i;
+			break;
+		}
+	int diff = li - ri;
+	ModNumber mres(l);
+	divRes = ModNumber();
+	for (int i = 0; i <= diff; i++)
+	{
+		llint divisor[COUNTLL] = {};
+		llint tmp[COUNTLL] = {};
+		for (int j = 0; j <= ri; j++)
+		{
+			tmp[j + diff - i] = r.num[j];
+		}
+		divisor[ri + diff - i] = 1ull;
+		ModNumber mtmp(tmp);
+		ModNumber mdivisor(divisor);
+		unsigned int bl = (LLSIZE * 8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
+		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
+		int bdiff = bl - br;
+		for (int j = 0; j <= bdiff; j++)
+		{
+			ModNumber mtmp2(mtmp);
+			ModNumber mdivisor2(mdivisor);
+			mtmp2 <<= bdiff - j;
+			mdivisor2 <<= bdiff - j;
+			while (mres >= mtmp2)
+			{
+				mres -= mtmp2;
+				divRes += mdivisor2;
+			}
+		}
+	}
+	return std::make_tuple(divRes,mres);
+}
+
 
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
@@ -101,11 +170,9 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 			return mzero;
 	}
 	if (l < r)
-	{
 		return l;
-	}
 	if (l == r)
-		return ModNumber();
+		return mzero;
 	int li = 0;
 	int ri = 0;
 	for (int i = COUNTLL - 1; i >= 0; i--)
@@ -136,10 +203,10 @@ ModNumber operator%(const ModNumber& l, const ModNumber& r)
 		for (int j = 0; j <= bdiff; j++)
 		{
 			ModNumber mtmp2(mtmp);
-			mtmp2 <<= bdiff -j;
-			if (mres >= mtmp2)
+			mtmp2 <<= bdiff - j;
+			while (mres >= mtmp2)
 			{
-				mres -= mtmp2; 
+				mres -= mtmp2;
 			}
 		}
 	}
@@ -201,7 +268,7 @@ ModNumber& operator%=(ModNumber& l, const ModNumber& r)
 		{
 			ModNumber mtmp2(mtmp);
 			mtmp2 <<= bdiff - j;
-			if (l >= mtmp2)
+			while (l >= mtmp2)
 			{
 				l -= mtmp2;
 			}
@@ -233,6 +300,28 @@ ModNumber operator << (const ModNumber& n, unsigned int i)
 	return ModNumber((llint *)pres);
 }
 
+ModNumber operator >> (const ModNumber& n, unsigned int i)
+{
+	int words = 0;
+	if (i >= LSIZE * 8)
+	{
+		if (i >= NSIZE)
+			return ModNumber();
+		words = i / (LSIZE * 8);
+		i %= (LSIZE * 8);
+	}
+	const lint* pn = (const lint*)n.num;
+	lint pres[COUNTL] = {};
+	pres[0] = pn[words] >> i;
+	for (int j = 0; j < COUNTL - words - 1; j++)
+	{
+		llint tmp = ((llint)pn[j + words + 1]) >> i;
+		pres[j] |= ((lint*)(&tmp))[0];
+		pres[j + 1] = ((lint*)(&tmp))[1];
+	}
+	return ModNumber((llint*)pres);
+}
+
 ModNumber& operator <<= (ModNumber& n, unsigned int i)
 {
 	int words = 0;
@@ -252,7 +341,29 @@ ModNumber& operator <<= (ModNumber& n, unsigned int i)
 		pn[j] = ((lint*)(&tmp))[0];
 	}
 	for (int j = 0; j < words; j++)
-		pn[j] = 0ull;
+		pn[j] = 0ul;
+	return n;
+}
+ModNumber& operator >>= (ModNumber& n, unsigned int i)
+{
+	int words = 0;
+	if (i >= LSIZE * 8)
+	{
+		if (i >= NSIZE)
+			return n = ModNumber();
+		words = i / (LSIZE * 8);
+		i %= (LSIZE * 8);
+	}
+	lint* pn = (lint*)n.num;
+	pn[0] = pn[words] >> i;
+	for (int j = 0; j < COUNTL - words - 1; j++)
+	{
+		llint tmp = ((llint)pn[j + words + 1]) >> i;
+		pn[j] |= ((lint*)(&tmp))[0];
+		pn[j + 1] = ((lint*)(&tmp))[1];
+	}
+	for (int j = COUNTL - words; j < COUNTL; j++)
+		pn[j] = 0ul;
 	return n;
 }
 
@@ -749,4 +860,33 @@ ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e)
 	}
 	return res;
 }
+
+ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r)
+{
+	ModNumber lMod = l % n;
+	ModNumber rMod = r % n;
+	if (lMod == rMod)
+		return ModNumber(0ull);
+	if (lMod > rMod)
+		return lMod - rMod;
+	else
+		return n - rMod + lMod;
+}
+
+ModNumber MultGroupMod::Inverse(const ModNumber x)
+{
+	ModNumber mzero;
+	ModNumber mone(1ull);
+	if (x == mzero)
+		throw std::domain_error("Zero does not have an inverse");
+	if (x == mone)
+		return mone;
+	if (x == n)
+		throw std::domain_error("Zero does not have an inverse");
+	ModNumber r = x % n;
+	ModNumber l = n;
+	std::tuple<> res;
+	return ModNumber();
+}
+
 

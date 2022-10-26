@@ -3444,6 +3444,131 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 
+		TEST_METHOD(TestExpMultGroupModFirstTwoBlocksAllOnesPowerTwoLessMod)
+		{
+			llint l[COUNTLL] = {};
+			llint n[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[0] = ~0ull;
+			l[1] = ~0ull;
+			n[4] = 1ull;
+			exp[0] = 1ull;
+			exp[1] = 0ull;
+			exp[2] = ~0ull - 1ull;
+			exp[3] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mn(n);
+			MultGroupMod mgm(mn);
+			ModNumber me(2ull);
+
+			ModNumber mexp(exp);
+			ModNumber mres = mgm.Exp(ml, me);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestGroupPropertiesGroupModEleven)
+		{
+			ModNumber mx(2ull);
+			ModNumber mn(11ull);
+			MultGroupMod mgm(mn);
+			ModNumber me(2ull);
+			ModNumber mexp(4ull);
+			ModNumber mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(8ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(5ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(10ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(9ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(7ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(3ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(6ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+			me += 1ull;
+			mexp = ModNumber(1ull);
+			mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestGGDLargeNumbers)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mres = ModNumber::ggd(mx, my);
+			ModNumber mexp(1ull);
+			Assert::IsTrue(mres == mexp);
+		}
+
+		TEST_METHOD(TestExpTwoLargeNumberxModLargeNumbery)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp = ModNumber::stomn("113638967017082606674052656070205979468957500859029166099119331283109255964689");
+			MultGroupMod mgm(my);
+			ModNumber me(2ull);
+			ModNumber mres = mgm.Exp(mx,me);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestExpThreeLargeNumberxModLargeNumbery)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp = ModNumber::stomn("959159918151361352804382650352706011784068412944254732668580895529266851090113");
+			MultGroupMod mgm(my);
+			ModNumber me(3ull);
+			ModNumber mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestExpFourLargeNumberxModLargeNumbery)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp = ModNumber::stomn("43252875649600596472804069974401733886601470807478913480533005345660321341646");
+			MultGroupMod mgm(my);
+			ModNumber me(4ull);
+			ModNumber mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestExpFiveLargeNumberxModLargeNumbery)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp = ModNumber::stomn("161704454599373732186620154854028099753067612674910409272189542689295694371582");
+			MultGroupMod mgm(my);
+			ModNumber me(5ull);
+			ModNumber mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestExpNineLargeNumberxModLargeNumbery)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber my = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp = ModNumber::stomn("229491963118798811250703753130022542480533480148820031152039444666272832238347");
+			MultGroupMod mgm(my);
+			ModNumber me(9ull);
+			ModNumber mres = mgm.Exp(mx, me);
+			Assert::IsTrue(mexp == mres);
+		}
 
 	};
 	END_TEST_CLASS

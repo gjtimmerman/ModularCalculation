@@ -736,14 +736,15 @@ ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e)
 	for (int i = 0; i <= top; i++)
 	{
 		llint mask = 1ull;
-		for (int j = 0; j < LLSIZE * 8; j++)
+		llint tmp = e.num[i];
+		for (int j = 0; j < LLSIZE * 8 && (tmp || i < top); j++)
 		{
-			if (e.num[i] & mask)
+			if (tmp & mask)
 			{
 				res = Mult(res, xMod);
 			}
 			xMod = Kwad(xMod);
-			mask <<= 1;
+			tmp >>= 1;
 		}
 	}
 	return res;

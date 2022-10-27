@@ -357,6 +357,109 @@ namespace ModularUnitTests
 			Assert::IsTrue(mexp == ml);
 		}
 
+		TEST_METHOD(TestShifRightZero)
+		{
+			ModNumber ml(12345678ull);
+			Assert::IsTrue(ml == ml >> 0);
+		}
+		TEST_METHOD(TestShiftRightAssignZero)
+		{
+			ModNumber ml(12345678ull);
+			ModNumber exp(ml);
+			Assert::IsTrue(exp == (ml >>= 0));
+		}
+		TEST_METHOD(TestShiftRightOne)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x091a2ull);
+			Assert::IsTrue(mexp == ml >> 1);
+		}
+		TEST_METHOD(TestShiftRightAssignOne)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp(0x091a2ull);
+			Assert::IsTrue(mexp == (ml >>= 1));
+		}
+		TEST_METHOD(TestShiftRight32)
+		{
+			ModNumber ml(0x1234500000000ull);
+			ModNumber mexp(0x12345ull);
+			Assert::IsTrue(mexp == ml >> 32);
+		}
+		TEST_METHOD(TestShiftRightAssign32)
+		{
+			ModNumber ml(0x1234500000000ull);
+			ModNumber mexp(0x12345ull);
+			Assert::IsTrue(mexp == (ml >>= 32));
+		}
+
+		TEST_METHOD(TestShiftRight60)
+		{
+			ModNumber mexp(0x0102030405060708ull);
+			llint l[COUNTLL] = {};
+			l[0] = 0x8000000000000000ull;
+			l[1] = 0x0010203040506070ull;
+			ModNumber ml(l);
+			ModNumber mres = ml >> 60;
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestShiftRightAssign60)
+		{
+			ModNumber mexp(0x0102030405060708ull);
+			llint l[COUNTLL] = {};
+			l[0] = 0x8000000000000000ull;
+			l[1] = 0x0010203040506070ull;
+			ModNumber ml(l);
+			ml >>= 60;
+			Assert::IsTrue(mexp == ml);
+		}
+
+		TEST_METHOD(TestShiftRight65)
+		{
+			ModNumber mexp(0x12345ull);
+			llint l[COUNTLL] = {};
+			l[1] = 0x2468aull;
+			ModNumber ml(l);
+			Assert::IsTrue(mexp == ml >> 65);
+		}
+		TEST_METHOD(TestShiftRightAssign65)
+		{
+			ModNumber mexp(0x12345ull);
+			llint l[COUNTLL] = {};
+			l[1] = 0x2468aull;
+			ModNumber ml(l);
+			Assert::IsTrue(mexp == (ml >>= 65));
+		}
+		TEST_METHOD(TestShiftRightNSIZEMinusLSIZETimes8)
+		{
+			ModNumber mexp(0x12345ull);
+			lint l[COUNTL] = {};
+			l[COUNTL - 1] = 0x12345ul;
+			ModNumber ml((llint*)l);
+			Assert::IsTrue(mexp == ml >> NSIZE - (LSIZE * 8));
+		}
+		TEST_METHOD(TestShiftRightAssignNSIZEMinusLSIZETimes8)
+		{
+			ModNumber mexp(0x12345ull);
+			lint l[COUNTL] = {};
+			l[COUNTL - 1] = 0x12345ul;
+			ModNumber ml((llint*)l);
+			Assert::IsTrue(mexp == (ml >>= NSIZE - (LSIZE * 8)));
+		}
+		TEST_METHOD(TestShiftRightLSIZEtimes8)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp;
+			Assert::IsTrue(mexp == ml >> LSIZE * 8);
+		}
+		TEST_METHOD(TestShiftRightAssignLSIZEtimes8)
+		{
+			ModNumber ml(0x12345ull);
+			ModNumber mexp;
+			ml >>= LSIZE * 8;
+			Assert::IsTrue(mexp == ml);
+		}
+
 		TEST_METHOD(TestModuloDivideByZero)
 		{
 			ModNumber l(1ull);

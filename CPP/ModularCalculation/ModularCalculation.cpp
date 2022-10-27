@@ -315,7 +315,7 @@ ModNumber operator >> (const ModNumber& n, unsigned int i)
 	pres[0] = pn[words] >> i;
 	for (int j = 0; j < COUNTL - words - 1; j++)
 	{
-		llint tmp = ((llint)pn[j + words + 1]) >> i;
+		llint tmp = ((llint)pn[j + words + 1]) << (LSIZE* 8)-i;
 		pres[j] |= ((lint*)(&tmp))[0];
 		pres[j + 1] = ((lint*)(&tmp))[1];
 	}
@@ -358,7 +358,7 @@ ModNumber& operator >>= (ModNumber& n, unsigned int i)
 	pn[0] = pn[words] >> i;
 	for (int j = 0; j < COUNTL - words - 1; j++)
 	{
-		llint tmp = ((llint)pn[j + words + 1]) >> i;
+		llint tmp = ((llint)pn[j + words + 1]) << (LSIZE *8) - i;
 		pn[j] |= ((lint*)(&tmp))[0];
 		pn[j + 1] = ((lint*)(&tmp))[1];
 	}

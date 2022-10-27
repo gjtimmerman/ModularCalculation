@@ -130,7 +130,7 @@ std::tuple<ModNumber,ModNumber> DivideAndModulo(const ModNumber& l, const ModNum
 		{
 			tmp[j + diff - i] = r.num[j];
 		}
-		divisor[ri + diff - i] = 1ull;
+		divisor[diff - i] = 1ull;
 		ModNumber mtmp(tmp);
 		ModNumber mdivisor(divisor);
 		unsigned int bl = (LLSIZE * 8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;

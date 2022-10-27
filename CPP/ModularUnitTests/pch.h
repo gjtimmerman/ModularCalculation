@@ -14,4 +14,5 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
+#include <tuple>
 #endif //PCH_H

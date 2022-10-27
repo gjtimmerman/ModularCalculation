@@ -529,12 +529,22 @@ ModNumber operator* (const ModNumber& n, lint scalar)
 	lint* ln = (lint*)n.num;
 	ModNumber mres;
 	lint* lres = (lint*)mres.num;
+	int lim;
 
-	for (int i = 0; i < COUNTL; i++)
+	for (lim = COUNTL - 1; lim >= 0; lim--)
+	{
+		if (ln[lim])
+		{
+			break;
+		}
+	}
+
+
+	for (int i = 0; i <= lim; i++)
 	{
 		llint res = ((llint)ln[i]) * scalar;
 		mres.AddAssignScalar(i, ((lint*)&res)[0]);
-		if (i < COUNTL - 1)
+		if (i < COUNTL-1)
 			mres.AddAssignScalar(i + 1, ((lint*)&res)[1]);
 	}
 	return mres;
@@ -814,7 +824,15 @@ ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
 	ModNumber lMod = l % n;
 	ModNumber rMod = r % n;
 	lint* rlint = (lint*)rMod.num;
-	for (int i = 0; i < COUNTL; i++)
+	int lim;
+	for (lim = COUNTL - 1; lim >= 0; lim--)
+	{
+		if (rlint[lim])
+		{
+			break;
+		}
+	}
+	for (int i = 0; i <= lim; i++)
 	{
 		ModNumber tmp = lMod * rlint[i];
 		for (int j = 0; j < i; j++)

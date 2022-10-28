@@ -315,7 +315,7 @@ ModNumber operator >> (const ModNumber& n, unsigned int i)
 	pres[0] = pn[words] >> i;
 	for (int j = 0; j < COUNTL - words - 1; j++)
 	{
-		llint tmp = ((llint)pn[j + words + 1]) << (LSIZE* 8)-i;
+		llint tmp = ((llint)pn[j + words + 1]) << ((LSIZE* 8)-i);
 		pres[j] |= ((lint*)(&tmp))[0];
 		pres[j + 1] = ((lint*)(&tmp))[1];
 	}
@@ -358,7 +358,7 @@ ModNumber& operator >>= (ModNumber& n, unsigned int i)
 	pn[0] = pn[words] >> i;
 	for (int j = 0; j < COUNTL - words - 1; j++)
 	{
-		llint tmp = ((llint)pn[j + words + 1]) << (LSIZE *8) - i;
+		llint tmp = ((llint)pn[j + words + 1]) << ((LSIZE *8) - i);
 		pn[j] |= ((lint*)(&tmp))[0];
 		pn[j + 1] = ((lint*)(&tmp))[1];
 	}
@@ -818,7 +818,7 @@ ModNumber ModNumber::ggd(const ModNumber l,const ModNumber r)
 }
 
 
-ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
+ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r) const
 {
 	ModNumber res;
 	ModNumber lMod = l % n;
@@ -847,14 +847,14 @@ ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r)
 	return res;
 }
 
-ModNumber MultGroupMod::Kwad(const ModNumber x)
+ModNumber MultGroupMod::Kwad(const ModNumber x) const
 {
 	ModNumber l = x;
 	ModNumber r = x;
 	return Mult(l, r);
 }
 
-ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e)
+ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e) const
 {
 	ModNumber res(1ull);
 	ModNumber xMod = x % n;
@@ -879,7 +879,7 @@ ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e)
 	return res;
 }
 
-ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r)
+ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r) const
 {
 	ModNumber lMod = l % n;
 	ModNumber rMod = r % n;
@@ -891,7 +891,7 @@ ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r)
 		return n - rMod + lMod;
 }
 
-ModNumber MultGroupMod::Inverse(const ModNumber x)
+ModNumber MultGroupMod::Inverse(const ModNumber x) const
 {
 	ModNumber mzero;
 	ModNumber mone(1ull);
@@ -903,8 +903,30 @@ ModNumber MultGroupMod::Inverse(const ModNumber x)
 		throw std::domain_error("Zero does not have an inverse");
 	ModNumber r = x % n;
 	ModNumber l = n;
-	std::tuple<> res;
-	return ModNumber();
+	std::list<ModNumber> divisors;
+	std::tuple<ModNumber,ModNumber> res = DivideAndModulo(l,r);
+	while (!(std::get<1>(res) == mone))
+	{
+		if (std::get<1>(res) == mzero)
+			throw std::domain_error("Numbers are not relative prime, so there is no inverse.");
+		divisors.push_back(std::get<0>(res));
+		l = r;
+		r = std::get<1>(res);
+		res = DivideAndModulo(l, r);
+	}
+	divisors.push_back(std::get<0>(res));
+//	divisors.push_back(r);
+	ModNumber tmp1 = mzero;
+	ModNumber tmp2 = mone;
+	for (auto it = divisors.rbegin(); it != divisors.rend(); it++)
+	{
+		ModNumber tmp = tmp2;
+		ModNumber product = Mult(tmp2, *it);
+		tmp2 = Diff(tmp1, product);
+		tmp1 = tmp;
+
+	}
+	return tmp2;
 }
 
 

@@ -119,11 +119,11 @@ public:
 			throw std::domain_error("Group modulo one is not allowed");
 		n.checkMax(COUNTMOD);
 	}
-	ModNumber Mult(const ModNumber l, const ModNumber r);
-	ModNumber Kwad(const ModNumber x);
-	ModNumber Exp(const ModNumber x, const ModNumber e);
-	ModNumber Diff(const ModNumber l, const ModNumber r);
-	ModNumber Inverse(const ModNumber x);
+	ModNumber Mult(const ModNumber l, const ModNumber r) const;
+	ModNumber Kwad(const ModNumber x) const;
+	ModNumber Exp(const ModNumber x, const ModNumber e) const;
+	ModNumber Diff(const ModNumber l, const ModNumber r) const;
+	ModNumber Inverse(const ModNumber x) const;
 
 private:
 	ModNumber n;

@@ -808,6 +808,25 @@ namespace ModularUnitTests
 			Assert::IsTrue(std::get<0>(res) == expDiv);
 			Assert::IsTrue(std::get<1>(res) == expMod);
 		}
+		TEST_METHOD(TestDivideAndModuloAllFsLeftAndRightWordByAllFsRightWord)
+		{
+			llint l[COUNTLL]={};
+			llint r[COUNTLL]={};
+			llint exp[COUNTLL]={};
+			l[0] = ~0ull;
+			l[COUNTLL - 1] = ~0ull;
+			r[0] = ~0ull;
+			exp[0] = 1ull;
+			exp[COUNTLL - 1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, mr);
+			ModNumber expDiv(exp);
+			ModNumber expMod;
+			Assert::IsTrue(std::get<0>(res) == expDiv);
+			Assert::IsTrue(std::get<1>(res) == expMod);
+		}
+
 		TEST_METHOD(TestDivideAndModuloAllFsByAlllFs)
 		{
 			llint l[COUNTLL];
@@ -3035,6 +3054,20 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::ggd(ml, mr);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestMultGroupModOfZero)
+		{
+			ModNumber mzero;
+			
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([mzero] {MultGroupMod mgm(mzero); });
+		}
+		TEST_METHOD(TestMultGroupModOfOne)
+		{
+			ModNumber mone(1ull);
+
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([mone] {MultGroupMod mgm(mone); });
+		}
 
 		TEST_METHOD(TestKwadMultGroupEqualMod)
 		{
@@ -4023,6 +4056,86 @@ namespace ModularUnitTests
 			ModNumber mexp(50ull);
 			ModNumber mres = mgm.Diff(ml, mr);
 			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseOfZero)
+		{
+			ModNumber mzero;
+			ModNumber mtwo(2ull);
+			MultGroupMod mgm(mtwo);
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([&mres, mzero, mgm] {mres = mgm.Inverse(mzero); });
+		}
+
+		TEST_METHOD(TestInverseThreeAndSevenModTwenty)
+		{
+			ModNumber mx(3ull);
+			ModNumber mn(20ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(7ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseSevenAndThreeModTwenty)
+		{
+			ModNumber mx(7ull);
+			ModNumber mn(20ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(3ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseTwoAndSixModEleven)
+		{
+			ModNumber mx(2ull);
+			ModNumber mn(11ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(6ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseSixAndTwoModEleven)
+		{
+			ModNumber mx(6ull);
+			ModNumber mn(11ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(2ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseFiveAndFiveModTwelve)
+		{
+			ModNumber mx(5ull);
+			ModNumber mn(12ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(5ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseSevenAndSevenModTwelve)
+		{
+			ModNumber mx(7ull);
+			ModNumber mn(12ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(7ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseElevenAndElevenModTwelve)
+		{
+			ModNumber mx(11ull);
+			ModNumber mn(12ull);
+			MultGroupMod mgm(mn);
+			ModNumber mexp(11ull);
+			ModNumber mres = mgm.Inverse(mx);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestInverseOfTwentyAndFifteen)
+		{
+			ModNumber mx(15ull);
+			ModNumber mn(20ull);
+			MultGroupMod mgm(mn);
+			ModNumber mres;
+			Assert::ExpectException<std::domain_error>([mx,mgm,&mres] {mres = mgm.Inverse(mx); });
 		}
 
 	};

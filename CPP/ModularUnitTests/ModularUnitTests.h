@@ -4137,6 +4137,76 @@ namespace ModularUnitTests
 			ModNumber mres;
 			Assert::ExpectException<std::domain_error>([mx,mgm,&mres] {mres = mgm.Inverse(mx); });
 		}
+		TEST_METHOD(TestInverseOfLargeNumber1)
+		{
+			ModNumber mx = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			ModNumber mn = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp1 = ModNumber::stomn("990338159586064333264351853726399202032439273344500090039361795769103042626153");
+			MultGroupMod mgm(mn);
+			ModNumber mres = mgm.Inverse(mx);
+			//std::string outstr = "LargeNumberInverse.txt";
+			//std::ofstream outstream;
+			//outstream.open(outstr);
+			//outstream << mres;
+			//outstream.close();
+			Assert::IsTrue(mexp1 == mres);
+			ModNumber product = mgm.Mult(mx, mres);
+			ModNumber mexp2(1ull);
+			Assert::IsTrue(mexp2 == product);
+		}
+		TEST_METHOD(TestInverseOfLargeNumber1Inverse)
+		{
+			ModNumber mx = ModNumber::stomn("990338159586064333264351853726399202032439273344500090039361795769103042626153");
+			ModNumber mn = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp1 = ModNumber::stomn("578960446186580977142963331984986262322713928121796301252124359127864509988867");
+			MultGroupMod mgm(mn);
+			ModNumber mres = mgm.Inverse(mx);
+			//std::string outstr = "LargeNumberInverse.txt";
+			//std::ofstream outstream;
+			//outstream.open(outstr);
+			//outstream << mres;
+			//outstream.close();
+			Assert::IsTrue(mexp1 == mres);
+			ModNumber product = mgm.Mult(mx, mres);
+			ModNumber mexp2(1ull);
+			Assert::IsTrue(mexp2 == product);
+		}
+
+		TEST_METHOD(TestInverseOfLargeNumber2)
+		{
+			ModNumber mx = ModNumber::stomn("113638967017082606674052656070205979468957500859029166099119331283109255964689");
+			ModNumber mn = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp1 = ModNumber::stomn("916563989161488767790915831324982323599332376517448274768723301425613841973609");
+			MultGroupMod mgm(mn);
+			ModNumber mres = mgm.Inverse(mx);
+			//std::string outstr = "LargeNumberInverse2.txt";
+			//std::ofstream outstream;
+			//outstream.open(outstr);
+			//outstream << mres;
+			//outstream.close();
+			Assert::IsTrue(mexp1 == mres);
+			ModNumber product = mgm.Mult(mx, mres);
+			ModNumber mexp2(1ull);
+			Assert::IsTrue(mexp2 == product);
+		}
+		TEST_METHOD(TestInverseOfLargeNumber2Inverse)
+		{
+			ModNumber mx = ModNumber::stomn("916563989161488767790915831324982323599332376517448274768723301425613841973609");
+			ModNumber mn = ModNumber::stomn("1042128803135845758856078577225897936027981799787823433585206957451846378061825");
+			ModNumber mexp1 = ModNumber::stomn("113638967017082606674052656070205979468957500859029166099119331283109255964689");
+			MultGroupMod mgm(mn);
+			ModNumber mres = mgm.Inverse(mx);
+			//std::string outstr = "LargeNumberInverse2.txt";
+			//std::ofstream outstream;
+			//outstream.open(outstr);
+			//outstream << mres;
+			//outstream.close();
+			Assert::IsTrue(mexp1 == mres);
+			ModNumber product = mgm.Mult(mx, mres);
+			ModNumber mexp2(1ull);
+			Assert::IsTrue(mexp2 == product);
+		}
+
 
 	};
 	END_TEST_CLASS

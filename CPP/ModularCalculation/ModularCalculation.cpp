@@ -788,7 +788,7 @@ ModNumber ModNumber::stomn(std::string s, int base)
 	throw std::invalid_argument("Invalid argument passed");
 }
 
-ModNumber ModNumber::ggd(const ModNumber l,const ModNumber r)
+ModNumber ModNumber::gcd(const ModNumber l,const ModNumber r)
 {
 	ModNumber mzero;
 	ModNumber mone(1ull);

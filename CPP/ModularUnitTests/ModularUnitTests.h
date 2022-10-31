@@ -897,6 +897,169 @@ namespace ModularUnitTests
 			Assert::IsTrue(std::get<1>(res6) == mexpMod1);
 		}
 
+		TEST_METHOD(TestDivideByZero)
+		{
+			ModNumber l(1ull);
+			ModNumber r;
+			Assert::ExpectException<std::domain_error>([l, r]() {ModNumber res = l / r; });
+		}
+		TEST_METHOD(TestDivideByOne)
+		{
+			ModNumber l(1000ull);
+			ModNumber r(1ull);
+			ModNumber res = l / r;
+			ModNumber expDiv(l);
+
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideZeroByOne)
+		{
+			ModNumber l(0ull);
+			ModNumber r(1ull);
+			ModNumber res = l / r;
+			ModNumber expDiv;
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideEvenByTwo)
+		{
+			ModNumber l(1000ull);
+			ModNumber r(2ull);
+			ModNumber res = l / r;
+			ModNumber expDiv(500ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideOddByTwo)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(2ull);
+			ModNumber res = l / r;
+			ModNumber expDiv(500ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideSmallByLarge)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(2001ull);
+			ModNumber res = l / r;
+			ModNumber expDiv;
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideEquals)
+		{
+			ModNumber l(1001ull);
+			ModNumber r(1001ull);
+			ModNumber res = l / r;
+			ModNumber expDiv(1ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDividePrimeByFive)
+		{
+			ModNumber l(101ull);
+			ModNumber r(5ull);
+			ModNumber res = l / r;
+			ModNumber expDiv(20ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivide2Pow64ByEight)
+		{
+			llint l[COUNTLL] = {};
+			l[1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mr(8ull);
+			ModNumber res = ml / mr;
+			ModNumber expDiv(ml >> 3);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideAllFsBy2Pow16)
+		{
+			llint l[COUNTLL];
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				exp[i] = ~0ull;
+			}
+			exp[COUNTLL - 1] ^= (65535ull << (LLSIZE * 8 - 16));
+			ModNumber ml(l);
+			ModNumber mr(65536ull);
+			ModNumber res = ml / mr;
+			ModNumber expDiv(exp);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideAllFsLeftAndRightWordByAllFsRightWord)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[0] = ~0ull;
+			l[COUNTLL - 1] = ~0ull;
+			r[0] = ~0ull;
+			exp[0] = 1ull;
+			exp[COUNTLL - 1] = 1ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber res = ml / mr;
+			ModNumber expDiv(exp);
+			Assert::IsTrue(res == expDiv);
+		}
+
+		TEST_METHOD(TestDivideAllFsByAlllFs)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = ~0ull;
+			ModNumber ml(l);
+			ModNumber res = ml / ml;
+			ModNumber expDiv(1ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideAllFsByAlllFsAndZeroLowWord)
+		{
+			llint l[COUNTLL];
+			llint r[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = ~0ull;
+				r[i] = ~0ull;
+			}
+			r[0] = 0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber res = ml / mr;
+			ModNumber expDiv(1ull);
+			Assert::IsTrue(res == expDiv);
+		}
+		TEST_METHOD(TestDivideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne)
+		{
+			ModNumber mnprime1(355687428095999);
+			lint prime2(39916799ul);
+			ModNumber mnprime2(prime2);
+			ModNumber product = mnprime1 * prime2;
+			ModNumber res1 = product / mnprime1;
+			ModNumber res2 = product / mnprime2;
+			ModNumber mexpDiv1(mnprime2);
+			ModNumber mexpDiv2(mnprime1);
+			Assert::IsTrue(res1 == mexpDiv1);
+			Assert::IsTrue(res2 == mexpDiv2);
+			ModNumber mone(1ull);
+			ModNumber mnprime1MinusOne = mnprime1 - mone;
+			ModNumber mnprime2MinusOne = mnprime2 - mone;
+			ModNumber productMinusPrime1 = product - mnprime1;
+			ModNumber productMinusPrime2 = product - mnprime2;
+			ModNumber mexpDiv3(mnprime1);
+			ModNumber mexpDiv4(mnprime2);
+			ModNumber mexpDiv5(mnprime2MinusOne);
+			ModNumber mexpDiv6(mnprime1MinusOne);
+			ModNumber res3 = productMinusPrime1 / mnprime2MinusOne;
+			ModNumber res4 = productMinusPrime2 / mnprime1MinusOne;
+			ModNumber res5 = productMinusPrime1 / mnprime1;
+			ModNumber res6 = productMinusPrime2 / mnprime2;
+			Assert::IsTrue(res3 == mexpDiv3);
+			Assert::IsTrue(res4 == mexpDiv4);
+			Assert::IsTrue(res5 == mexpDiv5);
+			Assert::IsTrue(res6 == mexpDiv6);
+		}
+
 
 		TEST_METHOD(TestEqualTrue)
 		{

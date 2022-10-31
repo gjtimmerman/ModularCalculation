@@ -52,7 +52,8 @@ public:
 	}
 	std::string to_string(const int base = 10) const;
 	static ModNumber stomn(std::string s, int base = 10);
-	static ModNumber gcd(ModNumber l, ModNumber r);
+	static ModNumber gcd(const ModNumber l,const ModNumber r);
+	static ModNumber lcm(const ModNumber l, const ModNumber r);
 
 
 private:
@@ -100,6 +101,7 @@ private:
 	friend ModNumber& operator >>= (ModNumber& n, unsigned int i);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
+	friend ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 
 	friend class MultGroupMod;
@@ -150,6 +152,7 @@ ModNumber operator>>(const ModNumber& n, const unsigned int i);
 ModNumber& operator >>= (ModNumber& n, unsigned int i);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
+ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 
 

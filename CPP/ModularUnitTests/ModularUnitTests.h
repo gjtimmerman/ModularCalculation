@@ -333,7 +333,7 @@ namespace ModularUnitTests
 			lint exp[COUNTL] = {};
 			exp[COUNTL-1] = 0x12345ul;
 			ModNumber mexp((llint *)exp);
-			Assert::IsTrue(mexp == ml << NSIZE-(LSIZE*8));
+			Assert::IsTrue(mexp == ml << (NSIZE-(LSIZE*8)));
 		}
 		TEST_METHOD(TestShiftLeftAssignNSIZEMinusLSIZETimes8)
 		{
@@ -341,7 +341,7 @@ namespace ModularUnitTests
 			lint exp[COUNTL] = {};
 			exp[COUNTL-1] = 0x12345ul;
 			ModNumber mexp((llint*)exp);
-			Assert::IsTrue(mexp == (ml <<= NSIZE-(LSIZE*8) ));
+			Assert::IsTrue(mexp == (ml <<= (NSIZE-(LSIZE*8))));
 		}
 		TEST_METHOD(TestShiftLeftNSIZE)
 		{
@@ -436,7 +436,7 @@ namespace ModularUnitTests
 			lint l[COUNTL] = {};
 			l[COUNTL - 1] = 0x12345ul;
 			ModNumber ml((llint*)l);
-			Assert::IsTrue(mexp == ml >> NSIZE - (LSIZE * 8));
+			Assert::IsTrue(mexp == ml >> (NSIZE - (LSIZE * 8)));
 		}
 		TEST_METHOD(TestShiftRightAssignNSIZEMinusLSIZETimes8)
 		{
@@ -444,13 +444,13 @@ namespace ModularUnitTests
 			lint l[COUNTL] = {};
 			l[COUNTL - 1] = 0x12345ul;
 			ModNumber ml((llint*)l);
-			Assert::IsTrue(mexp == (ml >>= NSIZE - (LSIZE * 8)));
+			Assert::IsTrue(mexp == (ml >>= (NSIZE - (LSIZE * 8))));
 		}
 		TEST_METHOD(TestShiftRightLSIZEtimes8)
 		{
 			ModNumber ml(0x12345ull);
 			ModNumber mexp;
-			Assert::IsTrue(mexp == ml >> LSIZE * 8);
+			Assert::IsTrue(mexp == ml >> (LSIZE * 8));
 		}
 		TEST_METHOD(TestShiftRightAssignLSIZEtimes8)
 		{

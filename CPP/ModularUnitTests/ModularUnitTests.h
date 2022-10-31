@@ -3507,6 +3507,99 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::gcd(ml, mr);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestLCMOf101and100)
+		{
+			ModNumber monehundredone(101ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(10100ull);
+			ModNumber mres = ModNumber::lcm(monehundredone, monehundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestLCMOf102and100)
+		{
+			ModNumber monehundredtwo(102ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(5100ull);
+			ModNumber mres = ModNumber::lcm(monehundredtwo, monehundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestLCMOf100and102)
+		{
+			ModNumber monehundredtwo(102ull);
+			ModNumber monehundred(100ull);
+			ModNumber exp(5100ull);
+			ModNumber mres = ModNumber::lcm(monehundred, monehundredtwo);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestLCMOf400and600)
+		{
+			ModNumber mfourhundred(400ull);
+			ModNumber msixhundred(600ull);
+			ModNumber exp(1200ull);
+			ModNumber mres = ModNumber::lcm(mfourhundred, msixhundred);
+			Assert::IsTrue(exp == mres);
+		}
+
+		TEST_METHOD(TestLCMOfAllFin2ndBlockAndAllFin1thBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[1] = ~0ull;
+			r[0] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(l);
+			ModNumber mres = ModNumber::lcm(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestLCMOfAllFinlastBlockAndAllFin2ndBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL - 1] = ~0ull;
+			r[1] = ~0ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(l);
+			ModNumber mres = ModNumber::lcm(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestLCMOfAllFinlastBlockAndAllAin3rdBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL - 1] = ~0ull;
+			r[2] = 0xaaaaaaaaaaaaaaaaull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(l);
+			ModNumber mres = ModNumber::lcm(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestLCMOfAllFinlastBlockAndAllBin3rdBlock)
+		{
+			llint l[COUNTLL] = {};
+			llint r[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			l[COUNTLL - 1] = ~0ull;
+			r[2] = 0xbbbbbbbbbbbbbbbbull;
+			exp[COUNTLL - 1] = 0xfffffffffffffff5ull;
+			ModNumber ml(l);
+			ModNumber mr(r);
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::lcm(ml, mr);
+			Assert::IsTrue(mexp == mres);
+		}
+
 		TEST_METHOD(TestMultGroupModOfZero)
 		{
 			ModNumber mzero;

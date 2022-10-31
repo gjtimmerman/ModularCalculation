@@ -909,7 +909,7 @@ ModNumber ModNumber::lcm(const ModNumber l,const ModNumber r)
 {
 	ModNumber gcdRes = gcd(l, r);
 	ModNumber lDivGcD = l / gcdRes;
-	return l * r;
+	return lDivGcD * r;
 }
 
 

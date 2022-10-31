@@ -915,7 +915,6 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 		res = DivideAndModulo(l, r);
 	}
 	divisors.push_back(std::get<0>(res));
-//	divisors.push_back(r);
 	ModNumber tmp1 = mzero;
 	ModNumber tmp2 = mone;
 	for (auto it = divisors.rbegin(); it != divisors.rend(); it++)

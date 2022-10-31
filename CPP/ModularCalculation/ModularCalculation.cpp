@@ -621,6 +621,30 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	return n;
 }
 
+ModNumber operator *(const ModNumber l, const ModNumber r)
+{
+	ModNumber res;
+	lint* rlint = (lint*)r.num;
+	int lim;
+	for (lim = COUNTL - 1; lim >= 0; lim--)
+	{
+		if (rlint[lim])
+		{
+			break;
+		}
+	}
+	for (int i = 0; i <= lim; i++)
+	{
+		ModNumber tmp = l * rlint[i];
+		for (int j = 0; j < i; j++)
+		{
+			tmp <<= LSIZE * 8;
+		}
+		res += tmp;
+	}
+	return res;
+}
+
 std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 {
 	if (scalar == 0)
@@ -884,7 +908,8 @@ ModNumber ModNumber::gcd(const ModNumber l,const ModNumber r)
 ModNumber ModNumber::lcm(const ModNumber l,const ModNumber r)
 {
 	ModNumber gcdRes = gcd(l, r);
-	return gcdRes;
+	ModNumber lDivGcD = l / gcdRes;
+	return l * r;
 }
 
 

@@ -1024,4 +1024,56 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 	return tmp2;
 }
 
+#ifdef _WIN32
+void GetRSAKey()
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, NULL, AT_KEYEXCHANGE, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
+	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	status = NCryptFinalizeKey(keyHandle, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	BCRYPT_RSAKEY_BLOB *pkeyData;
+	unsigned char rawKeyData[283];
+	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
+	DWORD size;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 283, &size, 0);
+	if (status != ERROR_SUCCESS)
+	{
+		switch (status)
+		{
+			case NTE_BAD_FLAGS:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_FLAGS");
+			case NTE_BAD_KEY_STATE:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_KEY_STATE");
+			case NTE_BAD_TYPE:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_TYPE");
+			case NTE_INVALID_HANDLE:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_HANDLE");
+			case NTE_INVALID_PARAMETER:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_PARAMETER");
+			case NTE_NOT_SUPPORTED:
+				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_NOT_SUPPORTED");
 
+			default:
+				throw std::runtime_error("CryptOpenStorageProvider returned unknown error code");
+
+		}
+	}
+	if (pkeyData->Magic != BCRYPT_RSAPRIVATE_MAGIC)
+		throw std::runtime_error("Key structure not of type RSA Private");
+	ULONG bitLength = pkeyData->BitLength;
+	unsigned long* pModulus = (unsigned long *)rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+
+
+}
+#endif

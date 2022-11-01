@@ -4780,7 +4780,10 @@ namespace ModularUnitTests
 			ModNumber mexp2(1ull);
 			Assert::IsTrue(mexp2 == product);
 		}
-
+		TEST_METHOD(TestGetRSAKey)
+		{
+			GetRSAKey();
+		}
 
 	};
 	END_TEST_CLASS

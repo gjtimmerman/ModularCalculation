@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef _WIN32
+#include <windows.h>
+#include <ncrypt.h>
+#include <wincrypt.h>
+#endif
 
 typedef unsigned long long int llint;
 #ifdef _WIN32
@@ -156,5 +161,9 @@ std::istream& operator>>(std::istream& in, ModNumber& n);
 ModNumber operator *(const ModNumber l, const ModNumber r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
+
+#ifdef _WIN32
+void GetRSAKey();
+#endif
 
 

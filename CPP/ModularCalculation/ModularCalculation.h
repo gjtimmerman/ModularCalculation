@@ -46,9 +46,9 @@ class ModNumber
 public:
 	ModNumber() = default;
 	
-	explicit ModNumber(llint* n)
+	explicit ModNumber(llint* n, int count = COUNTLL)
 	{
-		for (int i = 0; i < COUNTLL; i++)
+		for (int i = 0; i < count; i++)
 			num[i] = n[i];
 	}
 	explicit ModNumber(llint n) : ModNumber()
@@ -163,7 +163,7 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 
 #ifdef _WIN32
-void GetRSAKey();
+ModNumber GetRSAKey();
 #endif
 
 

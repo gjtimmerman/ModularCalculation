@@ -1025,7 +1025,7 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 }
 
 #ifdef _WIN32
-void GetRSAKey()
+ModNumber GetRSAKey()
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
@@ -1082,9 +1082,10 @@ void GetRSAKey()
 	}
 	if (pkeyData->Magic != BCRYPT_RSAPRIVATE_MAGIC)
 		throw std::runtime_error("Key structure not of type RSA Private");
-	ULONG bitLength = pkeyData->BitLength;
-	unsigned long* pModulus = (unsigned long *)rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
-
-
+	if (pkeyData->BitLength / 8 != MAXMOD)
+		throw std::runtime_error("Key Bitsize not correct!");
+	unsigned long* pModulus = (unsigned long *)(rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB) + pkeyData->cbPublicExp);
+	ModNumber mn((llint*)pModulus,pkeyData->cbModulus/sizeof(llint));
+	return mn;
 }
 #endif

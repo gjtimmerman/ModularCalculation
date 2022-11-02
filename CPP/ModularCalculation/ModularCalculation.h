@@ -45,8 +45,22 @@ class ModNumber
 {
 public:
 	ModNumber() = default;
+
+	explicit ModNumber(unsigned char* n, int count = MAXMOD) : ModNumber()
+	{
+		unsigned char* numc = (unsigned char*)num;
+		for (int i = 0; i < count; i++)
+			numc[i] = n[i];
+	}
 	
-	explicit ModNumber(llint* n, int count = COUNTLL)
+	explicit ModNumber(lint* n, int count = COUNTL) : ModNumber()
+	{
+		lint* numl = (lint*)num;
+		for (int i = 0; i < count; i++)
+			numl[i] = n[i];
+
+	}
+	explicit ModNumber(llint* n, int count = COUNTLL) : ModNumber()
 	{
 		for (int i = 0; i < count; i++)
 			num[i] = n[i];
@@ -163,7 +177,18 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 
 #ifdef _WIN32
-ModNumber GetRSAKey();
+struct RSAParameters
+{
+	ModNumber pubExp;
+	ModNumber Modulus;
+	ModNumber Prime1;
+	ModNumber Prime2;
+	ModNumber Exp1;		// DP
+	ModNumber Exp2;		// DQ
+	ModNumber Coefficient;	// InverseQ
+	ModNumber PrivExp;
+};
+RSAParameters GetRSAKey();
 #endif
 
 

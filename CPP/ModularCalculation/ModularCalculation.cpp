@@ -1025,7 +1025,7 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 }
 
 #ifdef _WIN32
-ModNumber GetRSAKey()
+RSAParameters GetRSAKey()
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
@@ -1054,10 +1054,10 @@ ModNumber GetRSAKey()
 		throw std::runtime_error("CryptOpenKey returned error code");
 
 	BCRYPT_RSAKEY_BLOB *pkeyData;
-	unsigned char rawKeyData[1051];
+	unsigned char rawKeyData[2331];
 	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
 	DWORD size;
-	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 1051, &size, 0);
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 2331, &size, 0);
 	if (status != ERROR_SUCCESS)
 	{
 		switch (status)
@@ -1080,12 +1080,32 @@ ModNumber GetRSAKey()
 
 		}
 	}
-	if (pkeyData->Magic != BCRYPT_RSAPRIVATE_MAGIC)
-		throw std::runtime_error("Key structure not of type RSA Private");
+	status = NCryptFreeObject(keyHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+
+	if (pkeyData->Magic != BCRYPT_RSAFULLPRIVATE_MAGIC)
+		throw std::runtime_error("Key structure not of type RSA Full Private");
 	if (pkeyData->BitLength / 8 != MAXMOD)
 		throw std::runtime_error("Key Bitsize not correct!");
-	unsigned long* pModulus = (unsigned long *)(rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB) + pkeyData->cbPublicExp);
-	ModNumber mn((llint*)pModulus,pkeyData->cbModulus/sizeof(llint));
-	return mn;
+	RSAParameters rsaParameters;
+	unsigned char* pExp = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+	rsaParameters.pubExp = ModNumber(pExp, pkeyData->cbPublicExp);
+	llint* pModulus = (llint *)(pExp + pkeyData->cbPublicExp);
+	rsaParameters.Modulus = ModNumber (pModulus,pkeyData->cbModulus/LLSIZE);
+	llint* pPrime1 = pModulus + (pkeyData->cbModulus / LLSIZE);
+	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1 / LLSIZE);
+	llint* pPrime2 = pPrime1 + (pkeyData->cbPrime1 / LLSIZE);
+	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2 / LLSIZE);
+	llint* pExp1 = pPrime2 + (pkeyData->cbPrime2 / LLSIZE);
+	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1 / LLSIZE);
+	llint* pExp2 = pExp1 + (pkeyData->cbPrime1 / LLSIZE);
+	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2 / LLSIZE);
+	llint* pCoefficient = pExp2 + (pkeyData->cbPrime2 / LLSIZE);
+	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1 / LLSIZE);
+	llint* pPrivExp = pCoefficient + (pkeyData->cbPrime1 / LLSIZE);
+	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus / LLSIZE);
+
+	return rsaParameters;
 }
 #endif

@@ -1032,21 +1032,32 @@ void GetRSAKey()
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	NCRYPT_KEY_HANDLE keyHandle;
-	status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, NULL, AT_KEYEXCHANGE, 0);
+	status = NCryptOpenKey(provHandle, &keyHandle, L"MyCoolKey", AT_KEYEXCHANGE, 0);
+	if (status == NTE_BAD_KEYSET)
+	{
+		status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, L"MyCoolKey", AT_KEYEXCHANGE, 0);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptCreateKey returned error code");
+		DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
+		status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptSetProperty returned error code");
+		policy = 4096;
+		status = NCryptSetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptSetProperty returned error code");
+		status = NCryptFinalizeKey(keyHandle, 0);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptFinalizeKey returned error code");
+	}
 	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptOpenStorageProvider returned error code");
-	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
-	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), 0);
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptOpenStorageProvider returned error code");
-	status = NCryptFinalizeKey(keyHandle, 0);
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+		throw std::runtime_error("CryptOpenKey returned error code");
+
 	BCRYPT_RSAKEY_BLOB *pkeyData;
-	unsigned char rawKeyData[283];
+	unsigned char rawKeyData[1051];
 	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
 	DWORD size;
-	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 283, &size, 0);
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 1051, &size, 0);
 	if (status != ERROR_SUCCESS)
 	{
 		switch (status)

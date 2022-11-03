@@ -1028,38 +1028,10 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 
 unsigned char *ConvertToLittleEndian(unsigned char* p, DWORD cb)
 {
-	if (cb % LSIZE == 0)
-	{
-		lint* pl = (lint*)p;
-		DWORD cbl = cb / LSIZE;
-		lint* pres = (lint *)new unsigned char[cb];
-		for (unsigned int i = 0; i < cbl; i++)
-			pres[i] = ntohl(pl[i]);
-		return (unsigned char *)pres;
-	}
-	if (cb < LSIZE)
-	{
-		unsigned char* pres = new unsigned char[LSIZE];
-		lint l = 0ul;
-		unsigned char* pl = ((unsigned char *) & l) + LSIZE - cb;
-		for (unsigned int i = 0; i < cb; i++)
-			pl[i] = p[i];
-		*((lint*)pres) = ntohl(l);
-		return pres;
-	}
-	throw std::runtime_error("illegal size for conversion to LittleEndian");
-	//DWORD cbBase = cb / LSIZE;
-	//DWORD cbRest = cb % LSIZE;
-	//lint* pl = (lint*)p;
-	//lint* pres = new lint[cbBase + 1];
-	//for (unsigned int i = 0; i < cbBase; i++)
-	//	pres[i] = ntohl(pl[i]);
-	//lint tmp = 0ul;
-	//unsigned char* pTmp = (unsigned char*)&tmp;
-	//for (unsigned int i = 0; i < cbRest; i++)
-	//	pTmp[i] = p[cb - cbRest + i];
-	//pres[cbBase] = ntohl(tmp);
-	//return pres;
+	unsigned char* res = new unsigned char[cb];
+	for (unsigned int i = 0; i < cb; i++)
+		res[i] = p[cb - i - 1];
+	return res;
 }
 RSAParameters GetRSAKey()
 {

@@ -2,7 +2,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <winsock.h>
 #include <ncrypt.h>
 #include <wincrypt.h>
 #endif

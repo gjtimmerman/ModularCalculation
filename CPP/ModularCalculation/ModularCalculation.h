@@ -41,6 +41,8 @@ const int OctalStringLength = NSIZE / 3 + 1;
 const int DecimalStringLength = static_cast<int>(std::ceil(NSIZE * 0.30102999566398119521373889472449)); // log(2)
 const int HexStringLength = NCOUNT * 2;
 
+struct RSAParameters;
+
 class ModNumber
 {
 public:
@@ -123,7 +125,8 @@ private:
 	friend ModNumber operator* (const ModNumber l, const ModNumber r);
 	friend ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
-
+	friend DWORD GetByteCount(ModNumber mn);
+	friend void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters);
 	friend class MultGroupMod;
 
 };
@@ -188,7 +191,9 @@ struct RSAParameters
 	ModNumber Coefficient;	// InverseQ
 	ModNumber PrivExp;
 };
-RSAParameters GetRSAKey();
+
+RSAParameters GetRSAKey(wchar_t *KeyName);
+void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters);
 #endif
 
 

@@ -1026,24 +1026,34 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 
 #ifdef _WIN32
 
-unsigned char *ConvertToLittleEndian(unsigned char* p, DWORD cb)
+unsigned char *ConvertEndianess(unsigned char* p, DWORD cb)
 {
 	unsigned char* res = new unsigned char[cb];
 	for (unsigned int i = 0; i < cb; i++)
 		res[i] = p[cb - i - 1];
 	return res;
 }
-RSAParameters GetRSAKey()
+
+DWORD GetByteCount(ModNumber mn)
+{
+	unsigned char* p = (unsigned char *)mn.num;
+	for (int i = NCOUNT - 1; i >= 0; i--)
+		if (p[i])
+			return i;
+	return 0;
+}
+
+RSAParameters GetRSAKey(wchar_t *KeyName)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	NCRYPT_KEY_HANDLE keyHandle;
-	status = NCryptOpenKey(provHandle, &keyHandle, L"MyCoolKey", AT_KEYEXCHANGE, 0);
+	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_KEYEXCHANGE, 0);
 	if (status == NTE_BAD_KEYSET)
 	{
-		status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, L"MyCoolKey", AT_KEYEXCHANGE, 0);
+		status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, KeyName, AT_KEYEXCHANGE, 0);
 		if (status != ERROR_SUCCESS)
 			throw std::runtime_error("CryptCreateKey returned error code");
 		DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
@@ -1098,28 +1108,28 @@ RSAParameters GetRSAKey()
 		throw std::runtime_error("Key Bitsize not correct!");
 	RSAParameters rsaParameters;
 	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
-	unsigned char *pExp = ConvertToLittleEndian(p,pkeyData->cbPublicExp);
+	unsigned char *pExp = ConvertEndianess(p,pkeyData->cbPublicExp);
 	rsaParameters.pubExp = ModNumber(pExp, pkeyData->cbPublicExp);
 	p += pkeyData->cbPublicExp;
-	unsigned char* pModulus = ConvertToLittleEndian(p ,pkeyData->cbModulus);
+	unsigned char* pModulus = ConvertEndianess(p ,pkeyData->cbModulus);
 	rsaParameters.Modulus = ModNumber (pModulus,pkeyData->cbModulus);
 	p += pkeyData->cbModulus;
-	unsigned char* pPrime1 = ConvertToLittleEndian(p,pkeyData->cbPrime1);
+	unsigned char* pPrime1 = ConvertEndianess(p,pkeyData->cbPrime1);
 	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1);
 	p += pkeyData->cbPrime1;
-	unsigned char* pPrime2 = ConvertToLittleEndian(p, pkeyData->cbPrime2);
+	unsigned char* pPrime2 = ConvertEndianess(p, pkeyData->cbPrime2);
 	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2);
 	p += pkeyData->cbPrime2;
-	unsigned char* pExp1 = ConvertToLittleEndian(p,pkeyData->cbPrime1);
+	unsigned char* pExp1 = ConvertEndianess(p,pkeyData->cbPrime1);
 	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1);
 	p += pkeyData->cbPrime1;
-	unsigned char* pExp2 = ConvertToLittleEndian(p, pkeyData->cbPrime2);
+	unsigned char* pExp2 = ConvertEndianess(p, pkeyData->cbPrime2);
 	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2);
 	p += pkeyData->cbPrime2;
-	unsigned char* pCoefficient = ConvertToLittleEndian(p, pkeyData->cbPrime1);
+	unsigned char* pCoefficient = ConvertEndianess(p, pkeyData->cbPrime1);
 	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1);
 	p += pkeyData->cbPrime1;
-	unsigned char* pPrivExp = ConvertToLittleEndian(p,pkeyData->cbModulus);
+	unsigned char* pPrivExp = ConvertEndianess(p,pkeyData->cbModulus);
 	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus);
 	delete[] pExp;
 	delete[] pModulus;
@@ -1130,5 +1140,88 @@ RSAParameters GetRSAKey()
 	delete[] pCoefficient;
 	delete[] pPrivExp;
 	return rsaParameters;
+}
+
+void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters)
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_KEYEXCHANGE, 0);
+	if (status == ERROR_SUCCESS)
+	{
+		status = NCryptFreeObject(keyHandle);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptFreeObject returned error code");
+		return;
+	}
+
+	BCRYPT_RSAKEY_BLOB* pkeyData;
+	unsigned char rawKeyData[2331];
+	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
+	DWORD size;
+
+	pkeyData->Magic = BCRYPT_RSAFULLPRIVATE_MAGIC;
+	pkeyData->BitLength = MAXMOD * 8;
+	pkeyData->cbPublicExp = GetByteCount(rsaParameters.pubExp);
+	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+	unsigned char* pExp = ConvertEndianess((unsigned char *)(rsaParameters.pubExp.num), pkeyData->cbPublicExp);
+	for (int i = 0; i < pkeyData->cbPublicExp; i++)
+		p[i] = pExp[i];
+	p += pkeyData->cbPublicExp;
+	unsigned char* pModulus = ConvertEndianess(p, pkeyData->cbModulus);
+	rsaParameters.Modulus = ModNumber(pModulus, pkeyData->cbModulus);
+	p += pkeyData->cbModulus;
+	unsigned char* pPrime1 = ConvertEndianess(p, pkeyData->cbPrime1);
+	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pPrime2 = ConvertEndianess(p, pkeyData->cbPrime2);
+	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2);
+	p += pkeyData->cbPrime2;
+	unsigned char* pExp1 = ConvertEndianess(p, pkeyData->cbPrime1);
+	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pExp2 = ConvertEndianess(p, pkeyData->cbPrime2);
+	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2);
+	p += pkeyData->cbPrime2;
+	unsigned char* pCoefficient = ConvertEndianess(p, pkeyData->cbPrime1);
+	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pPrivExp = ConvertEndianess(p, pkeyData->cbModulus);
+	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus);
+	delete[] pExp;
+	delete[] pModulus;
+	delete[] pPrime1;
+	delete[] pPrime2;
+	delete[] pExp1;
+	delete[] pExp2;
+	delete[] pCoefficient;
+	delete[] pPrivExp;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 2331, &size, 0);
+	if (status != ERROR_SUCCESS)
+	{
+		switch (status)
+		{
+		case NTE_BAD_FLAGS:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_FLAGS");
+		case NTE_BAD_KEY_STATE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_KEY_STATE");
+		case NTE_BAD_TYPE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_TYPE");
+		case NTE_INVALID_HANDLE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_HANDLE");
+		case NTE_INVALID_PARAMETER:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_PARAMETER");
+		case NTE_NOT_SUPPORTED:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_NOT_SUPPORTED");
+
+		default:
+			throw std::runtime_error("CryptOpenStorageProvider returned unknown error code");
+
+		}
+	}
+
 }
 #endif

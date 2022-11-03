@@ -1025,6 +1025,42 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 }
 
 #ifdef _WIN32
+
+unsigned char *ConvertToLittleEndian(unsigned char* p, DWORD cb)
+{
+	if (cb % LSIZE == 0)
+	{
+		lint* pl = (lint*)p;
+		DWORD cbl = cb / LSIZE;
+		lint* pres = (lint *)new unsigned char[cb];
+		for (unsigned int i = 0; i < cbl; i++)
+			pres[i] = ntohl(pl[i]);
+		return (unsigned char *)pres;
+	}
+	if (cb < LSIZE)
+	{
+		unsigned char* pres = new unsigned char[LSIZE];
+		lint l = 0ul;
+		unsigned char* pl = ((unsigned char *) & l) + LSIZE - cb;
+		for (unsigned int i = 0; i < cb; i++)
+			pl[i] = p[i];
+		*((lint*)pres) = ntohl(l);
+		return pres;
+	}
+	throw std::runtime_error("illegal size for conversion to LittleEndian");
+	//DWORD cbBase = cb / LSIZE;
+	//DWORD cbRest = cb % LSIZE;
+	//lint* pl = (lint*)p;
+	//lint* pres = new lint[cbBase + 1];
+	//for (unsigned int i = 0; i < cbBase; i++)
+	//	pres[i] = ntohl(pl[i]);
+	//lint tmp = 0ul;
+	//unsigned char* pTmp = (unsigned char*)&tmp;
+	//for (unsigned int i = 0; i < cbRest; i++)
+	//	pTmp[i] = p[cb - cbRest + i];
+	//pres[cbBase] = ntohl(tmp);
+	//return pres;
+}
 RSAParameters GetRSAKey()
 {
 	NCRYPT_PROV_HANDLE provHandle;
@@ -1089,23 +1125,38 @@ RSAParameters GetRSAKey()
 	if (pkeyData->BitLength / 8 != MAXMOD)
 		throw std::runtime_error("Key Bitsize not correct!");
 	RSAParameters rsaParameters;
-	unsigned char* pExp = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+	unsigned char *pExp = ConvertToLittleEndian(p,pkeyData->cbPublicExp);
 	rsaParameters.pubExp = ModNumber(pExp, pkeyData->cbPublicExp);
-	llint* pModulus = (llint *)(pExp + pkeyData->cbPublicExp);
-	rsaParameters.Modulus = ModNumber (pModulus,pkeyData->cbModulus/LLSIZE);
-	llint* pPrime1 = pModulus + (pkeyData->cbModulus / LLSIZE);
-	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1 / LLSIZE);
-	llint* pPrime2 = pPrime1 + (pkeyData->cbPrime1 / LLSIZE);
-	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2 / LLSIZE);
-	llint* pExp1 = pPrime2 + (pkeyData->cbPrime2 / LLSIZE);
-	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1 / LLSIZE);
-	llint* pExp2 = pExp1 + (pkeyData->cbPrime1 / LLSIZE);
-	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2 / LLSIZE);
-	llint* pCoefficient = pExp2 + (pkeyData->cbPrime2 / LLSIZE);
-	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1 / LLSIZE);
-	llint* pPrivExp = pCoefficient + (pkeyData->cbPrime1 / LLSIZE);
-	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus / LLSIZE);
-
+	p += pkeyData->cbPublicExp;
+	unsigned char* pModulus = ConvertToLittleEndian(p ,pkeyData->cbModulus);
+	rsaParameters.Modulus = ModNumber (pModulus,pkeyData->cbModulus);
+	p += pkeyData->cbModulus;
+	unsigned char* pPrime1 = ConvertToLittleEndian(p,pkeyData->cbPrime1);
+	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pPrime2 = ConvertToLittleEndian(p, pkeyData->cbPrime2);
+	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2);
+	p += pkeyData->cbPrime2;
+	unsigned char* pExp1 = ConvertToLittleEndian(p,pkeyData->cbPrime1);
+	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pExp2 = ConvertToLittleEndian(p, pkeyData->cbPrime2);
+	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2);
+	p += pkeyData->cbPrime2;
+	unsigned char* pCoefficient = ConvertToLittleEndian(p, pkeyData->cbPrime1);
+	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1);
+	p += pkeyData->cbPrime1;
+	unsigned char* pPrivExp = ConvertToLittleEndian(p,pkeyData->cbModulus);
+	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus);
+	delete[] pExp;
+	delete[] pModulus;
+	delete[] pPrime1;
+	delete[] pPrime2;
+	delete[] pExp1;
+	delete[] pExp2;
+	delete[] pCoefficient;
+	delete[] pPrivExp;
 	return rsaParameters;
 }
 #endif

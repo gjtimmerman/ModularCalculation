@@ -621,7 +621,7 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	return n;
 }
 
-ModNumber operator *(const ModNumber l, const ModNumber r)
+ModNumber operator* (const ModNumber l, const ModNumber r)
 {
 	ModNumber res;
 	lint* rlint = (lint*)r.num;

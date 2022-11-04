@@ -4806,6 +4806,16 @@ namespace ModularUnitTests
 			Assert::IsTrue(mExp1Exp == DpCalc);
 			Assert::IsTrue(mExp2Exp == DqCalc);
 			Assert::IsTrue(mCoefficientExp == InverseQCalc);
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = mModulusExp;
+			rsaParameters.pubExp = mExponent;
+			rsaParameters.Prime1 = mPrime1;
+			rsaParameters.Prime2 = mPrime2;
+			rsaParameters.Exp1 = mExp1Exp;
+			rsaParameters.Exp2 = mExp2Exp;
+			rsaParameters.Coefficient = mCoefficientExp;
+			rsaParameters.PrivExp = mPrivExpExp;
+			SetRSAKey(L"MyCoolKey1", rsaParameters);
 		}
 
 	};

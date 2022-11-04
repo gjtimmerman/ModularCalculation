@@ -126,7 +126,8 @@ private:
 	friend ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 	friend DWORD GetByteCount(ModNumber mn);
-	friend void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters);
+	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
+	friend unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
 	friend class MultGroupMod;
 
 };
@@ -193,7 +194,8 @@ struct RSAParameters
 };
 
 RSAParameters GetRSAKey(wchar_t *KeyName);
-void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters);
+void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
+unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
 #endif
 
 

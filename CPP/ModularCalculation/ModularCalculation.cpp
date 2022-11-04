@@ -1039,8 +1039,17 @@ DWORD GetByteCount(ModNumber mn)
 	unsigned char* p = (unsigned char *)mn.num;
 	for (int i = NCOUNT - 1; i >= 0; i--)
 		if (p[i])
-			return i;
+			return i + 1;
 	return 0;
+}
+
+unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest)
+{
+	unsigned char* pKey = ConvertEndianess((unsigned char*)(mn.num), cbsize);
+	for (unsigned int i = 0; i < cbsize; i++)
+		pDest[i] = pKey[i];
+	delete[] pKey;
+	return pDest + cbsize;
 }
 
 RSAParameters GetRSAKey(wchar_t *KeyName)
@@ -1142,64 +1151,50 @@ RSAParameters GetRSAKey(wchar_t *KeyName)
 	return rsaParameters;
 }
 
-void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters)
+void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters)
 {
+
+	BCRYPT_RSAKEY_BLOB *pkeyData;
+	DWORD cbPublicExp;
+	DWORD cbModulus;
+	DWORD cbPrime1;
+	DWORD cbPrime2;
+	cbPublicExp = GetByteCount(rsaParameters.pubExp);
+	cbModulus = GetByteCount(rsaParameters.Modulus);
+	cbPrime1 = GetByteCount(rsaParameters.Prime1);
+	cbPrime2 = GetByteCount(rsaParameters.Prime2);
+	DWORD size = sizeof(BCRYPT_RSAKEY_BLOB) + cbPublicExp + (cbModulus * 2) + (cbPrime1 * 3) + (cbPrime2 * 2);
+	unsigned char *rawKeyData = new unsigned char[size];
+	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
+	pkeyData->Magic = BCRYPT_RSAFULLPRIVATE_MAGIC;
+	pkeyData->BitLength = MAXMOD * 8;
+	pkeyData->cbModulus = cbModulus;
+	pkeyData->cbPrime1 = cbPrime1;
+	pkeyData->cbPrime2 = cbPrime2;
+	pkeyData->cbPublicExp = cbPublicExp;
+	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
+	p = CopyKeyPart(rsaParameters.pubExp,pkeyData->cbPublicExp, p);
+	p = CopyKeyPart(rsaParameters.Modulus, pkeyData->cbModulus, p);
+	p = CopyKeyPart(rsaParameters.Prime1, pkeyData->cbPrime1, p);
+	p = CopyKeyPart(rsaParameters.Prime2, pkeyData->cbPrime2,p);
+	p = CopyKeyPart(rsaParameters.Exp1, pkeyData->cbPrime1,p);
+	p = CopyKeyPart(rsaParameters.Exp2, pkeyData->cbPrime2,p);
+	p = CopyKeyPart(rsaParameters.Coefficient, pkeyData->cbPrime1,p);
+	p = CopyKeyPart(rsaParameters.PrivExp, pkeyData->cbModulus,p);
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	NCryptBufferDesc bufferDesc;
+	BCryptBuffer cryptBuffer;
+	cryptBuffer.BufferType = NCRYPTBUFFER_PKCS_KEY_NAME;
+	cryptBuffer.cbBuffer = (ULONG)(wcslen(KeyName) + 1) * sizeof(wchar_t);
+	cryptBuffer.pvBuffer = (PVOID)KeyName;
+	bufferDesc.cBuffers = 1;
+	bufferDesc.pBuffers = &cryptBuffer;
+	bufferDesc.ulVersion = NCRYPTBUFFER_VERSION;
 	NCRYPT_KEY_HANDLE keyHandle;
-	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_KEYEXCHANGE, 0);
-	if (status == ERROR_SUCCESS)
-	{
-		status = NCryptFreeObject(keyHandle);
-		if (status != ERROR_SUCCESS)
-			throw std::runtime_error("CryptFreeObject returned error code");
-		return;
-	}
-
-	BCRYPT_RSAKEY_BLOB* pkeyData;
-	unsigned char rawKeyData[2331];
-	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
-	DWORD size;
-
-	pkeyData->Magic = BCRYPT_RSAFULLPRIVATE_MAGIC;
-	pkeyData->BitLength = MAXMOD * 8;
-	pkeyData->cbPublicExp = GetByteCount(rsaParameters.pubExp);
-	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
-	unsigned char* pExp = ConvertEndianess((unsigned char *)(rsaParameters.pubExp.num), pkeyData->cbPublicExp);
-	for (int i = 0; i < pkeyData->cbPublicExp; i++)
-		p[i] = pExp[i];
-	p += pkeyData->cbPublicExp;
-	unsigned char* pModulus = ConvertEndianess(p, pkeyData->cbModulus);
-	rsaParameters.Modulus = ModNumber(pModulus, pkeyData->cbModulus);
-	p += pkeyData->cbModulus;
-	unsigned char* pPrime1 = ConvertEndianess(p, pkeyData->cbPrime1);
-	rsaParameters.Prime1 = ModNumber(pPrime1, pkeyData->cbPrime1);
-	p += pkeyData->cbPrime1;
-	unsigned char* pPrime2 = ConvertEndianess(p, pkeyData->cbPrime2);
-	rsaParameters.Prime2 = ModNumber(pPrime2, pkeyData->cbPrime2);
-	p += pkeyData->cbPrime2;
-	unsigned char* pExp1 = ConvertEndianess(p, pkeyData->cbPrime1);
-	rsaParameters.Exp1 = ModNumber(pExp1, pkeyData->cbPrime1);
-	p += pkeyData->cbPrime1;
-	unsigned char* pExp2 = ConvertEndianess(p, pkeyData->cbPrime2);
-	rsaParameters.Exp2 = ModNumber(pExp2, pkeyData->cbPrime2);
-	p += pkeyData->cbPrime2;
-	unsigned char* pCoefficient = ConvertEndianess(p, pkeyData->cbPrime1);
-	rsaParameters.Coefficient = ModNumber(pCoefficient, pkeyData->cbPrime1);
-	p += pkeyData->cbPrime1;
-	unsigned char* pPrivExp = ConvertEndianess(p, pkeyData->cbModulus);
-	rsaParameters.PrivExp = ModNumber(pPrivExp, pkeyData->cbModulus);
-	delete[] pExp;
-	delete[] pModulus;
-	delete[] pPrime1;
-	delete[] pPrime2;
-	delete[] pExp1;
-	delete[] pExp2;
-	delete[] pCoefficient;
-	delete[] pPrivExp;
-	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 2331, &size, 0);
+	status = NCryptImportKey(provHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, &bufferDesc,&keyHandle, (PBYTE)pkeyData, size, NCRYPT_DO_NOT_FINALIZE_FLAG);
 	if (status != ERROR_SUCCESS)
 	{
 		switch (status)
@@ -1222,6 +1217,16 @@ void SetRSAKey(wchar_t* KeyName, RSAParameters rsaParameters)
 
 		}
 	}
+	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
+	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptSetProperty returned error code");
+	status = NCryptFinalizeKey(keyHandle, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFinalizeKey returned error code");
+	status = NCryptFreeObject(keyHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
 
 }
 #endif

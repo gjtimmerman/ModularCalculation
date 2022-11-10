@@ -1024,7 +1024,7 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 	return tmp2;
 }
 
-#ifdef _WIN32
+
 
 unsigned char *ConvertEndianess(unsigned char* p, DWORD cb)
 {
@@ -1034,7 +1034,7 @@ unsigned char *ConvertEndianess(unsigned char* p, DWORD cb)
 	return res;
 }
 
-DWORD GetByteCount(ModNumber mn)
+unsigned long GetByteCount(ModNumber mn)
 {
 	unsigned char* p = (unsigned char *)mn.num;
 	for (int i = NCOUNT - 1; i >= 0; i--)
@@ -1051,6 +1051,64 @@ unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest)
 	delete[] pKey;
 	return pDest + cbsize;
 }
+
+ModNumber RSA::GetPKCS1Mask(unsigned long keyByteSize, ModNumber m) const
+{
+	if (keyByteSize > MAXMOD)
+		throw std::domain_error("Key Byte size greater than maximum");
+	unsigned long mSize = GetByteCount(m);
+	unsigned long mCount = mSize / LLSIZE;
+	if (keyByteSize - 11u < mSize)
+		throw std::domain_error("Message size greater than Key Byte size minus 11");
+	ModNumber res;
+	srand((unsigned int)time(0));
+	unsigned long padSize = keyByteSize - mSize - 3;
+	unsigned long totalBytesLeft = keyByteSize % LLSIZE;
+	unsigned long totalNumWords = keyByteSize / LLSIZE;
+	llint tmp = 0x0002;
+	unsigned long totalBytesShift = totalBytesLeft;
+	if (totalBytesLeft < 2)
+		totalBytesShift += 8;
+	for (unsigned int i = 0; i < totalBytesShift - 2; i++)
+	{
+		tmp <<= 8;
+		unsigned char mask = (unsigned char)rand() % 0x100;
+		tmp |= mask;
+	}
+	res.num[totalNumWords - 1] = tmp;
+	unsigned long padLeft = padSize - (totalBytesShift - 2);
+	unsigned long padLeftCount = padLeft / LLSIZE;
+	unsigned long padLeftOver = padLeft % LLSIZE;
+	for (unsigned int i = 0; i < padLeftCount; i++)
+	{
+		tmp = 0;
+		for (int j = 0; j < LLSIZE; j++)
+		{
+			tmp <<= 8;
+			unsigned char mask = (unsigned char)rand() % 0x100;
+			tmp |= mask;
+		}
+		res.num[totalNumWords - i - 2] = tmp;
+	}
+	tmp = 0;
+	for (unsigned int j = 0; j < padLeftOver; j++)
+	{
+		unsigned char mask = (unsigned char)rand() % 0x100;
+		tmp |= mask;
+		tmp <<= 8;
+	}
+	tmp <<= (LLSIZE - padLeftOver - 1) * 8;
+	tmp |= m.num[mCount];
+	res.num[totalNumWords - padLeftCount - 2] = tmp;
+	for (unsigned int i = 0; i < mCount; i++)
+	{
+		res.num[i] = m.num[i];
+	}
+	return res;
+}
+
+
+#ifdef _WIN32 
 
 RSAParameters GetRSAKey(wchar_t *KeyName)
 {

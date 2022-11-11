@@ -1085,7 +1085,7 @@ ModNumber RSA::GetPKCS1Mask(unsigned long keyByteSize, ModNumber m) const
 		for (int j = 0; j < LLSIZE; j++)
 		{
 			tmp <<= 8;
-			unsigned char mask = (unsigned char)rand() % 0x100;
+			unsigned char mask = ((unsigned char)rand() % 0xFF) + 1u;
 			tmp |= mask;
 		}
 		res.num[totalNumWords - i - 2] = tmp;

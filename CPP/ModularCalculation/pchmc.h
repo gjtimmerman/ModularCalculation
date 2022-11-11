@@ -16,6 +16,8 @@
 #include <tuple>
 #include <cmath>
 #include <list>
+#include <random>
+#include <time.h>
 
 // add headers that you want to pre-compile here
 #include "framework.h"

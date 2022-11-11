@@ -129,6 +129,7 @@ private:
 	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 	friend unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
 	friend class MultGroupMod;
+	friend class RSA;
 
 };
 
@@ -155,6 +156,45 @@ private:
 	ModNumber n;
 };
 
+struct RSAParameters
+{
+	ModNumber pubExp;
+	ModNumber Modulus;
+	ModNumber Prime1;
+	ModNumber Prime2;
+	ModNumber Exp1;		// DP
+	ModNumber Exp2;		// DQ
+	ModNumber Coefficient;	// InverseQ
+	ModNumber PrivExp;
+};
+
+class RSA
+{
+public:
+	RSA(RSAParameters rsaParameters)
+	{
+		pubExp = rsaParameters.pubExp;
+		Modulus = rsaParameters.Modulus;
+		Prime1 = rsaParameters.Prime1;
+		Prime2 = rsaParameters.Prime2;
+		Exp1 = rsaParameters.Exp1;
+		Exp2 = rsaParameters.Exp2;
+		Coefficient = rsaParameters.Coefficient;
+		PrivExp = rsaParameters.PrivExp;
+	}
+	ModNumber GetPKCS1Mask(unsigned long keyByteSize, ModNumber m) const;
+private:
+	ModNumber pubExp;
+	ModNumber Modulus;
+	ModNumber Prime1;
+	ModNumber Prime2;
+	ModNumber Exp1;		// DP
+	ModNumber Exp2;		// DQ
+	ModNumber Coefficient;	// InverseQ
+	ModNumber PrivExp;
+
+};
+
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
 ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
@@ -179,23 +219,14 @@ std::istream& operator>>(std::istream& in, ModNumber& n);
 ModNumber operator* (const ModNumber l, const ModNumber r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
+unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
+
+
+
 
 #ifdef _WIN32
-struct RSAParameters
-{
-	ModNumber pubExp;
-	ModNumber Modulus;
-	ModNumber Prime1;
-	ModNumber Prime2;
-	ModNumber Exp1;		// DP
-	ModNumber Exp2;		// DQ
-	ModNumber Coefficient;	// InverseQ
-	ModNumber PrivExp;
-};
-
 RSAParameters GetRSAKey(wchar_t *KeyName);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
-unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
 #endif
 
 

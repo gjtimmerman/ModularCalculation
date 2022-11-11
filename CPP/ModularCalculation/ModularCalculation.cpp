@@ -1052,10 +1052,9 @@ unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest)
 	return pDest + cbsize;
 }
 
-ModNumber RSA::GetPKCS1Mask(unsigned long keyByteSize, ModNumber m) const
+ModNumber RSA::GetPKCS1Mask(ModNumber m) const
 {
-	if (keyByteSize > MAXMOD)
-		throw std::domain_error("Key Byte size greater than maximum");
+	unsigned long keyByteSize = GetByteCount(Modulus);
 	unsigned long mSize = GetByteCount(m);
 	unsigned long mCount = mSize / LLSIZE;
 	if (keyByteSize - 11u < mSize)

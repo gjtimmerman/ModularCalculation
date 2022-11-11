@@ -182,7 +182,7 @@ public:
 		Coefficient = rsaParameters.Coefficient;
 		PrivExp = rsaParameters.PrivExp;
 	}
-	ModNumber GetPKCS1Mask(unsigned long keyByteSize, ModNumber m) const;
+	ModNumber GetPKCS1Mask(ModNumber m) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;

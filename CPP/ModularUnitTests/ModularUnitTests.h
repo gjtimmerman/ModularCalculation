@@ -4817,6 +4817,26 @@ namespace ModularUnitTests
 			rsaParameters.PrivExp = mPrivExpExp;
 //			SetRSAKey(L"MyCoolKey1", rsaParameters);
 		}
+		TEST_METHOD(TestGetPKCS1MaskMessageTooLong)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFFFFFF",16);
+			Assert::ExpectException<std::domain_error>([message, rsa] {rsa.GetPKCS1Mask(message); });
+
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageEightFs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(HexStringLength - 32, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
+		}
 
 	};
 	END_TEST_CLASS

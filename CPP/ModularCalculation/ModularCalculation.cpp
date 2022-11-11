@@ -1064,6 +1064,8 @@ ModNumber RSA::GetPKCS1Mask(ModNumber m) const
 	unsigned long padSize = keyByteSize - mSize - 3;
 	unsigned long totalBytesLeft = keyByteSize % LLSIZE;
 	unsigned long totalNumWords = keyByteSize / LLSIZE;
+	if (totalBytesLeft > 1)
+		totalNumWords++;
 	llint tmp = 0x0002;
 	unsigned long totalBytesShift = totalBytesLeft;
 	if (totalBytesLeft < 2)

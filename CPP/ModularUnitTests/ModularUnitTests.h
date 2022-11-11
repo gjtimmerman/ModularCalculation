@@ -4826,7 +4826,29 @@ namespace ModularUnitTests
 			Assert::ExpectException<std::domain_error>([message, rsa] {rsa.GetPKCS1Mask(message); });
 
 		}
-		TEST_METHOD(TestGetPKCS1MaskMessageEightFs)
+		TEST_METHOD(TestGetPKCS1MaskMessageSixFsModulus28Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(HexStringLength - 28, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 8, 8, "00FFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus30Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(HexStringLength - 30, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus32Fs)
 		{
 			RSAParameters rsaParameters;
 			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
@@ -4835,6 +4857,17 @@ namespace ModularUnitTests
 			ModNumber res = rsa.GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
 			Assert::IsTrue(resstr.compare(HexStringLength - 32, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus34Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(HexStringLength - 34, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
 		}
 

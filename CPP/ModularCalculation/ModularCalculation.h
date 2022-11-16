@@ -75,6 +75,7 @@ public:
 	static ModNumber stomn(std::string s, int base = 10);
 	static ModNumber gcd(const ModNumber l,const ModNumber r);
 	static ModNumber lcm(const ModNumber l, const ModNumber r);
+	static ModNumber convertTextToMN(std::string text);
 
 
 private:
@@ -183,6 +184,7 @@ public:
 		PrivExp = rsaParameters.PrivExp;
 	}
 	ModNumber GetPKCS1Mask(ModNumber m) const;
+	ModNumber Encrypt(ModNumber m) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;

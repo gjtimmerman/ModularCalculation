@@ -912,6 +912,31 @@ ModNumber ModNumber::lcm(const ModNumber l,const ModNumber r)
 	return lDivGcD * r;
 }
 
+ModNumber ModNumber::convertTextToMN(std::string text)
+{
+	llint* pText = (llint*)text.c_str();
+	std::size_t textSize = text.length() / LLSIZE;
+	std::size_t textLeft = text.length() % LLSIZE;
+	llint res[COUNTLL] = {};
+	if (textSize > COUNTLL)
+		throw std::domain_error("Text message too long");
+	if (textSize == COUNTLL && textLeft > 0)
+		throw std::domain_error("Text message too long");
+	for (unsigned int i = 0; i < textSize; i++)
+		res[i] = pText[i];
+	llint tmp = 0;
+	for (unsigned int i = 0; i < textLeft; i++)
+	{
+		llint c = text[textSize * LLSIZE + i];
+		c <<= 8 * i;
+		tmp |= (llint)c;
+	}
+	if (textLeft > 0)
+		res[textSize] = tmp;
+	return ModNumber(res);
+}
+
+
 
 
 ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r) const
@@ -1107,6 +1132,14 @@ ModNumber RSA::GetPKCS1Mask(ModNumber m) const
 	}
 	return res;
 }
+
+ModNumber RSA::Encrypt(ModNumber m) const
+{
+	ModNumber masked = GetPKCS1Mask(m);
+	MultGroupMod mgm(Modulus);
+	return mgm.Exp(masked, pubExp);
+}
+
 
 
 #ifdef _WIN32 

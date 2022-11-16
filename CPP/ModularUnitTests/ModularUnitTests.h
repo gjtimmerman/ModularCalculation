@@ -4949,7 +4949,71 @@ namespace ModularUnitTests
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 20, 2, "00") == 0);
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 22, HexStringLength - LLSIZE * 2 - 26, std::string(HexStringLength - LLSIZE * 2 - 26, 'F')) == 0);
 		}
+		TEST_METHOD(TestConverTextToMNTextOneCharTooLong)
+		{
+				std::string message(COUNTLL*LLSIZE + 1,'a');
+				Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::convertTextToMN(message); });
 
+		}
+		TEST_METHOD(TestConverTextToMNTextEightCharsTooLong)
+		{
+			std::string message((COUNTLL+1) * LLSIZE, 'a');
+			Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::convertTextToMN(message); });
+
+		}
+		TEST_METHOD(TestConverTextToMNTextMaxSizeAllas)
+		{
+			std::string message(COUNTLL * LLSIZE, 'a');
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				exp[i] = 0x6161616161616161ull;
+			}
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::convertTextToMN(message);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestConverTextToMNTextMaxSizeMinusOneAllas)
+		{
+			std::string message(COUNTLL * LLSIZE - 1, 'a');
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL - 1; i++)
+			{
+				exp[i] = 0x6161616161616161ull;
+			}
+			exp[COUNTLL - 1] = 0x61616161616161ull;
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::convertTextToMN(message);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestConverTextToMNWholeAlphabet)
+		{
+			std::string message("abcdefghijklmnopqrstuvwxyz");
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x6867666564636261ull;
+			exp[1] = 0x706f6e6d6c6b6a69ull;
+			exp[2] = 0x7877767574737271ull;
+			exp[3] = 0x7a79ull;
+			ModNumber mexp(exp);
+			ModNumber mres = ModNumber::convertTextToMN(message);
+			Assert::IsTrue(mexp == mres);
+		}
+		 
+
+		//TEST_METHOD(TestRSAEncrypt)
+		//{
+		//		RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
+		//		RSA myRsa(rsaParameters);
+		//		std::string message = "Dit is een test";
+		//		ModNumber convertedMessage = ModNumber::convertTextToMN(message);
+		//		ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+		//		std::string encryptedString = encryptedMessage.to_string(16);
+		//		std::string outStreamName = "TestEncryptOutput.txt";
+		//		std::ofstream outStream(outStreamName);
+		//		outStream << std::hex << encryptedMessage;
+		//		outStream.close();
+		//}
 	};
 	END_TEST_CLASS
 }

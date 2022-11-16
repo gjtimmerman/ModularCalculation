@@ -4826,6 +4826,18 @@ namespace ModularUnitTests
 			Assert::ExpectException<std::domain_error>([message, rsa] {rsa.GetPKCS1Mask(message); });
 
 		}
+		TEST_METHOD(TestGetPKCS1MaskMessageFourFsModulus26Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 26, std::string(HexStringLength - 26, '0')) == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 26, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 6, 6, "00FFFF") == 0);
+		}
 		TEST_METHOD(TestGetPKCS1MaskMessageSixFsModulus28Fs)
 		{
 			RSAParameters rsaParameters;
@@ -4834,6 +4846,7 @@ namespace ModularUnitTests
 			ModNumber message = ModNumber::stomn("FFFFFF", 16);
 			ModNumber res = rsa.GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 28, std::string(HexStringLength - 28, '0')) == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 28, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 8, 8, "00FFFFFF") == 0);
 		}
@@ -4845,6 +4858,7 @@ namespace ModularUnitTests
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = rsa.GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 30, std::string(HexStringLength - 30, '0')) == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 30, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
 		}
@@ -4856,6 +4870,7 @@ namespace ModularUnitTests
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = rsa.GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 32, std::string(HexStringLength - 32, '0')) == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 32, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
 		}
@@ -4867,8 +4882,72 @@ namespace ModularUnitTests
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = rsa.GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 34, std::string(HexStringLength - 34, '0')) == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 34, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 10, 10, "00FFFFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageTenFsModulus36Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 36, std::string(HexStringLength - 36, '0')) == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 36, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 12, 12, "00FFFFFFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageTwentyFsModulus72Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFF", 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 72, std::string(HexStringLength - 72, '0')) == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 72, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 22, 22, "00FFFFFFFFFFFFFFFFFFFF") == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsModulusAllFsMinusOneBlock)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE*2,'F'),16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 22,'F'), 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, LLSIZE * 2, std::string (LLSIZE * 2, '0')) == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 16,2, "00") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE*2 + 4 + 18, HexStringLength - LLSIZE * 2 - 22, std::string(HexStringLength - LLSIZE * 2 - 22,'F')) == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus2ModulusAllFsMinusOneBlock)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2, 'F'), 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 24, 'F'), 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, LLSIZE * 2, std::string(LLSIZE * 2, '0')) == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 18, 2, "00") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 20, HexStringLength - LLSIZE * 2 - 24, std::string(HexStringLength - LLSIZE * 2 - 24, 'F')) == 0);
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus4ModulusAllFsMinusOneBlock)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2, 'F'), 16);
+			RSA rsa(rsaParameters);
+			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 26, 'F'), 16);
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, LLSIZE * 2, std::string(LLSIZE * 2, '0')) == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 20, 2, "00") == 0);
+			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 22, HexStringLength - LLSIZE * 2 - 26, std::string(HexStringLength - LLSIZE * 2 - 26, 'F')) == 0);
 		}
 
 	};

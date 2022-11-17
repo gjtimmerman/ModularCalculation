@@ -258,9 +258,9 @@ std::basic_string<T> ModNumber::getText() const
 {
 	std::basic_string<T> res;
 	unsigned int byteCount = GetByteCount(*this);
-	std::size_t charlen = sizeof(typename std::basic_string<T>::traits_type::char_type);
+	unsigned int charlen = (unsigned int)sizeof(typename std::basic_string<T>::traits_type::char_type);
 	if (byteCount % charlen != 0)
-		byteCount += byteCount % charlen;
+		byteCount += charlen - (byteCount % charlen);
 	res.reserve(byteCount / charlen);
 	res.clear();
 	typename std::basic_string<T>::traits_type::char_type* pText = (typename std::basic_string<T>::traits_type::char_type*)this;

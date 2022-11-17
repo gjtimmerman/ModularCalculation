@@ -1037,7 +1037,7 @@ unsigned char *ConvertEndianess(unsigned char* p, unsigned int cb)
 	return res;
 }
 
-unsigned long GetByteCount(ModNumber mn)
+unsigned int GetByteCount(ModNumber mn)
 {
 	unsigned char* p = (unsigned char *)mn.num;
 	for (int i = NCOUNT - 1; i >= 0; i--)

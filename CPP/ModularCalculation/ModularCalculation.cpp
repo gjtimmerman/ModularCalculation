@@ -1029,7 +1029,7 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 
 
 
-unsigned char *ConvertEndianess(unsigned char* p, DWORD cb)
+unsigned char *ConvertEndianess(unsigned char* p, unsigned int cb)
 {
 	unsigned char* res = new unsigned char[cb];
 	for (unsigned int i = 0; i < cb; i++)
@@ -1046,7 +1046,7 @@ unsigned long GetByteCount(ModNumber mn)
 	return 0;
 }
 
-unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest)
+unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest)
 {
 	unsigned char* pKey = ConvertEndianess((unsigned char*)(mn.num), cbsize);
 	for (unsigned int i = 0; i < cbsize; i++)

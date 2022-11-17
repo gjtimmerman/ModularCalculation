@@ -129,7 +129,7 @@ private:
 	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 	friend DWORD GetByteCount(ModNumber mn);
 	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
-	friend unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
+	friend unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest);
 	friend class MultGroupMod;
 	friend class RSA;
 
@@ -222,7 +222,7 @@ std::istream& operator>>(std::istream& in, ModNumber& n);
 ModNumber operator* (const ModNumber l, const ModNumber r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
-unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
+unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest);
 
 
 template <typename T>

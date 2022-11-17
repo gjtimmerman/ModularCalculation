@@ -4782,7 +4782,7 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestCalculateRSAKeyGivenTwoPrimesAndChosenExponent)
 		{
-//			RSAParameters rsaParameters = GetRSAKey();
+			//RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
 			ModNumber mExponent = ModNumber::stomn("010001", 16);
 			ModNumber mModulusExp = ModNumber::stomn("A26960E1102074E8E1E7D0754F6BED06BC5AAFEEA086704ACB33B99289FBC180874418D11E02B1B250313EE873E7307D932DA7C30A5E703CBE86EC588B318B46C20BD8BB01F51549635641E8958B0A109E59B06752ABED027539FBEA8BB700E58AD1985CE405F57BD01F4FB91E88BC8B50C4F0208EA02BB72612F41DE302DB3C7BFF5EB12C277417068CE2CA387BEBDE35320D045438951AD51D34CE1F52B10E1F7A9023E9C647582D266CEF6D2E067B60C1BED9C781ADC520223091210854A356C6CAE5B1874FDC59A643441C228F30E4329345AD96A2605972524BFEE8764D207435E42001C678028C48167610A6FCDDF43BC789DD04A6AC3B337E4F6D8085A404E759936355BCA8E7ED93AB6BB031830CEB586D1CC5A90E87F497B8096AC6ABE37BC701E33C9D9B61FBC8AF73446AAC90301ACDCE9E0DEBD322A032F1C90CA8D766285723B5DE918E65F1A987B32E2D51DB7E2C8EB8F2A28C7292E14BD56FB0EC779F44C138C9DF08BEDBD0568DC8FB9F65B7DD20CE80652C9194E160DCAA6C5F96BB5D357BE742B971B3F73923447C36C906E12147C0153CFB2551AB581513B38F2D3B90F2F3FDD17CC799224AA7DDBCAF41309008637CBAD18C27E226E849532B3CEE58CF3C9B3E147438935BCECB35C47B50E29623F76687A51792B75E077BC3D1240C73F6AB79B33577014C7BE2738BBE1F8B179517C5B5BEC23D7C9D", 16);
 			ModNumber mPrime1 = ModNumber::stomn("CDA901CDEFC7392972350E5160DCE36D9E3415ABA270EFA599B72EA3A36E4BECF727A46DDE4B39181D2A1B76CA2A79DBFCAEE2DF3D46648BB6F5766DE8FBDB9B97915A5D6BC9E3C2AB30DF0251B7DF103CB8BB9C8873188E395C01CD8C374D72B6B65FBFF47331232D6F86E3EC22B3F866D35C74DF6D76D35836363D020571C86104307324EE0A704FF5BB77DBBCDC7A2D98BBDB0C65B60F22F4EFD5EE8555715F2C79CCC438484C4E1B2136E881C2B04AB27E015AD354AECDF0D717A78205CA7DF0353F2312FD54EF8FB51DA12E35115AFDFA0659C4386DF841C0FF51BB5EC37D555CEDF88FC783FB568FA6F5736060837B4020CACD9D9BAC5F75348673EDCB", 16);
@@ -4806,15 +4806,20 @@ namespace ModularUnitTests
 			Assert::IsTrue(mExp1Exp == DpCalc);
 			Assert::IsTrue(mExp2Exp == DqCalc);
 			Assert::IsTrue(mCoefficientExp == InverseQCalc);
-			RSAParameters rsaParameters;
-			rsaParameters.Modulus = mModulusExp;
-			rsaParameters.pubExp = mExponent;
-			rsaParameters.Prime1 = mPrime1;
-			rsaParameters.Prime2 = mPrime2;
-			rsaParameters.Exp1 = mExp1Exp;
-			rsaParameters.Exp2 = mExp2Exp;
-			rsaParameters.Coefficient = mCoefficientExp;
-			rsaParameters.PrivExp = mPrivExpExp;
+			//Assert::IsTrue(rsaParameters.Modulus == mModulusExp);
+			//Assert::IsTrue(rsaParameters.pubExp == mExponent);
+			//Assert::IsTrue(rsaParameters.Prime1 == mPrime1);
+			//Assert::IsTrue(rsaParameters.Prime2 == mPrime2);
+			//Assert::IsTrue(rsaParameters.PrivExp == mPrivExpExp);
+			//			RSAParameters rsaParameters;
+//			rsaParameters.Modulus = mModulusExp;
+//			rsaParameters.pubExp = mExponent;
+//			rsaParameters.Prime1 = mPrime1;
+//			rsaParameters.Prime2 = mPrime2;
+//			rsaParameters.Exp1 = mExp1Exp;
+//			rsaParameters.Exp2 = mExp2Exp;
+//			rsaParameters.Coefficient = mCoefficientExp;
+//			rsaParameters.PrivExp = mPrivExpExp;
 //			SetRSAKey(L"MyCoolKey1", rsaParameters);
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageTooLong)
@@ -4825,6 +4830,18 @@ namespace ModularUnitTests
 			ModNumber message = ModNumber::stomn("FFFFFFFFFFFF",16);
 			Assert::ExpectException<std::domain_error>([message, rsa] {rsa.GetPKCS1Mask(message); });
 
+		}
+		TEST_METHOD(TestGetPKCS1MaskMessageEmptyModulus26Fs)
+		{
+			RSAParameters rsaParameters;
+			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
+			RSA rsa(rsaParameters);
+			ModNumber message;
+			ModNumber res = rsa.GetPKCS1Mask(message);
+			std::string resstr = res.to_string(16);
+			Assert::IsTrue(resstr.compare(0, HexStringLength - 26, std::string(HexStringLength - 26, '0')) == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 26, 4, "0002") == 0);
+			Assert::IsTrue(resstr.compare(HexStringLength - 2, 2, "00") == 0);
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageFourFsModulus26Fs)
 		{
@@ -5014,7 +5031,7 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestfromTextWcharTextMaxSizeAllas)
 		{
-			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t), 'a');
+			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t), L'a');
 			wchar_t exp[COUNTLL * LLSIZE/sizeof(wchar_t)];
 			for (int i = 0; i < COUNTLL * LLSIZE/sizeof(wchar_t); i++)
 			{
@@ -5026,7 +5043,7 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestfromTextWcharTextMaxSizeMinusOneAllas)
 		{
-			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t) - 1, 'a');
+			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t) - 1, L'a');
 			wchar_t exp[COUNTLL * LLSIZE / sizeof(wchar_t)];
 			for (int i = 0; i < COUNTLL * LLSIZE / sizeof(wchar_t) - 1; i++)
 			{
@@ -5047,6 +5064,121 @@ namespace ModularUnitTests
 			ModNumber mexp((llint*)exp);
 			ModNumber mres = ModNumber::fromText(message);
 			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestgetTextTextEmpty)
+		{
+			std::string exp;
+			exp.clear();
+			llint n[COUNTLL] = {};
+			ModNumber mn(n);
+			std::string res = mn.getText<char>();
+			Assert::IsTrue(exp == res);
+		}
+		TEST_METHOD(TestgetTextTextSingleChar)
+		{
+			std::string exp("a");
+			llint n[COUNTLL] = {};
+			n[0] = 0x61ull;
+			ModNumber mn(n);
+			std::string res = mn.getText<char>();
+			Assert::IsTrue(exp == res);
+		}
+
+
+		TEST_METHOD(TestgetTextTextMaxSizeAllas)
+		{
+			std::string exp(COUNTLL * LLSIZE, 'a');
+			llint n[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				n[i] = 0x6161616161616161ull;
+			}
+			ModNumber mn(n);
+			std::string res = mn.getText<char>();
+			Assert::IsTrue(exp == res);
+		}
+		TEST_METHOD(TestgetTextTextMaxSizeMinusOneAllas)
+		{
+			std::string exp(COUNTLL * LLSIZE - 1, 'a');
+			llint n[COUNTLL];
+			for (int i = 0; i < COUNTLL - 1; i++)
+			{
+				n[i] = 0x6161616161616161ull;
+			}
+			n[COUNTLL - 1] = 0x61616161616161ull;
+			ModNumber mn(n);
+			std::string res = mn.getText<char>();
+			Assert::IsTrue(exp == res);
+		}
+
+		TEST_METHOD(TestgetTextWholeAlphabet)
+		{
+			std::string exp("abcdefghijklmnopqrstuvwxyz");
+			llint n[COUNTLL] = {};
+			n[0] = 0x6867666564636261ull;
+			n[1] = 0x706f6e6d6c6b6a69ull;
+			n[2] = 0x7877767574737271ull;
+			n[3] = 0x7a79ull;
+			ModNumber mn(n);
+			std::string res = mn.getText<char>();
+			Assert::IsTrue(exp == res);
+		}
+
+		TEST_METHOD(TestgetTextWCharTextEmpty)
+		{
+			std::wstring exp;
+			exp.clear();
+			llint n[COUNTLL] = {};
+			ModNumber mn(n);
+			std::wstring res = mn.getText<wchar_t>();
+			Assert::IsTrue(exp == res);
+		}
+		TEST_METHOD(TestgetTextWCharTextSingleChar)
+		{
+			std::wstring exp(L"a");
+			llint n[COUNTLL] = {};
+			n[0] = 0x61ull;
+			ModNumber mn(n);
+			std::wstring res = mn.getText<wchar_t>();
+			Assert::IsTrue(exp == res);
+		}
+
+
+		TEST_METHOD(TestgetTextWCharTextMaxSizeAllas)
+		{
+			std::wstring exp(COUNTLL * LLSIZE / sizeof(wchar_t), L'a');
+			wchar_t n[COUNTLL * LLSIZE / sizeof(wchar_t)];
+			for (int i = 0; i < COUNTLL * LLSIZE / sizeof(wchar_t); i++)
+			{
+				n[i] = 0x0061u;
+			}
+			ModNumber mn((llint*)n);
+			std::wstring res = mn.getText<wchar_t>();
+			Assert::IsTrue(exp == res);
+		}
+		TEST_METHOD(TestgetTextWCharTextMaxSizeMinusOneAllas)
+		{
+			std::wstring exp(COUNTLL * LLSIZE / sizeof(wchar_t) - 1, L'a');
+			wchar_t n[COUNTLL * LLSIZE / sizeof(wchar_t)] = {};
+			for (int i = 0; i < COUNTLL * LLSIZE / sizeof(wchar_t) - 1; i++)
+			{
+				n[i] = 0x0061u;
+			}
+			ModNumber mn((llint *)n);
+			std::wstring res = mn.getText<wchar_t>();
+			Assert::IsTrue(exp == res);
+		}
+
+		TEST_METHOD(TestgetTextWCharWholeAlphabet)
+		{
+			std::wstring exp(L"abcdefghijklmnopqrstuvwxyz");
+			wchar_t n[COUNTLL * LLSIZE / sizeof(wchar_t)] = {};
+			for (wchar_t i = 0x0061u; i <= 0x007au; i++)
+				n[i - 0x0061u] = i;
+			ModNumber mn((llint*)n);
+			std::wstring res = mn.getText<wchar_t>();
+			Assert::IsTrue(exp == res);
 		}
 
 

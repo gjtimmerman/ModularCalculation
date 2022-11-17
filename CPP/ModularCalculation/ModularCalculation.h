@@ -229,7 +229,7 @@ template <typename T>
 ModNumber ModNumber::fromText(std::basic_string<T> text)
 {
 	llint* pText = (llint*)text.c_str();
-	std::size_t charlen = sizeof(std::basic_string<T>::traits_type::char_type);
+	std::size_t charlen = sizeof(typename std::basic_string<T>::traits_type::char_type);
 	std::size_t textSize = text.length() * charlen / LLSIZE;
 	std::size_t textLeft = text.length() * charlen % LLSIZE;
 	llint res[COUNTLL] = {};

@@ -4949,19 +4949,19 @@ namespace ModularUnitTests
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 20, 2, "00") == 0);
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 22, HexStringLength - LLSIZE * 2 - 26, std::string(HexStringLength - LLSIZE * 2 - 26, 'F')) == 0);
 		}
-		TEST_METHOD(TestConverTextToMNTextOneCharTooLong)
+		TEST_METHOD(TestfromTextTextOneCharTooLong)
 		{
 				std::string message(COUNTLL*LLSIZE + 1,'a');
-				Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::convertTextToMN(message); });
+				Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::fromText(message); });
 
 		}
-		TEST_METHOD(TestConverTextToMNTextEightCharsTooLong)
+		TEST_METHOD(TestfromTextTextEightCharsTooLong)
 		{
 			std::string message((COUNTLL+1) * LLSIZE, 'a');
-			Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::convertTextToMN(message); });
+			Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::fromText(message); });
 
 		}
-		TEST_METHOD(TestConverTextToMNTextMaxSizeAllas)
+		TEST_METHOD(TestfromTextTextMaxSizeAllas)
 		{
 			std::string message(COUNTLL * LLSIZE, 'a');
 			llint exp[COUNTLL];
@@ -4970,10 +4970,10 @@ namespace ModularUnitTests
 				exp[i] = 0x6161616161616161ull;
 			}
 			ModNumber mexp(exp);
-			ModNumber mres = ModNumber::convertTextToMN(message);
+			ModNumber mres = ModNumber::fromText(message);
 			Assert::IsTrue(mexp == mres);
 		}
-		TEST_METHOD(TestConverTextToMNTextMaxSizeMinusOneAllas)
+		TEST_METHOD(TestfromTextTextMaxSizeMinusOneAllas)
 		{
 			std::string message(COUNTLL * LLSIZE - 1, 'a');
 			llint exp[COUNTLL];
@@ -4983,11 +4983,11 @@ namespace ModularUnitTests
 			}
 			exp[COUNTLL - 1] = 0x61616161616161ull;
 			ModNumber mexp(exp);
-			ModNumber mres = ModNumber::convertTextToMN(message);
+			ModNumber mres = ModNumber::fromText(message);
 			Assert::IsTrue(mexp == mres);
 		}
 
-		TEST_METHOD(TestConverTextToMNWholeAlphabet)
+		TEST_METHOD(TestfromTextWholeAlphabet)
 		{
 			std::string message("abcdefghijklmnopqrstuvwxyz");
 			llint exp[COUNTLL] = {};
@@ -4996,10 +4996,59 @@ namespace ModularUnitTests
 			exp[2] = 0x7877767574737271ull;
 			exp[3] = 0x7a79ull;
 			ModNumber mexp(exp);
-			ModNumber mres = ModNumber::convertTextToMN(message);
+			ModNumber mres = ModNumber::fromText(message);
 			Assert::IsTrue(mexp == mres);
 		}
-		 
+
+		TEST_METHOD(TestfromTextWcharTextOneCharTooLong)
+		{
+			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t) + 1, 'a');
+			Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::fromText(message); });
+
+		}
+		TEST_METHOD(TestfromTextWcharTextEightCharsTooLong)
+		{
+			std::wstring message((COUNTLL + 1) * LLSIZE/sizeof(wchar_t), 'a');
+			Assert::ExpectException<std::domain_error>([message] {ModNumber m = ModNumber::fromText(message); });
+
+		}
+		TEST_METHOD(TestfromTextWcharTextMaxSizeAllas)
+		{
+			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t), 'a');
+			wchar_t exp[COUNTLL * LLSIZE/sizeof(wchar_t)];
+			for (int i = 0; i < COUNTLL * LLSIZE/sizeof(wchar_t); i++)
+			{
+				exp[i] = 0x0061u;
+			}
+			ModNumber mexp((llint*)exp);
+			ModNumber mres = ModNumber::fromText(message);
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestfromTextWcharTextMaxSizeMinusOneAllas)
+		{
+			std::wstring message(COUNTLL * LLSIZE/sizeof(wchar_t) - 1, 'a');
+			wchar_t exp[COUNTLL * LLSIZE / sizeof(wchar_t)];
+			for (int i = 0; i < COUNTLL * LLSIZE / sizeof(wchar_t) - 1; i++)
+			{
+				exp[i] = 0x0061u;
+			}
+			exp[COUNTLL* LLSIZE / sizeof(wchar_t) - 1] = 0x00u;
+			ModNumber mexp((llint*)exp);
+			ModNumber mres = ModNumber::fromText(message);
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestfromTextWcharWholeAlphabet)
+		{
+			std::wstring message(L"abcdefghijklmnopqrstuvwxyz");
+			wchar_t exp[COUNTLL * LLSIZE / sizeof(wchar_t)] = {};
+			for (wchar_t i = 0x0061u; i <= 0x007au; i++)
+				exp[i - 0x0061u] = i;
+			ModNumber mexp((llint*)exp);
+			ModNumber mres = ModNumber::fromText(message);
+			Assert::IsTrue(mexp == mres);
+		}
+
 
 		//TEST_METHOD(TestRSAEncrypt)
 		//{

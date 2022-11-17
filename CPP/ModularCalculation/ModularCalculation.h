@@ -75,7 +75,8 @@ public:
 	static ModNumber stomn(std::string s, int base = 10);
 	static ModNumber gcd(const ModNumber l,const ModNumber r);
 	static ModNumber lcm(const ModNumber l, const ModNumber r);
-	static ModNumber convertTextToMN(std::string text);
+	template <typename T>
+	static ModNumber fromText(std::basic_string<T> text);
 
 
 private:
@@ -224,6 +225,31 @@ std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNu
 unsigned char* CopyKeyPart(ModNumber mn, DWORD cbsize, unsigned char* pDest);
 
 
+template <typename T>
+ModNumber ModNumber::fromText(std::basic_string<T> text)
+{
+	llint* pText = (llint*)text.c_str();
+	std::size_t charlen = sizeof(std::basic_string<T>::traits_type::char_type);
+	std::size_t textSize = text.length() * charlen / LLSIZE;
+	std::size_t textLeft = text.length() * charlen % LLSIZE;
+	llint res[COUNTLL] = {};
+	if (textSize > COUNTLL)
+		throw std::domain_error("Text message too long");
+	if (textSize == COUNTLL && textLeft > 0)
+		throw std::domain_error("Text message too long");
+	for (unsigned int i = 0; i < textSize; i++)
+		res[i] = pText[i];
+	llint tmp = 0;
+	for (unsigned int i = 0; i < textLeft/charlen; i++)
+	{
+		llint c = text[(textSize * LLSIZE)/charlen + i];
+		c <<= 8 * charlen * i;
+		tmp |= (llint)c;
+	}
+	if (textLeft > 0)
+		res[textSize] = tmp;
+	return ModNumber(res);
+}
 
 
 #ifdef _WIN32

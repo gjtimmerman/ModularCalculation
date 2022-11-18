@@ -1297,6 +1297,69 @@ void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters)
 	status = NCryptFreeObject(keyHandle);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptFreeObject returned error code");
+	delete[] rawKeyData;
+}
 
+std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName, ModNumber data)
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_KEYEXCHANGE, 0);
+	if (status == NTE_BAD_KEYSET)
+	{
+		status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, KeyName, AT_KEYEXCHANGE, 0);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptCreateKey returned error code");
+		DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
+		status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptSetProperty returned error code");
+		policy = 4096;
+		status = NCryptSetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptSetProperty returned error code");
+		status = NCryptFinalizeKey(keyHandle, 0);
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptFinalizeKey returned error code");
+	}
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenKey returned error code");
+	unsigned int cbData = GetByteCount(data);
+	unsigned char *pData = (unsigned char *)data.num;
+	unsigned char* pDataBigEndian = ConvertEndianess(pData, cbData);
+	unsigned char* pDataDecryptedBigEndian = new unsigned char[cbData];
+	unsigned char* pDataDecrypted;
+	DWORD cbResult;
+	status = NCryptDecrypt(keyHandle, pDataBigEndian, cbData, nullptr, pDataDecryptedBigEndian, cbData, &cbResult, NCRYPT_PAD_PKCS1_FLAG);
+	if (status != ERROR_SUCCESS)
+		switch (status)
+		{
+		case NTE_BAD_FLAGS:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_FLAGS");
+		case NTE_BAD_KEY_STATE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_KEY_STATE");
+		case NTE_BAD_TYPE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_TYPE");
+		case NTE_INVALID_HANDLE:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_HANDLE");
+		case NTE_INVALID_PARAMETER:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_PARAMETER");
+		case NTE_NOT_SUPPORTED:
+			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_NOT_SUPPORTED");
+
+		default:
+			throw std::runtime_error("CryptOpenStorageProvider returned unknown error code");
+
+		}
+	pDataDecrypted = ConvertEndianess(pDataDecryptedBigEndian, cbResult);
+	ModNumber res(pDataDecrypted, cbResult);
+	delete[] pDataDecrypted;
+	status = NCryptFreeObject(keyHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+	return std::make_tuple(res, cbResult);
 }
 #endif

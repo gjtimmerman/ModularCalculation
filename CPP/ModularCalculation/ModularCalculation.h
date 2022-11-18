@@ -132,6 +132,7 @@ private:
 	friend unsigned int GetByteCount(ModNumber mn);
 	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 	friend unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest);
+	friend std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName, ModNumber data);
 	friend class MultGroupMod;
 	friend class RSA;
 
@@ -273,6 +274,7 @@ std::basic_string<T> ModNumber::getText() const
 #ifdef _WIN32
 RSAParameters GetRSAKey(wchar_t *KeyName);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
+std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName, ModNumber data);
 #endif
 
 

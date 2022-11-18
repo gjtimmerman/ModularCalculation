@@ -5181,20 +5181,26 @@ namespace ModularUnitTests
 			Assert::IsTrue(exp == res);
 		}
 
+#ifdef _WIN32
 
-		//TEST_METHOD(TestRSAEncrypt)
-		//{
-		//		RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
-		//		RSA myRsa(rsaParameters);
-		//		std::string message = "Dit is een test";
-		//		ModNumber convertedMessage = ModNumber::convertTextToMN(message);
-		//		ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-		//		std::string encryptedString = encryptedMessage.to_string(16);
-		//		std::string outStreamName = "TestEncryptOutput.txt";
-		//		std::ofstream outStream(outStreamName);
-		//		outStream << std::hex << encryptedMessage;
-		//		outStream.close();
-		//}
+		TEST_METHOD(TestRSAEncrypt)
+		{
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
+				RSA myRsa(rsaParameters);
+				std::string message = "Dit is een test";
+				ModNumber convertedMessage = ModNumber::fromText(message);
+				ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
+				std::string resText = std::get<0>(res).getText<char>();
+				Assert::IsTrue(resText == message);
+				//std::string encryptedString = encryptedMessage.to_string(16);
+				//std::string outStreamName = "TestEncryptOutput.txt";
+				//std::ofstream outStream(outStreamName);
+				//outStream << std::hex << encryptedMessage;
+				//outStream.close();
+		}
+#endif
+
 	};
 	END_TEST_CLASS
 }

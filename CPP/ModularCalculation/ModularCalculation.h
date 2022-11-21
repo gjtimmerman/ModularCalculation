@@ -188,7 +188,9 @@ public:
 		PrivExp = rsaParameters.PrivExp;
 	}
 	ModNumber GetPKCS1Mask(ModNumber m) const;
+	ModNumber RemovePKCS1Mask(ModNumber m) const;
 	ModNumber Encrypt(ModNumber m) const;
+	ModNumber Decrypt(ModNumber c) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;

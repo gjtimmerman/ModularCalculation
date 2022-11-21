@@ -1111,11 +1111,47 @@ ModNumber RSA::GetPKCS1Mask(ModNumber m) const
 	return res;
 }
 
+ModNumber RSA::RemovePKCS1Mask(ModNumber m) const
+{
+	unsigned char* pMaskedNumber = (unsigned char*)m.num;
+	int i;
+	for (i = MAXMOD - 1; i >= 0; i--)
+	{
+		if (pMaskedNumber[i])
+			break;
+	}
+	if (pMaskedNumber[i+1] != 0x00u || pMaskedNumber[i] != 0x02u)
+		throw std::domain_error("Not a valid PKCS1 Mask");
+	while (pMaskedNumber[i] != 0x00u and i >= 0)
+		i--;
+	if (pMaskedNumber[i] != 0x00u)
+		throw std::domain_error("Not a valid PKCS1 Mask");
+	ModNumber res(pMaskedNumber, i);
+	return res;
+
+}
+
 ModNumber RSA::Encrypt(ModNumber m) const
 {
 	ModNumber masked = GetPKCS1Mask(m);
 	MultGroupMod mgm(Modulus);
 	return mgm.Exp(masked, pubExp);
+}
+
+ModNumber RSA::Decrypt(ModNumber c) const
+{
+	MultGroupMod mgmp(Prime1);
+	MultGroupMod mgmq(Prime2);
+	ModNumber m1;
+	ModNumber m2;
+	std::thread th1([&m1, &mgmp, &c, this]() {m1 = mgmp.Exp(c, Exp1); });
+	std::thread th2([&m2, &mgmq, &c, this]() {m2 = mgmq.Exp(c, Exp2); });
+	th1.join();
+	th2.join();
+	ModNumber diff = mgmp.Diff(m1,m2);
+	ModNumber h = mgmp.Mult(Coefficient, diff);
+	ModNumber hq = h * Prime2;
+	return m2 + hq;
 }
 
 

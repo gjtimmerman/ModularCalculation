@@ -5199,6 +5199,27 @@ namespace ModularUnitTests
 				//outStream << std::hex << encryptedMessage;
 				//outStream.close();
 		}
+		TEST_METHOD(TestRSADecrypt)
+		{
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
+			RSA myRsa(rsaParameters);
+			std::string message = "Dit is een test";
+			ModNumber convertedMessage = ModNumber::fromText(message);
+			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+			ModNumber resultingMessage = myRsa.Decrypt(encryptedMessage);
+			ModNumber decryptedMessage = myRsa.RemovePKCS1Mask(resultingMessage);
+			std::string decryptedString = decryptedMessage.getText<char>();
+			Assert::IsTrue(message == decryptedString);
+			//std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
+			//std::string resText = std::get<0>(res).getText<char>();
+			//Assert::IsTrue(resText == message);
+			//std::string encryptedString = encryptedMessage.to_string(16);
+			//std::string outStreamName = "TestEncryptOutput.txt";
+			//std::ofstream outStream(outStreamName);
+			//outStream << std::hex << encryptedMessage;
+			//outStream.close();
+		}
+
 #endif
 
 	};

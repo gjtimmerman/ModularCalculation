@@ -978,6 +978,13 @@ ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e) const
 	return res;
 }
 
+ModNumber MultGroupMod::Add(const ModNumber l, const ModNumber r) const
+{
+	ModNumber lMod = l % n;
+	ModNumber rMod = r % n;
+	return (lMod + rMod) % n;
+}
+
 ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r) const
 {
 	ModNumber lMod = l % n;
@@ -1142,6 +1149,7 @@ ModNumber RSA::Decrypt(ModNumber c) const
 {
 	MultGroupMod mgmp(Prime1);
 	MultGroupMod mgmq(Prime2);
+	MultGroupMod mgmn(Modulus);
 	ModNumber m1;
 	ModNumber m2;
 	std::thread th1([&m1, &mgmp, &c, this]() {m1 = mgmp.Exp(c, Exp1); });
@@ -1150,8 +1158,8 @@ ModNumber RSA::Decrypt(ModNumber c) const
 	th2.join();
 	ModNumber diff = mgmp.Diff(m1,m2);
 	ModNumber h = mgmp.Mult(Coefficient, diff);
-	ModNumber hq = h * Prime2;
-	return m2 + hq;
+	ModNumber hq = mgmn.Mult(h,Prime2);
+	return mgmn.Add(m2, hq);
 }
 
 

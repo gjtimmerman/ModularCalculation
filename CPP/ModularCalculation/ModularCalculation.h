@@ -154,6 +154,7 @@ public:
 	ModNumber Mult(const ModNumber l, const ModNumber r) const;
 	ModNumber Kwad(const ModNumber x) const;
 	ModNumber Exp(const ModNumber x, const ModNumber e) const;
+	ModNumber Add(const ModNumber l, const ModNumber r) const;
 	ModNumber Diff(const ModNumber l, const ModNumber r) const;
 	ModNumber Inverse(const ModNumber x) const;
 

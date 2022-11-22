@@ -5198,8 +5198,7 @@ namespace ModularUnitTests
 			ModNumber convertedMessage = ModNumber::fromText(message);
 			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
 			ModNumber resultingMessage = myRsa.Decrypt(encryptedMessage);
-			ModNumber decryptedMessage = myRsa.RemovePKCS1Mask(resultingMessage);
-			std::string decryptedString = decryptedMessage.getText<char>();
+			std::string decryptedString = resultingMessage.getText<char>();
 			Assert::IsTrue(message == decryptedString);
 		}
 
@@ -5207,7 +5206,7 @@ namespace ModularUnitTests
 
 		TEST_METHOD(TestRSAEncrypt)
 		{
-				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
 				RSA myRsa(rsaParameters);
 				std::string message = "Dit is een test";
 				ModNumber convertedMessage = ModNumber::fromText(message);
@@ -5215,31 +5214,17 @@ namespace ModularUnitTests
 				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
-				//std::string encryptedString = encryptedMessage.to_string(16);
-				//std::string outStreamName = "TestEncryptOutput.txt";
-				//std::ofstream outStream(outStreamName);
-				//outStream << std::hex << encryptedMessage;
-				//outStream.close();
 		}
 		TEST_METHOD(TestRSADecrypt)
 		{
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey");
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
-			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-			ModNumber resultingMessage = myRsa.Decrypt(encryptedMessage);
-			ModNumber decryptedMessage = myRsa.RemovePKCS1Mask(resultingMessage);
-			std::string decryptedString = decryptedMessage.getText<char>();
-			Assert::IsTrue(message == decryptedString);
-			//std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
-			//std::string resText = std::get<0>(res).getText<char>();
-			//Assert::IsTrue(resText == message);
-			//std::string encryptedString = encryptedMessage.to_string(16);
-			//std::string outStreamName = "TestEncryptOutput.txt";
-			//std::ofstream outStream(outStreamName);
-			//outStream << std::hex << encryptedMessage;
-			//outStream.close();
+			ModNumber encryptedMessage = encrypt(L"MyCoolKey", convertedMessage);
+			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
+			std::string resText = decryptedMessage.getText<char>();
+			Assert::IsTrue(resText == message);
 		}
 
 #endif

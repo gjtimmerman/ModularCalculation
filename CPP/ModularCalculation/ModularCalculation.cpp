@@ -706,7 +706,7 @@ std::string ModNumber::to_string_octal_base() const
 {
 	std::string res;
 	res.reserve(OctalStringLength);
-	res.assign(OctalStringLength, ' ');
+	res.assign(OctalStringLength, '0');
 	lint mask = 7;
 	lint* pLint = (lint*)num;
 	lint buf[2];
@@ -737,7 +737,7 @@ std::string ModNumber::to_string_decimal_base() const
 {
 	std::string res;
 	res.reserve(DecimalStringLength);
-	res.assign(DecimalStringLength, ' ');
+	res.assign(DecimalStringLength, '0');
 	ModNumber tmp(*this);
 	for (int i = 0; i < DecimalStringLength; i++)
 	{
@@ -1186,10 +1186,28 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptSetProperty returned error code");
-	policy = 4096;
+	policy = MAXMOD*8;
 	status = NCryptSetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
 	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptSetProperty returned error code");
+		switch (status)
+		{
+		case NTE_BAD_FLAGS:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_FLAGS");
+		case NTE_BAD_KEY_STATE:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_KEY_STATE");
+		case NTE_BAD_TYPE:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_TYPE");
+		case NTE_INVALID_HANDLE:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_INVALID_HANDLE");
+		case NTE_INVALID_PARAMETER:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_INVALID_PARAMETER");
+		case NTE_NOT_SUPPORTED:
+			throw std::runtime_error("CryptSetProperty returned error code: NTE_NOT_SUPPORTED");
+
+		default:
+			throw std::runtime_error("CryptSetProperty returned unknown error code");
+
+		}
 	status = NCryptFinalizeKey(keyHandle, 0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptFinalizeKey returned error code");
@@ -1221,12 +1239,17 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 	}
 	else if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptOpenKey returned error code");
-
+	DWORD keyLength;
+	DWORD keyLengthSize;
+	status = NCryptGetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (unsigned char*)&keyLength, sizeof(DWORD), &keyLengthSize, 0);
+	if (keyLength > MAXMOD * 8)
+		throw std::domain_error("KeyLength not less or equal to MAXMOD");
 	BCRYPT_RSAKEY_BLOB *pkeyData;
-	unsigned char rawKeyData[2331];
-	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
 	DWORD size;
-	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, 2331, &size, 0);
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, NULL, 0, &size, 0);
+	unsigned char *rawKeyData = new unsigned char[size];
+	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, size, &size, 0);
 	if (status != ERROR_SUCCESS)
 	{
 		switch (status)
@@ -1258,7 +1281,7 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 
 	if (pkeyData->Magic != BCRYPT_RSAFULLPRIVATE_MAGIC)
 		throw std::runtime_error("Key structure not of type RSA Full Private");
-	if (pkeyData->BitLength / 8 != MAXMOD)
+	if (pkeyData->BitLength / 8 > MAXMOD)
 		throw std::runtime_error("Key Bitsize not correct!");
 	RSAParameters rsaParameters;
 	unsigned char* p = rawKeyData + sizeof(BCRYPT_RSAKEY_BLOB);
@@ -1293,6 +1316,7 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 	delete[] pExp2;
 	delete[] pCoefficient;
 	delete[] pPrivExp;
+	delete[] rawKeyData;
 	return rsaParameters;
 }
 

@@ -48,21 +48,21 @@ class ModNumber
 public:
 	ModNumber() = default;
 
-	explicit ModNumber(unsigned char* n, int count = MAXMOD) : ModNumber()
+	explicit ModNumber(const unsigned char* n, int count = MAXMOD) : ModNumber()
 	{
 		unsigned char* numc = (unsigned char*)num;
 		for (int i = 0; i < count; i++)
 			numc[i] = n[i];
 	}
 	
-	explicit ModNumber(lint* n, int count = COUNTL) : ModNumber()
+	explicit ModNumber(const lint* n, int count = COUNTL) : ModNumber()
 	{
 		lint* numl = (lint*)num;
 		for (int i = 0; i < count; i++)
 			numl[i] = n[i];
 
 	}
-	explicit ModNumber(llint* n, int count = COUNTLL) : ModNumber()
+	explicit ModNumber(const llint* n, int count = COUNTLL) : ModNumber()
 	{
 		for (int i = 0; i < count; i++)
 			num[i] = n[i];
@@ -71,10 +71,10 @@ public:
 	{
 		num[0] = n;
 	}
-	std::string to_string(const int base = 10) const;
+	std::string to_string(int base = 10) const;
 	static ModNumber stomn(std::string s, int base = 10);
-	static ModNumber gcd(const ModNumber l,const ModNumber r);
-	static ModNumber lcm(const ModNumber l, const ModNumber r);
+	static ModNumber gcd(const ModNumber &l,const ModNumber &r);
+	static ModNumber lcm(const ModNumber &l, const ModNumber &r);
 	template <typename T>
 	std::basic_string<T> getText() const;
 	template <typename T>
@@ -126,14 +126,14 @@ private:
 	friend ModNumber& operator >>= (ModNumber& n, unsigned int i);
 	friend std::ostream& operator << (std::ostream& out,const ModNumber& n);
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
-	friend ModNumber operator* (const ModNumber l, const ModNumber r);
+	friend ModNumber operator* (const ModNumber& l, const ModNumber& r);
 	friend ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
-	friend unsigned int GetByteCount(ModNumber mn);
+	friend unsigned int GetByteCount(const ModNumber& mn);
 	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
-	friend unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest);
-	friend std::tuple<ModNumber, unsigned long> decrypt(const wchar_t *KeyName, ModNumber data);
-	friend ModNumber encrypt(const wchar_t* KeyName, ModNumber data);
+	friend unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
+	friend std::tuple<ModNumber, unsigned long> decrypt(const wchar_t *KeyName,const ModNumber& data);
+	friend ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
 	friend class MultGroupMod;
 	friend class RSA;
 
@@ -152,12 +152,12 @@ public:
 			throw std::domain_error("Group modulo one is not allowed");
 		n.checkMax(COUNTMOD);
 	}
-	ModNumber Mult(const ModNumber l, const ModNumber r) const;
-	ModNumber Kwad(const ModNumber x) const;
-	ModNumber Exp(const ModNumber x, const ModNumber e) const;
-	ModNumber Add(const ModNumber l, const ModNumber r) const;
-	ModNumber Diff(const ModNumber l, const ModNumber r) const;
-	ModNumber Inverse(const ModNumber x) const;
+	ModNumber Mult(const ModNumber& l, const ModNumber& r) const;
+	ModNumber Kwad(const ModNumber& x) const;
+	ModNumber Exp(const ModNumber& x, const ModNumber& e) const;
+	ModNumber Add(const ModNumber& l, const ModNumber& r) const;
+	ModNumber Diff(const ModNumber& l, const ModNumber& r) const;
+	ModNumber Inverse(const ModNumber& x) const;
 
 private:
 	ModNumber n;
@@ -189,10 +189,10 @@ public:
 		Coefficient = rsaParameters.Coefficient;
 		PrivExp = rsaParameters.PrivExp;
 	}
-	ModNumber GetPKCS1Mask(ModNumber m) const;
-	ModNumber RemovePKCS1Mask(ModNumber m) const;
-	ModNumber Encrypt(ModNumber m) const;
-	ModNumber Decrypt(ModNumber c) const;
+	ModNumber GetPKCS1Mask(const ModNumber& m) const;
+	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
+	ModNumber Encrypt(const ModNumber& m) const;
+	ModNumber Decrypt(const ModNumber& c) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;
@@ -226,10 +226,10 @@ ModNumber operator>>(const ModNumber& n, const unsigned int i);
 ModNumber& operator >>= (ModNumber& n, unsigned int i);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
-ModNumber operator* (const ModNumber l, const ModNumber r);
+ModNumber operator* (const ModNumber& l, const ModNumber& r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
-unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest);
+unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 
 
 template <typename T>
@@ -276,10 +276,10 @@ std::basic_string<T> ModNumber::getText() const
 
 
 #ifdef _WIN32
-RSAParameters GetRSAKey(wchar_t *KeyName, bool createIfNotExists);
+RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
-std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName, ModNumber data);
-ModNumber encrypt(const wchar_t* KeyName, ModNumber data);
+std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data);
+ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
 #endif
 
 

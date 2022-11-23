@@ -621,7 +621,7 @@ ModNumber &operator*=(ModNumber& n, lint scalar)
 	return n;
 }
 
-ModNumber operator* (const ModNumber l, const ModNumber r)
+ModNumber operator* (const ModNumber& l, const ModNumber& r)
 {
 	ModNumber res;
 	lint* rlint = (lint*)r.num;
@@ -876,7 +876,7 @@ ModNumber ModNumber::stomn(std::string s, int base)
 	throw std::invalid_argument("Invalid argument passed");
 }
 
-ModNumber ModNumber::gcd(const ModNumber l,const ModNumber r)
+ModNumber ModNumber::gcd(const ModNumber& l,const ModNumber& r)
 {
 	ModNumber mzero;
 	ModNumber mone(1ull);
@@ -905,7 +905,7 @@ ModNumber ModNumber::gcd(const ModNumber l,const ModNumber r)
 
 }
 
-ModNumber ModNumber::lcm(const ModNumber l,const ModNumber r)
+ModNumber ModNumber::lcm(const ModNumber& l,const ModNumber& r)
 {
 	ModNumber gcdRes = gcd(l, r);
 	ModNumber lDivGcD = l / gcdRes;
@@ -917,7 +917,7 @@ ModNumber ModNumber::lcm(const ModNumber l,const ModNumber r)
 
 
 
-ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r) const
+ModNumber MultGroupMod::Mult(const ModNumber& l, const ModNumber& r) const
 {
 	ModNumber res;
 	ModNumber lMod = l % n;
@@ -946,14 +946,14 @@ ModNumber MultGroupMod::Mult(const ModNumber l, const ModNumber r) const
 	return res;
 }
 
-ModNumber MultGroupMod::Kwad(const ModNumber x) const
+ModNumber MultGroupMod::Kwad(const ModNumber& x) const
 {
 	ModNumber l = x;
 	ModNumber r = x;
 	return Mult(l, r);
 }
 
-ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e) const
+ModNumber MultGroupMod::Exp(const ModNumber& x, const ModNumber& e) const
 {
 	ModNumber res(1ull);
 	ModNumber xMod = x % n;
@@ -978,14 +978,14 @@ ModNumber MultGroupMod::Exp(const ModNumber x, const ModNumber e) const
 	return res;
 }
 
-ModNumber MultGroupMod::Add(const ModNumber l, const ModNumber r) const
+ModNumber MultGroupMod::Add(const ModNumber& l, const ModNumber& r) const
 {
 	ModNumber lMod = l % n;
 	ModNumber rMod = r % n;
 	return (lMod + rMod) % n;
 }
 
-ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r) const
+ModNumber MultGroupMod::Diff(const ModNumber& l, const ModNumber& r) const
 {
 	ModNumber lMod = l % n;
 	ModNumber rMod = r % n;
@@ -997,7 +997,7 @@ ModNumber MultGroupMod::Diff(const ModNumber l, const ModNumber r) const
 		return n - rMod + lMod;
 }
 
-ModNumber MultGroupMod::Inverse(const ModNumber x) const
+ModNumber MultGroupMod::Inverse(const ModNumber& x) const
 {
 	ModNumber mzero;
 	ModNumber mone(1ull);
@@ -1036,7 +1036,7 @@ ModNumber MultGroupMod::Inverse(const ModNumber x) const
 
 
 
-unsigned char *ConvertEndianess(unsigned char* p, unsigned int cb)
+unsigned char *ConvertEndianess(const unsigned char* p, unsigned int cb)
 {
 	unsigned char* res = new unsigned char[cb];
 	for (unsigned int i = 0; i < cb; i++)
@@ -1044,7 +1044,7 @@ unsigned char *ConvertEndianess(unsigned char* p, unsigned int cb)
 	return res;
 }
 
-unsigned int GetByteCount(ModNumber mn)
+unsigned int GetByteCount(const ModNumber& mn)
 {
 	unsigned char* p = (unsigned char *)mn.num;
 	for (int i = NCOUNT - 1; i >= 0; i--)
@@ -1053,7 +1053,7 @@ unsigned int GetByteCount(ModNumber mn)
 	return 0;
 }
 
-unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDest)
+unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest)
 {
 	unsigned char* pKey = ConvertEndianess((unsigned char*)(mn.num), cbsize);
 	for (unsigned int i = 0; i < cbsize; i++)
@@ -1062,7 +1062,7 @@ unsigned char* CopyKeyPart(ModNumber mn, unsigned int cbsize, unsigned char* pDe
 	return pDest + cbsize;
 }
 
-ModNumber RSA::GetPKCS1Mask(ModNumber m) const
+ModNumber RSA::GetPKCS1Mask(const ModNumber& m) const
 {
 	unsigned long keyByteSize = GetByteCount(Modulus);
 	unsigned long mSize = GetByteCount(m);
@@ -1118,7 +1118,7 @@ ModNumber RSA::GetPKCS1Mask(ModNumber m) const
 	return res;
 }
 
-ModNumber RSA::RemovePKCS1Mask(ModNumber m) const
+ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
 	int i;
@@ -1138,14 +1138,14 @@ ModNumber RSA::RemovePKCS1Mask(ModNumber m) const
 
 }
 
-ModNumber RSA::Encrypt(ModNumber m) const
+ModNumber RSA::Encrypt(const ModNumber& m) const
 {
 	ModNumber masked = GetPKCS1Mask(m);
 	MultGroupMod mgm(Modulus);
 	return mgm.Exp(masked, pubExp);
 }
 
-ModNumber RSA::Decrypt(ModNumber c) const
+ModNumber RSA::Decrypt(const ModNumber& c) const
 {
 	MultGroupMod mgmp(Prime1);
 	MultGroupMod mgmq(Prime2);
@@ -1167,7 +1167,7 @@ ModNumber RSA::Decrypt(ModNumber c) const
 
 #ifdef _WIN32 
 
-NCRYPT_KEY_HANDLE GenerateKey(wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
+NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
 {
 	NCRYPT_KEY_HANDLE keyHandle;
 	NCRYPT_PROV_HANDLE tmpProvHandle = NULL;
@@ -1176,9 +1176,9 @@ NCRYPT_KEY_HANDLE GenerateKey(wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
 	{
 		status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
 		tmpProvHandle = provHandle;
+		if (status != ERROR_SUCCESS)
+			throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	}
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, KeyName, AT_KEYEXCHANGE, 0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptCreateKey returned error code");
@@ -1203,7 +1203,7 @@ NCRYPT_KEY_HANDLE GenerateKey(wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
 
 }
 
-RSAParameters GetRSAKey(wchar_t *KeyName, bool createIfNotExists)
+RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
@@ -1375,7 +1375,7 @@ void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters)
 	delete[] rawKeyData;
 }
 
-std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName, ModNumber data)
+std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
@@ -1426,7 +1426,7 @@ std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName, ModNumber data)
 	return std::make_tuple(res, cbResult);
 }
 
-ModNumber encrypt(const wchar_t* KeyName, ModNumber data)
+ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);

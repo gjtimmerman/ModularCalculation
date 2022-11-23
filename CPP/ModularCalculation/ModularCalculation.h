@@ -16,8 +16,9 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
+#define MAXMOD (1024/8)
 //#define MAXMOD (2048/8)
-#define MAXMOD (4096/8)
+//#define MAXMOD (4096/8)
 
 #define NSIZE (NCOUNT*8)
 

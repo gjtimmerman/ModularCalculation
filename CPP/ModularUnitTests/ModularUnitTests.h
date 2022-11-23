@@ -2728,7 +2728,7 @@ namespace ModularUnitTests
 		}
 
 
-
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestMultiplySixteenBlock9sDecBySixteenBlock9sDec)
 		{
 			std::string lstr = "9999999999999999";
@@ -2752,7 +2752,7 @@ namespace ModularUnitTests
 			ModNumber mres = ml * mr;
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 
 #if (MAXMOD == 4096/8)
 		TEST_METHOD(TestMultiplyThirtyOneBlock9sDecByThirtyOneBlock9sDec)
@@ -3208,7 +3208,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Mult(ml, mr);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestMultiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultLessMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3243,7 +3243,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Mult(ml, mr);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 		TEST_METHOD(TestMultiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3343,6 +3343,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 #endif
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestMultiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3387,7 +3388,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Mult(ml, mr);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 
 		TEST_METHOD(TestGCDOfOneAndZero)
 		{
@@ -3749,7 +3750,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Kwad(ml);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestKwadMultGroupModEightBlock9sDecResultLessMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3782,7 +3783,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Kwad(ml);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 		TEST_METHOD(TestKwadMultGroupModEightBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3874,6 +3875,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 #endif
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestKwadMultGroupModThirtyOneBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -3914,7 +3916,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Kwad(ml);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 		TEST_METHOD(TestExpZeroMultGroupAllOnesLessMod)
 		{
 			llint l[COUNTLL];
@@ -4110,7 +4112,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Exp(ml, me);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestExpTwoMultGroupModEightBlock9sDecResultLessMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -4144,7 +4146,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Exp(ml,me);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 		TEST_METHOD(TestExpTwoMultGroupModEightBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -4240,6 +4242,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(mres == mexp);
 		}
 #endif
+#if (MAXMOD > 1024/8)
 		TEST_METHOD(TestExpTwoMultGroupModThirtyOneBlock9sDecResultGreaterMod)
 		{
 			std::string lstr = "9999999999999999";
@@ -4282,7 +4285,7 @@ namespace ModularUnitTests
 			ModNumber mres = mgm.Exp(ml, me);
 			Assert::IsTrue(mres == mexp);
 		}
-
+#endif
 		TEST_METHOD(TestExpMultGroupModTwoPowerThirteenModTenThousand)
 		{
 			ModNumber ml(2ull);
@@ -4845,6 +4848,31 @@ namespace ModularUnitTests
 			Assert::IsTrue(mExp1Exp == DpCalc);
 			Assert::IsTrue(mExp2Exp == DqCalc);
 			Assert::IsTrue(mCoefficientExp == InverseQCalc);
+#elif (MAXMOD == 1024/8)
+			ModNumber mExponent = ModNumber::stomn("010001", 16);
+			ModNumber mModulusExp = ModNumber::stomn("B08B5EF115AED8F91EE2FB82E7E8C8611DF101B4138B37787A18D1E72FC75437342A8961F7C462CBD2208DE6EC0472882CE6410BCE3AE096BB2CA0506B5FBF5865FC80465653F2AEA678C8A8638AF8CF98F105166B6CFA71A61567765DF9521FAE5616DBBF26F99512EEBF857C166941FC2402C5E27258B10206A8AF016C45E9", 16);
+			ModNumber mPrime1 = ModNumber::stomn("C882E9B30B9F87F47AD7653886EF5CD53D9CAA96D2B83C24C643F024B86CDFE61DE6627F0C63B3CBB885DD3212C77CBE47A3469E5EA2FAD245984A75D866AAF3", 16);
+			ModNumber mPrime2 = ModNumber::stomn("E1668918F4DD83B3066B32577933BD27B1FFA8F49907637863750304EFCBDB1DCC86362EEBC81ACD68B7E0C0BCE35B1BC0F353F16B59C5E7636AF1464805CAB3", 16);
+			ModNumber mExp1Exp = ModNumber::stomn("A8130C8077D2BEECD0F7B2B242716C5896EFB712FC0950E8E684D64C818749DB23DF155B37F06F2AEA3ED39E809D55544ECA6F8C9AF974D4436017B256B620BF", 16);
+			ModNumber mExp2Exp = ModNumber::stomn("74EDCA456611DC166D4802EF99F29B381280FC571763DBD842501B66DE3734CE7AA14D4E7E066AD110780362391B00D29F001C15EB88C0BFCEB555C10DEFE33D", 16);
+			ModNumber mCoefficientExp = ModNumber::stomn("89C0F663B05BC7C1CE547866B45F137DC73739DF9C159B5BA648A5C7818BC46A9CD12C41922A82DB150F9D34F08D69B4A94A947848E88DC5735800C882C856A1", 16);
+			ModNumber mPrivExpExp = ModNumber::stomn("9E7C2F39FBFE1FD7DC2B662009328717EFFA184E61311C15F27DEF893BF2141F0E9C9502369BBD193E446D3EFD67ACADA4A8FB81AE9C5A5BD621E4B4ECFF625469B82CE442C50E56F2C7E860FD7414AB46C9BA2C8F043FC2FAF5408E50A758BFDB2AF454020A1E77586C4F7E2D7CCF66E354715606B5223C31538AEDAAA0DB85", 16);
+
+			ModNumber mModulusProduct = mPrime1 * mPrime2;
+			ModNumber Pminus1 = mPrime1 - ModNumber(1ull);
+			ModNumber Qminus1 = mPrime2 - ModNumber(1ull);
+			ModNumber PhiPQ = Pminus1 * Qminus1;
+			MultGroupMod mgmPhiPQ(PhiPQ);
+			ModNumber PrivExpCalc = mgmPhiPQ.Inverse(mExponent);
+			ModNumber DpCalc = PrivExpCalc % Pminus1;
+			ModNumber DqCalc = PrivExpCalc % Qminus1;
+			MultGroupMod mgmP(mPrime1);
+			ModNumber InverseQCalc = mgmP.Inverse(mPrime2);
+			Assert::IsTrue(mModulusExp == mModulusProduct);
+			Assert::IsTrue(mPrivExpExp == PrivExpCalc);
+			Assert::IsTrue(mExp1Exp == DpCalc);
+			Assert::IsTrue(mExp2Exp == DqCalc);
+			Assert::IsTrue(mCoefficientExp == InverseQCalc);
 #endif
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageTooLong)
@@ -5241,6 +5269,22 @@ namespace ModularUnitTests
 			ModNumber resultingMessage = myRsa.Decrypt(encryptedMessage);
 			std::string decryptedString = resultingMessage.getText<char>();
 			Assert::IsTrue(message == decryptedString);
+#elif (MAXMOD == 1024/8)
+			rsaParameters.pubExp = ModNumber::stomn("010001", 16);
+			rsaParameters.Modulus = ModNumber::stomn("B08B5EF115AED8F91EE2FB82E7E8C8611DF101B4138B37787A18D1E72FC75437342A8961F7C462CBD2208DE6EC0472882CE6410BCE3AE096BB2CA0506B5FBF5865FC80465653F2AEA678C8A8638AF8CF98F105166B6CFA71A61567765DF9521FAE5616DBBF26F99512EEBF857C166941FC2402C5E27258B10206A8AF016C45E9", 16);
+			rsaParameters.Prime1 = ModNumber::stomn("C882E9B30B9F87F47AD7653886EF5CD53D9CAA96D2B83C24C643F024B86CDFE61DE6627F0C63B3CBB885DD3212C77CBE47A3469E5EA2FAD245984A75D866AAF3", 16);
+			rsaParameters.Prime2 = ModNumber::stomn("E1668918F4DD83B3066B32577933BD27B1FFA8F49907637863750304EFCBDB1DCC86362EEBC81ACD68B7E0C0BCE35B1BC0F353F16B59C5E7636AF1464805CAB3", 16);
+			rsaParameters.Exp1 = ModNumber::stomn("A8130C8077D2BEECD0F7B2B242716C5896EFB712FC0950E8E684D64C818749DB23DF155B37F06F2AEA3ED39E809D55544ECA6F8C9AF974D4436017B256B620BF", 16);
+			rsaParameters.Exp2 = ModNumber::stomn("74EDCA456611DC166D4802EF99F29B381280FC571763DBD842501B66DE3734CE7AA14D4E7E066AD110780362391B00D29F001C15EB88C0BFCEB555C10DEFE33D", 16);
+			rsaParameters.Coefficient = ModNumber::stomn("89C0F663B05BC7C1CE547866B45F137DC73739DF9C159B5BA648A5C7818BC46A9CD12C41922A82DB150F9D34F08D69B4A94A947848E88DC5735800C882C856A1", 16);
+			rsaParameters.PrivExp = ModNumber::stomn("9E7C2F39FBFE1FD7DC2B662009328717EFFA184E61311C15F27DEF893BF2141F0E9C9502369BBD193E446D3EFD67ACADA4A8FB81AE9C5A5BD621E4B4ECFF625469B82CE442C50E56F2C7E860FD7414AB46C9BA2C8F043FC2FAF5408E50A758BFDB2AF454020A1E77586C4F7E2D7CCF66E354715606B5223C31538AEDAAA0DB85", 16);
+			RSA myRsa(rsaParameters);
+			std::string message = "Dit is een test";
+			ModNumber convertedMessage = ModNumber::fromText(message);
+			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+			ModNumber resultingMessage = myRsa.Decrypt(encryptedMessage);
+			std::string decryptedString = resultingMessage.getText<char>();
+			Assert::IsTrue(message == decryptedString);
 #endif
 		}
 
@@ -5267,6 +5311,16 @@ namespace ModularUnitTests
 				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey2048", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
+#elif (MAXMOD == 1024/8)
+
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", true);
+			RSA myRsa(rsaParameters);
+			std::string message = "Dit is een test";
+			ModNumber convertedMessage = ModNumber::fromText(message);
+			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+			std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey1024", encryptedMessage);
+			std::string resText = std::get<0>(res).getText<char>();
+			Assert::IsTrue(resText == message);
 #endif
 		}
 		TEST_METHOD(TestRSADecrypt)
@@ -5289,6 +5343,16 @@ namespace ModularUnitTests
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
+#elif (MAXMOD == 1024/8)
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", true);
+			RSA myRsa(rsaParameters);
+			std::string message = "Dit is een test";
+			ModNumber convertedMessage = ModNumber::fromText(message);
+			ModNumber encryptedMessage = encrypt(L"MyCoolKey1024", convertedMessage);
+			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
+			std::string resText = decryptedMessage.getText<char>();
+			Assert::IsTrue(resText == message);
+
 #endif
 		}
 

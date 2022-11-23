@@ -5248,6 +5248,17 @@ namespace ModularUnitTests
 
 		TEST_METHOD(TestRSAEncrypt)
 		{
+#if (MAXMOD == 4096/8)
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
+				RSA myRsa(rsaParameters);
+				std::string message = "Dit is een test";
+				ModNumber convertedMessage = ModNumber::fromText(message);
+				ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
+				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
+				std::string resText = std::get<0>(res).getText<char>();
+				Assert::IsTrue(resText == message);
+#elif (MAXMOD == 2048/8)
+
 				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", true);
 				RSA myRsa(rsaParameters);
 				std::string message = "Dit is een test";
@@ -5256,9 +5267,20 @@ namespace ModularUnitTests
 				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey2048", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
+#endif
 		}
 		TEST_METHOD(TestRSADecrypt)
 		{
+#if (MAXMOD == 4096/8)
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
+			RSA myRsa(rsaParameters);
+			std::string message = "Dit is een test";
+			ModNumber convertedMessage = ModNumber::fromText(message);
+			ModNumber encryptedMessage = encrypt(L"MyCoolKey", convertedMessage);
+			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
+			std::string resText = decryptedMessage.getText<char>();
+			Assert::IsTrue(resText == message);
+#elif (MAXMOD == 2048/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
@@ -5267,6 +5289,7 @@ namespace ModularUnitTests
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
+#endif
 		}
 
 #endif

@@ -5387,6 +5387,8 @@ namespace ModularUnitTests
 			Assert::IsTrue(message == decryptedString);
 #endif
 		}
+
+#ifdef _WIN32
 		TEST_METHOD(TestRSADecryptSymmetricKey)
 		{
 #if (MAXMOD == 4096/8)
@@ -5414,7 +5416,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 #endif
 		}
-#ifdef _WIN32
+
 
 		TEST_METHOD(TestRSAEncrypt)
 		{

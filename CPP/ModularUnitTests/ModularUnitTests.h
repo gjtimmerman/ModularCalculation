@@ -700,6 +700,37 @@ namespace ModularUnitTests
 			ml %= mr;
 			Assert::IsTrue(mexp == ml);
 		}
+		TEST_METHOD(TestModuloAssignDivideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne)
+		{
+			ModNumber mnprime1(355687428095999);
+			lint prime2(39916799ul);
+			ModNumber mnprime2(prime2);
+			ModNumber product = mnprime1 * prime2;
+			ModNumber res1 = product;
+			res1 %= mnprime1;
+			ModNumber res2 = product;
+			res2 %= mnprime2;
+			ModNumber mexp1;
+			Assert::IsTrue(res1 == mexp1);
+			Assert::IsTrue(res2 == mexp1);
+			ModNumber mone(1ull);
+			ModNumber mnprime1MinusOne = mnprime1 - mone;
+			ModNumber mnprime2MinusOne = mnprime2 - mone;
+			ModNumber productMinusPrime1 = product - mnprime1;
+			ModNumber productMinusPrime2 = product - mnprime2;
+			ModNumber res3 = productMinusPrime1;
+			res3 %= mnprime2MinusOne;
+			ModNumber res4 = productMinusPrime2;
+			res4 %= mnprime1MinusOne;
+			ModNumber res5 = productMinusPrime1;
+			res5 %= mnprime1;
+			ModNumber res6 = productMinusPrime2;
+			res6 %= mnprime2;
+			Assert::IsTrue(res3 == mexp1);
+			Assert::IsTrue(res4 == mexp1);
+			Assert::IsTrue(res5 == mexp1);
+			Assert::IsTrue(res6 == mexp1);
+		}
 
 		TEST_METHOD(TestDivideAndModuloByZero)
 		{

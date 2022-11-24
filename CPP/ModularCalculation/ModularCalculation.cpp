@@ -948,8 +948,8 @@ ModNumber MultGroupMod::Mult(const ModNumber& l, const ModNumber& r) const
 
 ModNumber MultGroupMod::Kwad(const ModNumber& x) const
 {
-	ModNumber l = x;
-	ModNumber r = x;
+	const ModNumber &l = x;
+	const ModNumber &r = x;
 	return Mult(l, r);
 }
 

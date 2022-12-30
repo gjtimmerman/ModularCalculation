@@ -912,6 +912,29 @@ ModNumber ModNumber::lcm(const ModNumber& l,const ModNumber& r)
 	return lDivGcD * r;
 }
 
+unsigned short GetDoubleByteValue(const llint *pNum, int db)
+{
+	unsigned short* p = (unsigned short*)pNum;
+	return p[db];
+}
+
+ModNumber ModNumber::sqrt() const
+{
+	ModNumber mzero;
+	if (*this == mzero)
+		return mzero;
+	ModNumber mone(1ull);
+	if (*this == mone)
+		return mone;
+	unsigned int doubleByteCount = (GetByteCount(*this) - 1u) / 2u;
+	for (unsigned int ui = doubleByteCount; ui >= 0; ui--)
+	{
+		unsigned short tmp = GetDoubleByteValue(this->num, ui);
+		 
+	}
+	ModNumber res;
+	return res;
+}
 
 
 

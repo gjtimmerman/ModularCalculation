@@ -8,6 +8,29 @@
 
 
 
+ModNumber& operator-=(ModNumber& l, const lint r)
+{
+	lint* ll = (lint*)l.num;
+	lint carry = 0;
+	lint ltmp = ll[0];
+	if (ltmp < r)
+	{
+		carry = 1;
+	}
+	ll[0] = ltmp - r;
+	int i = 1;
+	while (carry > 0 && i < COUNTL)
+	{
+		if (carry <= ll[i])
+		{
+			ll[i] -= carry;
+			carry = 0;
+		}
+		else
+			ll[i] -= carry;
+	}
+	return l;
+}
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r)
 {
@@ -926,14 +949,44 @@ ModNumber ModNumber::sqrt() const
 	ModNumber mone(1ull);
 	if (*this == mone)
 		return mone;
+	ModNumber mres;
+	ModNumber mdivisor;
+	ModNumber mremainder;
 	unsigned int doubleByteCount = (GetByteCount(*this) - 1u) / 2u;
-	for (unsigned int ui = doubleByteCount; ui >= 0; ui--)
+	for (int ui = doubleByteCount; ui >= 0; ui--)
 	{
 		unsigned short tmp = GetDoubleByteValue(this->num, ui);
-		 
+		mremainder <<= 16;
+		mdivisor <<= 8;
+		mres <<= 8;
+		unsigned short* pRemainder = (unsigned short*)mremainder.num;
+		*pRemainder |= tmp;
+		if (mremainder == mzero)
+		{
+			continue;
+		}
+		unsigned short counter = 1;
+		mdivisor += 1;
+		ModNumber divisorTimesCounter = mdivisor * counter;
+		while (divisorTimesCounter < mremainder)
+		{
+			mdivisor += 1;
+			divisorTimesCounter = mdivisor * ++counter;
+		}
+		if (divisorTimesCounter == mremainder)
+		{
+			mremainder = ModNumber(0ull);
+		}
+		else
+		{
+			mdivisor -= 1;
+			divisorTimesCounter = mdivisor * --counter;
+			mremainder -= divisorTimesCounter;
+		}
+		mdivisor += counter;
+		mres += counter;
 	}
-	ModNumber res;
-	return res;
+	return mres;
 }
 
 

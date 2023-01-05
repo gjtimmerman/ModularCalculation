@@ -3680,6 +3680,46 @@ namespace ModularUnitTests
 			ModNumber mres = ModNumber::lcm(ml, mr);
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestSqrtOfZero)
+		{
+			ModNumber mzero;
+			ModNumber mres = mzero.sqrt();
+			Assert::IsTrue(mzero == mres);
+		}
+		TEST_METHOD(TestSqrtOfOne)
+		{
+			ModNumber mone(1ull);
+			ModNumber mres = mone.sqrt();
+			Assert::IsTrue(mone == mres);
+		}
+		TEST_METHOD(TestSqrtOfFour)
+		{
+			ModNumber mfour(4ull);
+			ModNumber mexp(2ull);
+			ModNumber mres = mfour.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOfTwentyFive)
+		{
+			ModNumber mx(25ull);
+			ModNumber mexp(5ull);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOfOnehundredSixtyNine)
+		{
+			ModNumber mx(169ull);
+			ModNumber mexp(13ull);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOf152399025)
+		{
+			ModNumber mx(152399025ull);
+			ModNumber mexp(12345ull);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
 
 		TEST_METHOD(TestMultGroupModOfZero)
 		{

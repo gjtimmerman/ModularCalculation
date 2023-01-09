@@ -3810,6 +3810,33 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSqrtPrecisionOf13)
+		{
+			ModNumber x(13ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x039b05688c;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf17)
+		{
+			ModNumber x(17ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x041f83d9ab;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf19)
+		{
+			ModNumber x(19ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x045be0cd19;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
 
 		TEST_METHOD(TestMultGroupModOfZero)
 		{

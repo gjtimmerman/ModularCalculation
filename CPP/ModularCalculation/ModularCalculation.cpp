@@ -989,6 +989,12 @@ ModNumber ModNumber::sqrt() const
 	return mres;
 }
 
+ModNumber ModNumber::sqrt(unsigned int precision) const
+{
+	ModNumber copy(*this);
+	copy <<= precision * 8;
+	return copy.sqrt();
+}
 
 
 

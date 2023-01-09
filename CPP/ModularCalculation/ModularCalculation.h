@@ -82,6 +82,7 @@ public:
 	template <typename T>
 	static ModNumber fromText(std::basic_string<T> text);
 	ModNumber sqrt() const;
+	ModNumber sqrt(unsigned int precision) const;
 
 private:
 	llint num[COUNTLL] = {};

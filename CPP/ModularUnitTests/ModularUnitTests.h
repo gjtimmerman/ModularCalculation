@@ -3720,6 +3720,96 @@ namespace ModularUnitTests
 			ModNumber mres = mx.sqrt();
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestSqrtOf1524157875019052100)
+		{
+			ModNumber mx(1524157875019052100ull);
+			ModNumber mexp(1234567890ull);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOf152415787532374345526722756)
+		{
+			ModNumber mx = ModNumber::stomn("152415787532374345526722756");
+			ModNumber mexp(12345678901234ull);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOfAllFsSquared)
+		{
+			llint x[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			int numInts = COUNTLL % 2 == 0 ? COUNTLL : COUNTLL - 1;
+			for (int i = numInts / 2; i < numInts; i++)
+			{
+				x[i] = ~0ull;
+			}
+			x[numInts/2] <<= 1;
+			x[0] = 1;
+			for (int i = 0; i < numInts/2; i++)
+				exp[i] = ~0ull;
+			ModNumber mx(x);
+			ModNumber mexp(exp);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+		TEST_METHOD(TestSqrtOf1inLastWord)
+		{
+			llint x[COUNTLL] = {};
+			llint exp[COUNTLL] = {};
+			int numInts = COUNTLL % 2 == 1 ? COUNTLL : COUNTLL - 1;
+			x[numInts - 1] = 1ull;
+			exp[(numInts - 1) / 2] = 1ull;
+			ModNumber mx(x);
+			ModNumber mexp(exp);
+			ModNumber mres = mx.sqrt();
+			Assert::IsTrue(mexp == mres);
+		}
+
+		TEST_METHOD(TestSqrtPrecisionOf2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a09e667;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf3)
+		{
+			ModNumber x(3ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x01bb67ae85;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf5)
+		{
+			ModNumber x(5ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x023c6ef372;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf7)
+		{
+			ModNumber x(7ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x02a54ff53a;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf11)
+		{
+			ModNumber x(11ull);
+			ModNumber res = x.sqrt(8);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x03510e527f;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
 
 		TEST_METHOD(TestMultGroupModOfZero)
 		{

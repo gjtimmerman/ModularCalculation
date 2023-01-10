@@ -89,6 +89,24 @@ namespace ModularUnitTests
 
 			Assert::IsTrue(mr == ml);
 		}
+		TEST_METHOD(TestSubtractAssignScalarSimple)
+		{
+			llint l[COUNTLL];
+			llint exp[COUNTLL];
+			lint r = 1ul;
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				l[i] = 2ull;
+				exp[i] = 2ull;
+			}
+			exp[0] = 1ull;
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml -= r;
+
+			Assert::IsTrue(mexp == ml);
+		}
+
 		TEST_METHOD(TestSubtractWithCarry)
 		{
 			llint l[COUNTLL] = {};
@@ -122,6 +140,22 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			ModNumber mexp(exp);
 			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestSubtractAssignScalarWithCarry)
+		{
+			llint l[COUNTLL] = {};
+			lint r;
+			l[0] = 0ull;
+			l[1] = 1ull;
+			r = 1ul;
+			llint exp[COUNTLL] = {};
+			exp[0] = ~0ull;
+
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml -= r;
 
 			Assert::IsTrue(mexp == ml);
 		}
@@ -168,6 +202,25 @@ namespace ModularUnitTests
 			ml -= mr;
 			Assert::IsTrue(mexp == ml);
 		}
+		TEST_METHOD(TestSubtractAssignScalarWithCarryAcrossMultipleSections)
+		{
+			llint l[COUNTLL] = {};
+			lint r;
+			l[0] = 0ul;
+			l[COUNTLL - 1] = 1ul;
+			r = 1ul;
+			llint exp[COUNTLL];
+			exp[COUNTLL - 1] = 0ull;
+			for (int i = 0; i < COUNTLL - 1; i++)
+			{
+				exp[i] = ~0ull;
+			}
+
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml -= r;
+			Assert::IsTrue(mexp == ml);
+		}
 
 		TEST_METHOD(TestSubtractOneFromZero)
 		{
@@ -200,6 +253,22 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			ModNumber mexp(exp);
 			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestSubtractAssignScalarOneFromZero)
+		{
+			llint l[COUNTLL] = {};
+			lint r;
+			r = 1ul;
+			llint exp[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+			{
+				exp[i] = ~0ull;
+			}
+			ModNumber ml(l);
+			ModNumber mexp(exp);
+			ml -= r;
 
 			Assert::IsTrue(mexp == ml);
 		}
@@ -250,6 +319,22 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			ModNumber mexp(1ull);
 			ml -= mr;
+
+			Assert::IsTrue(mexp == ml);
+		}
+		TEST_METHOD(TestSubtractAssignScalarAllFsFromZero)
+		{
+			llint exp[COUNTLL] = {};
+			lint r;
+			r = ~0ul;
+			ModNumber ml;
+			lint* pExp = (lint *)exp;
+			pExp[0] = 1;
+			pExp[1] = ~0ul;
+			for (int i = 1; i < COUNTLL; i++)
+				exp[i] = ~0ull;
+			ModNumber mexp(exp);
+			ml -= r;
 
 			Assert::IsTrue(mexp == ml);
 		}

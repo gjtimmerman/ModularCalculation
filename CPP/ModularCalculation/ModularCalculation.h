@@ -105,7 +105,7 @@ private:
 
 	}
 
-	friend ModNumber& operator-=(ModNumber& l, const lint r);
+	friend ModNumber& operator-=(ModNumber& l, const lint &r);
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 	friend bool operator==(const ModNumber& l, const ModNumber& r);

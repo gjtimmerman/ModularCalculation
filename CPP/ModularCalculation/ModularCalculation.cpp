@@ -8,7 +8,7 @@
 
 
 
-ModNumber& operator-=(ModNumber& l, const lint r)
+ModNumber& operator-=(ModNumber& l, const lint &r)
 {
 	lint* ll = (lint*)l.num;
 	lint carry = 0;
@@ -28,6 +28,7 @@ ModNumber& operator-=(ModNumber& l, const lint r)
 		}
 		else
 			ll[i] -= carry;
+		i++;
 	}
 	return l;
 }

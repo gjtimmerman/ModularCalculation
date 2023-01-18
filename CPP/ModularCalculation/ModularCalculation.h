@@ -73,7 +73,7 @@ public:
 	{
 		num[0] = n;
 	}
-	std::string to_string(int base = 10) const;
+	std::string to_string(int base = 10, const int scale = 0) const;
 	static ModNumber stomn(std::string s, int base = 10);
 	static ModNumber gcd(const ModNumber &l,const ModNumber &r);
 	static ModNumber lcm(const ModNumber &l, const ModNumber &r);
@@ -86,9 +86,9 @@ public:
 
 private:
 	llint num[COUNTLL] = {};
-	std::string to_string_hex_base() const;
-	std::string to_string_octal_base() const;
-	std::string to_string_decimal_base() const;
+	std::string to_string_hex_base(const int scale=0) const;
+	std::string to_string_octal_base(const int scale=0) const;
+	std::string to_string_decimal_base(const int scale=0) const;
 	static ModNumber stomn_hex_base(std::string s);
 	static ModNumber stomn_decimal_base(std::string s);
 	static ModNumber stomn_octal_base(std::string s);

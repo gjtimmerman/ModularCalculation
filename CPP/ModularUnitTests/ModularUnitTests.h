@@ -3850,7 +3850,91 @@ namespace ModularUnitTests
 			Assert::IsTrue(mexp == mres);
 		}
 
-		TEST_METHOD(TestSqrtPrecisionOf2)
+		TEST_METHOD(TestSqrtPrecision16Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(16);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x6a09e667f3bcc908;
+			exp[1] = 0x01;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision16Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(16);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 17, '0');
+			exp.append("1.6A09E667F3BCC908");
+			std::string resStr = res.to_string(16, 8);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision14Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(14);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a09e667f3bcc9;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision14Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(14);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 15, '0');
+			exp.append("1.6A09E667F3BCC9");
+			std::string resStr = res.to_string(16, 7);
+			Assert::IsTrue(exp == resStr);
+		}
+
+		TEST_METHOD(TestSqrtPrecision12Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(12);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a09e667f3bc;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision12Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(12);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 13, '0');
+			exp.append("1.6A09E667F3BC");
+			std::string resStr = res.to_string(16, 6);
+			Assert::IsTrue(exp == resStr);
+		}
+
+		TEST_METHOD(TestSqrtPrecision10Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(10);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a09e667f3;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision10Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(10);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 11, '0');
+			exp.append("1.6A09E667F3");
+			std::string resStr = res.to_string(16, 5);
+			Assert::IsTrue(exp == resStr);
+		}
+
+		TEST_METHOD(TestSqrtPrecision8Of2)
 		{
 			ModNumber x(2ull);
 			ModNumber res = x.sqrt(8);
@@ -3859,6 +3943,58 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			Assert::IsTrue(mexp == res);
 		}
+		TEST_METHOD(TestSqrtPrecision8Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(8);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 9, '0');
+			exp.append("1.6A09E667");
+			std::string resStr = res.to_string(16, 4);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision4Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(4);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a09;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision4Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(4);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 5, '0');
+			exp.append("1.6A09");
+			std::string resStr = res.to_string(16, 2);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision2Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(2);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x016a;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision2Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(2);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 3, '0');
+			exp.append("1.6A");
+			std::string resStr = res.to_string(16, 1);
+			Assert::IsTrue(exp == resStr);
+		}
+
 		TEST_METHOD(TestSqrtPrecisionOf3)
 		{
 			ModNumber x(3ull);
@@ -3867,6 +4003,17 @@ namespace ModularUnitTests
 			exp[0] = 0x01bb67ae85;
 			ModNumber mexp(exp);
 			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecisionOf3Str)
+		{
+			ModNumber x(3ull);
+			ModNumber res = x.sqrt(8);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 9, '0');
+			exp.append("1.BB67AE85");
+			std::string resStr = res.to_string(16, 4);
+			Assert::IsTrue(exp == resStr);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf5)
 		{

@@ -469,7 +469,10 @@ bool operator < (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
-			return l.num[i] < r.num[i];
+			if (l.num[i] == r.num[i])
+				continue;
+			else
+				return l.num[i] < r.num[i];
 	return false;
 }
 
@@ -707,13 +710,13 @@ lint operator% (const ModNumber& n, lint scalar)
 	return std::get<1>(n.DivideAndModulo(scalar));
 }
 
-std::string ModNumber::to_string_hex_base() const
+std::string ModNumber::to_string_hex_base(const int scale) const
 {
 	std::string res;
 	const int buflen = LLSIZE * 2;
 	int width;
 	width = buflen;
-	res.reserve(buflen * COUNTLL);
+	res.reserve(buflen * COUNTLL + 1);
 	for (int i = COUNTLL-1; i >= 0; i--)
 	{
 		std::stringstream mystrstr;
@@ -723,10 +726,15 @@ std::string ModNumber::to_string_hex_base() const
 		mystrstr <<std::hex << num[i];
 		res.append(mystrstr.str());
 	}
+	if (scale > 0)
+	{
+		size_t pos = buflen * COUNTLL - (scale * 2);
+		res.insert(pos, ".");
+	}
 	return res;
 }
 
-std::string ModNumber::to_string_octal_base() const
+std::string ModNumber::to_string_octal_base(const int scale) const
 {
 	std::string res;
 	res.reserve(OctalStringLength);
@@ -757,7 +765,7 @@ std::string ModNumber::to_string_octal_base() const
 	return res;
 }
 
-std::string ModNumber::to_string_decimal_base() const
+std::string ModNumber::to_string_decimal_base(const int scale) const
 {
 	std::string res;
 	res.reserve(DecimalStringLength);
@@ -772,18 +780,18 @@ std::string ModNumber::to_string_decimal_base() const
 	return res;
 }
 
-std::string ModNumber::to_string(const int base) const
+std::string ModNumber::to_string(const int base, const int scale) const
 {
 	if (!(base == 8 || base == 10 || base == 16))
 		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
 	switch (base)
 	{
 	case 16:
-		return to_string_hex_base();
+		return to_string_hex_base(scale);
 	case 10:
-		return to_string_decimal_base();
+		return to_string_decimal_base(scale);
 	case 8:
-		return to_string_octal_base();
+		return to_string_octal_base(scale);
 	}
 	std::string res;
 	return res;

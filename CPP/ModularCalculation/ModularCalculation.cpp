@@ -490,12 +490,10 @@ bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
-		{
-			if (l.num[i] > r.num[i])
-				return true;
-			else if (l.num[i] < r.num[i])
-				return false;
-		}
+			if (l.num[i] == r.num[i])
+				continue;
+			else
+				return l.num[i] > r.num[i];
 	return false;
 }
 
@@ -768,14 +766,33 @@ std::string ModNumber::to_string_octal_base(const int scale) const
 std::string ModNumber::to_string_decimal_base(const int scale) const
 {
 	std::string res;
-	res.reserve(DecimalStringLength);
-	res.assign(DecimalStringLength, '0');
-	ModNumber tmp(*this);
-	for (int i = 0; i < DecimalStringLength; i++)
+	const int IntegerStringLength = static_cast<int>(std::ceil((NSIZE - scale * 8)  * 0.30102999566398119521373889472449)); // log(2)
+	res.reserve(DecimalStringLength+3);
+	res.assign(IntegerStringLength, '0');
+	ModNumber tmp = *this >> scale * 8;
+	for (int i = 0; i < IntegerStringLength; i++)
 	{
 		lint digit = tmp % 10ul;
 		tmp /= 10ul;
-		res[DecimalStringLength - i - 1] = '0' + (char)digit;
+		res[IntegerStringLength - i - 1] = '0' + (char)digit;
+	}
+	if (scale > 0)
+	{
+		res.append(".");
+		ModNumber tmp(*this);
+		char* p = ((char*)tmp.num);
+		for (int i = scale; i < NCOUNT; i++)
+			p[i] = 0;
+		ModNumber divisor(1ull);
+		for (int i = 1; i < scale; i++)
+			divisor *= 10ul;
+		for (int i = 0; i < scale; i++)
+		{
+			ModNumber resTmp = tmp / divisor;
+			lint digit = resTmp % 10ul;
+			divisor /= 10ul;
+			res[IntegerStringLength + 2 + i] = '0' + (char)digit;
+		}		
 	}
 	return res;
 }

@@ -3849,6 +3849,27 @@ namespace ModularUnitTests
 			ModNumber mres = mx.sqrt();
 			Assert::IsTrue(mexp == mres);
 		}
+		TEST_METHOD(TestSqrtPrecision18Of2)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(18);
+			llint exp[COUNTLL] = {};
+			exp[0] = 0x09e667f3bcc908b2;
+			exp[1] = 0x016a;
+			ModNumber mexp(exp);
+			Assert::IsTrue(mexp == res);
+		}
+		TEST_METHOD(TestSqrtPrecision18Of2Str)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(18);
+			std::string exp;
+			exp.reserve(HexStringLength + 1);
+			exp.assign(HexStringLength - 19, '0');
+			exp.append("1.6A09E667F3BCC908B2");
+			std::string resStr = res.to_string(16, 9);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision16Of2)
 		{

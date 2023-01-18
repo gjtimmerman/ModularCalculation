@@ -208,7 +208,7 @@ namespace ModularUnitTests
 			lint r;
 			l[0] = 0ul;
 			l[COUNTLL - 1] = 1ul;
-			r = 1ul;
+			r = 1u;
 			llint exp[COUNTLL];
 			exp[COUNTLL - 1] = 0ull;
 			for (int i = 0; i < COUNTLL - 1; i++)
@@ -260,7 +260,7 @@ namespace ModularUnitTests
 		{
 			llint l[COUNTLL] = {};
 			lint r;
-			r = 1ul;
+			r = 1u;
 			llint exp[COUNTLL];
 			for (int i = 0; i < COUNTLL; i++)
 			{
@@ -326,11 +326,11 @@ namespace ModularUnitTests
 		{
 			llint exp[COUNTLL] = {};
 			lint r;
-			r = ~0ul;
+			r = ~0u;
 			ModNumber ml;
 			lint* pExp = (lint *)exp;
-			pExp[0] = 1;
-			pExp[1] = ~0ul;
+			pExp[0] = 1u;
+			pExp[1] = ~0u;
 			for (int i = 1; i < COUNTLL; i++)
 				exp[i] = ~0ull;
 			ModNumber mexp(exp);
@@ -5662,6 +5662,7 @@ namespace ModularUnitTests
 		}
 
 #ifdef _WIN32
+
 		TEST_METHOD(TestRSADecryptSymmetricKey)
 		{
 #if (MAXMOD == 4096/8)
@@ -5681,9 +5682,9 @@ namespace ModularUnitTests
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2-1024", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
 			RSA myRsa(rsaParameters);
-			ModNumber encryptedSymKey = ModNumber::stomn("74D00004122EDB7FC7982EEC4692C3039C153FC1BF5460B07B3158EDBA8DF5B1E3AC269888B1EE37EC068CA9C9802DD8115C326D1A1C00D394F786DD78D162ADAFE84B0944E4EF4BF4FB8AD8FD4178B8C7A68E6D8BE4DEE50A3957EA22240D489CA463068EE5253D25ABB1AC447DFCFA22496B132FCD1CA5B120FB8B0D730462",16);
+			ModNumber encryptedSymKey = ModNumber::stomn("127306035CE4FBAA5A36589404A5E8F482E0435DB7A12F9A29CCF864237193C05D20DECCA455BE16F9623132B252F104DF584705ABB1FEC36786C8CF75EDFADE7DB69CF658403F052E0FDB1FEE6F7FFEF77968E975BB5B8AA59E884E9183F0B6175FE21BD7101E89CFF98C214E9F212008148A5CB886CB46F43E818E21224464", 16);
 			ModNumber symmetricKey = ModNumber::stomn("6C698A9323B751181E0F076B7B8148C56CEDA3296A15D603028199B70F47F015", 16);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
@@ -5694,7 +5695,7 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSAEncrypt)
 		{
 #if (MAXMOD == 4096/8)
-				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", true);
 				RSA myRsa(rsaParameters);
 				std::string message = "Dit is een test";
 				ModNumber convertedMessage = ModNumber::fromText(message);

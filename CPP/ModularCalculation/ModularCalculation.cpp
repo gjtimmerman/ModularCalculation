@@ -1316,7 +1316,7 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 	{
 		keyHandle = GenerateKey(KeyName, provHandle);
 	}
-	else if (status == NTE_BAD_KEYSET)
+	else if (status == NTE_BAD_KEYSET && !createIfNotExists)
 	{
 		throw std::runtime_error("Key does not exist!");
 	}

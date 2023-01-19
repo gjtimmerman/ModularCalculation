@@ -4004,7 +4004,7 @@ namespace ModularUnitTests
 			ModNumber mexp(exp);
 			Assert::IsTrue(mexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision2Of2Str)
+		TEST_METHOD(TestSqrtPrecision2Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ModNumber res = x.sqrt(2);
@@ -4013,6 +4013,17 @@ namespace ModularUnitTests
 			exp.assign(HexStringLength - 3, '0');
 			exp.append("1.6A");
 			std::string resStr = res.to_string(16, 1);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision2Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ModNumber res = x.sqrt(2);
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 3, '0');
+			exp.append("1.4");
+			std::string resStr = res.to_string(10, 1);
 			Assert::IsTrue(exp == resStr);
 		}
 

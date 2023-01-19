@@ -780,18 +780,19 @@ std::string ModNumber::to_string_decimal_base(const int scale) const
 	{
 		res.append(".");
 		ModNumber tmp(*this);
-		char* p = ((char*)tmp.num);
-		for (int i = scale; i < NCOUNT; i++)
-			p[i] = 0;
 		ModNumber divisor(1ull);
-		for (int i = 1; i < scale; i++)
+		for (int i = 0; i < scale * 2; i++)
 			divisor *= 10ul;
+		tmp = tmp * divisor;
+		tmp >>= scale * 8;
+		tmp %= divisor;
+		ModNumber factor(1ull);
 		for (int i = 0; i < scale; i++)
 		{
+			divisor /= 10ul;
 			ModNumber resTmp = tmp / divisor;
 			lint digit = resTmp % 10ul;
-			divisor /= 10ul;
-			res[IntegerStringLength + 2 + i] = '0' + (char)digit;
+			res.append(1,'0' + (char)digit);
 		}		
 	}
 	return res;

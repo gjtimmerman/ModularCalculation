@@ -787,7 +787,7 @@ std::string ModNumber::to_string_decimal_base(const int scale) const
 		tmp >>= scale * 8;
 		tmp %= divisor;
 		ModNumber factor(1ull);
-		for (int i = 0; i < scale; i++)
+		for (int i = 0; i < scale * 2; i++)
 		{
 			divisor /= 10ul;
 			ModNumber resTmp = tmp / divisor;

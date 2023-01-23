@@ -1965,6 +1965,18 @@ namespace ModularUnitTests
 			exp.append("10");
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToStringOctalForEightScale6)
+		{
+			ModNumber ml(8);
+			ScaledNumber sn(ml, 6);
+			std::string res = sn.to_string(8);
+			std::string exp;
+			exp.reserve(OctalStringLength);
+			exp.assign(OctalStringLength - 17, '0');
+			exp.append("10.000000000000000");
+			Assert::IsTrue(res == exp);
+		}
+
 		TEST_METHOD(TestToStringOctalForMax)
 		{
 			llint l[COUNTLL];
@@ -3858,10 +3870,10 @@ namespace ModularUnitTests
 			exp[0] = 0x09e667f3bcc908b2;
 			exp[1] = 0x016a;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 18 / 2);
+			ScaledNumber snexp(mexp, 18 / 2, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision18Of2Str)
+		TEST_METHOD(TestSqrtPrecision18Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 18);
@@ -3871,6 +3883,18 @@ namespace ModularUnitTests
 			exp.assign(HexStringLength - 19, '0');
 			exp.append("1.6A09E667F3BCC908B2");
 			std::string resStr = res.to_string(16);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision18Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 18);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 23, '0');
+			exp.append("1.414213562373095048");
+			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
 
@@ -3883,10 +3907,10 @@ namespace ModularUnitTests
 			exp[0] = 0x6a09e667f3bcc908;
 			exp[1] = 0x01;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 8);
+			ScaledNumber snexp(mexp, 8, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision16Of2Str)
+		TEST_METHOD(TestSqrtPrecision16Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 16);
@@ -3898,6 +3922,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(16);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision16Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 16);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 20, '0');
+			exp.append("1.4142135623730950");
+			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
 		TEST_METHOD(TestSqrtPrecision14Of2)
 		{
 			ModNumber x(2ull);
@@ -3906,10 +3942,10 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a09e667f3bcc9;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 7);
+			ScaledNumber snexp(mexp, 7, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision14Of2Str)
+		TEST_METHOD(TestSqrtPrecision14Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 14);
@@ -3921,6 +3957,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(16);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision14Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 14);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 18, '0');
+			exp.append("1.41421356237309");
+			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision12Of2)
 		{
@@ -3930,10 +3978,10 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a09e667f3bc;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 6);
+			ScaledNumber snexp(mexp, 6, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision12Of2Str)
+		TEST_METHOD(TestSqrtPrecision12Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 12);
@@ -3945,6 +3993,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(16);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision12Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 12);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 15, '0');
+			exp.append("1.414213562373");
+			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision10Of2)
 		{
@@ -3954,10 +4014,10 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a09e667f3;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 5);
+			ScaledNumber snexp(mexp, 5, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision10Of2Str)
+		TEST_METHOD(TestSqrtPrecision10Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 10);
@@ -3969,6 +4029,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(16);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision10Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 10);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 13, '0');
+			exp.append("1.4142135623");
+			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision8Of2)
 		{
@@ -3978,10 +4050,10 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a09e667;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
-		TEST_METHOD(TestSqrtPrecision8Of2Str)
+		TEST_METHOD(TestSqrtPrecision8Of2StrHex)
 		{
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 8);
@@ -3993,6 +4065,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(16);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision8Of2StrDec)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 8);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(DecimalStringLength + 1);
+			exp.assign(DecimalStringLength - 11, '0');
+			exp.append("1.41421356");
+			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
 		TEST_METHOD(TestSqrtPrecision4Of2)
 		{
 			ModNumber x(2ull);
@@ -4001,7 +4085,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a09;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 2);
+			ScaledNumber snexp(mexp, 2, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecision4Of2StrHex)
@@ -4036,7 +4120,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x016a;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 1);
+			ScaledNumber snexp(mexp, 1, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecision2Of2StrHex)
@@ -4072,7 +4156,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x01bb67ae85;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf3Str)
@@ -4095,7 +4179,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x023c6ef372;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf7)
@@ -4106,7 +4190,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x02a54ff53a;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf11)
@@ -4117,7 +4201,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x03510e527f;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf13)
@@ -4128,7 +4212,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x039b05688c;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf17)
@@ -4139,7 +4223,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x041f83d9ab;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 		TEST_METHOD(TestSqrtPrecisionOf19)
@@ -4150,7 +4234,7 @@ namespace ModularUnitTests
 			llint exp[COUNTLL] = {};
 			exp[0] = 0x045be0cd19;
 			ModNumber mexp(exp);
-			ScaledNumber snexp(mexp, 4);
+			ScaledNumber snexp(mexp, 4, true);
 			Assert::IsTrue(snexp == res);
 		}
 

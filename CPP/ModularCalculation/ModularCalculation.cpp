@@ -999,10 +999,7 @@ bool operator == (ScaledNumber l, ScaledNumber r)
 ScaledNumber ScaledNumber::sqrt()
 {
 	ModNumber rt = this->mn.sqrt();
-	ScaledNumber sn;
-	sn.mn = rt;
-	sn.scale = this->scale / 2;
-	return sn;
+	return ScaledNumber(rt, this->scale / 2, true);
 }
 
 std::string ScaledNumber::to_string_hex_base() const
@@ -1032,6 +1029,82 @@ std::string ScaledNumber::to_string_hex_base() const
 std::string ScaledNumber::to_string_octal_base() const
 {
 	std::string res;
+	res.reserve(OctalStringLength+1);
+	res.assign(OctalStringLength+1, '0');
+	lint mask = 7;
+	int wordsToSkip = scale / LSIZE;
+	int bitsToSkip = (scale % LSIZE) * 8;
+	lint* pLint = (lint*)this->mn.num+wordsToSkip;
+	lint buf[2]; 
+	llint* shiftBuf = (llint*)&buf;
+	buf[0] = pLint[0];
+	buf[1] = pLint[1];
+	int tripleCount = 0;
+	int digitsToSkip = (scale * 8) / 3;
+	res[OctalStringLength - digitsToSkip + 1] = '.';
+	int wordCount = bitsToSkip;
+	(*shiftBuf) >>= bitsToSkip;
+	for (int i = scale * 8; i < NSIZE; i++)
+	{
+		if ((wordCount++ % (8 * LSIZE)) == 0)
+		{
+			if (wordCount / (8 * LSIZE) + 1 < (COUNTL - wordsToSkip))
+				buf[1] = pLint[wordCount / (8 * LSIZE) + 1];
+			else
+				buf[1] = 0;
+		}
+		if ((tripleCount++ % 3) == 0)
+		{
+			lint numToPrint = buf[0] & mask;
+			std::stringstream mystrstr;
+			mystrstr << std::oct << numToPrint;
+			res[(OctalStringLength)-(tripleCount / 3) - digitsToSkip] = mystrstr.str()[0];
+		}
+		(*shiftBuf) >>= 1;
+	}
+	if (bitsToSkip == 0)
+	{
+		if (wordsToSkip > 0)
+			buf[1] = pLint[-1];
+		else
+			buf[1] = 0;
+		if (wordsToSkip > 1)
+			buf[0] = pLint[-2];
+		else
+			buf[0] = 0;
+	}
+	else
+	{
+		buf[1] = pLint[0];
+		if (wordsToSkip > 0)
+		{
+			buf[0] = pLint[-1];
+		}
+		else
+			buf[0] = 0;
+		(*shiftBuf) <<= (LSIZE * 8) - bitsToSkip;
+	}
+	wordCount = ((8 * LSIZE) - bitsToSkip) + 1;
+	tripleCount = 0;
+	for (int i = 0; i < scale * 8; i++)
+	{
+		if ((wordCount++ % (8 * LSIZE)) == 0)
+		{
+			if (wordCount < (wordsToSkip * 8 * LSIZE))
+				buf[0] = pLint[0-(wordCount / (8 * LSIZE))];
+			else
+				buf[0] = 0;
+		}
+		if ((tripleCount++ % 3) == 0)
+		{
+			lint numToPrint = (buf[1] >> 5) & mask;
+			std::stringstream mystrstr;
+			mystrstr << std::oct << numToPrint;
+			res[(OctalStringLength)+(tripleCount / 3) - digitsToSkip] = mystrstr.str()[0];
+		}
+		(*shiftBuf) <<= 1;
+
+	}
 	return res;
 }
 std::string ScaledNumber::to_string_decimal_base() const

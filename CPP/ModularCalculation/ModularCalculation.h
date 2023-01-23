@@ -148,15 +148,12 @@ private:
 class ScaledNumber
 {
 public:
-	ScaledNumber(ModNumber mn, int scale) :  scale(scale)
+	ScaledNumber(ModNumber mn, int scale, bool alreadyScaled = false) : mn(alreadyScaled ? mn : mn << scale * 8), scale(scale)
 	{
-		this->mn = mn << scale * 8;
 	}
 	ScaledNumber sqrt();
 	std::string to_string(int base = 10) const;
 private:
-	ScaledNumber()
-	{}
 	std::string to_string_hex_base() const;
 	std::string to_string_octal_base() const;
 	std::string to_string_decimal_base() const;

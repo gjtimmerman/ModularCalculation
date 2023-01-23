@@ -708,7 +708,7 @@ lint operator% (const ModNumber& n, lint scalar)
 	return std::get<1>(n.DivideAndModulo(scalar));
 }
 
-std::string ModNumber::to_string_hex_base(const int scale) const
+std::string ModNumber::to_string_hex_base() const
 {
 	std::string res;
 	const int buflen = LLSIZE * 2;
@@ -724,15 +724,10 @@ std::string ModNumber::to_string_hex_base(const int scale) const
 		mystrstr <<std::hex << num[i];
 		res.append(mystrstr.str());
 	}
-	if (scale > 0)
-	{
-		size_t pos = buflen * COUNTLL - (scale * 2);
-		res.insert(pos, ".");
-	}
 	return res;
 }
 
-std::string ModNumber::to_string_octal_base(const int scale) const
+std::string ModNumber::to_string_octal_base() const
 {
 	std::string res;
 	res.reserve(OctalStringLength);
@@ -763,53 +758,33 @@ std::string ModNumber::to_string_octal_base(const int scale) const
 	return res;
 }
 
-std::string ModNumber::to_string_decimal_base(const int scale) const
+std::string ModNumber::to_string_decimal_base() const
 {
 	std::string res;
-	const int IntegerStringLength = static_cast<int>(std::ceil((NSIZE - scale * 8)  * 0.30102999566398119521373889472449)); // log(2)
-	res.reserve(DecimalStringLength+3);
-	res.assign(IntegerStringLength, '0');
-	ModNumber tmp = *this >> scale * 8;
-	for (int i = 0; i < IntegerStringLength; i++)
+	res.reserve(DecimalStringLength);
+	res.assign(DecimalStringLength, '0');
+	ModNumber tmp = *this;
+	for (int i = 0; i < DecimalStringLength; i++)
 	{
 		lint digit = tmp % 10ul;
 		tmp /= 10ul;
-		res[IntegerStringLength - i - 1] = '0' + (char)digit;
-	}
-	if (scale > 0)
-	{
-		res.append(".");
-		ModNumber tmp(*this);
-		ModNumber divisor(1ull);
-		for (int i = 0; i < scale * 2; i++)
-			divisor *= 10ul;
-		tmp = tmp * divisor;
-		tmp >>= scale * 8;
-		tmp %= divisor;
-		ModNumber factor(1ull);
-		for (int i = 0; i < scale * 2; i++)
-		{
-			divisor /= 10ul;
-			ModNumber resTmp = tmp / divisor;
-			lint digit = resTmp % 10ul;
-			res.append(1,'0' + (char)digit);
-		}		
+		res[DecimalStringLength - i - 1] = '0' + (char)digit;
 	}
 	return res;
 }
 
-std::string ModNumber::to_string(const int base, const int scale) const
+std::string ModNumber::to_string(const int base) const
 {
 	if (!(base == 8 || base == 10 || base == 16))
 		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
 	switch (base)
 	{
 	case 16:
-		return to_string_hex_base(scale);
+		return to_string_hex_base();
 	case 10:
-		return to_string_decimal_base(scale);
+		return to_string_decimal_base();
 	case 8:
-		return to_string_octal_base(scale);
+		return to_string_octal_base();
 	}
 	std::string res;
 	return res;
@@ -1016,11 +991,102 @@ ModNumber ModNumber::sqrt() const
 	return mres;
 }
 
-ModNumber ModNumber::sqrt(unsigned int precision) const
+bool operator == (ScaledNumber l, ScaledNumber r)
 {
-	ModNumber copy(*this);
-	copy <<= precision * 8;
-	return copy.sqrt();
+	return l.scale == r.scale && l.mn == r.mn;
+}
+
+ScaledNumber ScaledNumber::sqrt()
+{
+	ModNumber rt = this->mn.sqrt();
+	ScaledNumber sn;
+	sn.mn = rt;
+	sn.scale = this->scale / 2;
+	return sn;
+}
+
+std::string ScaledNumber::to_string_hex_base() const
+{
+	std::string res;
+	const int buflen = LLSIZE * 2;
+	int width;
+	width = buflen;
+	res.reserve(buflen * COUNTLL + 1);
+	for (int i = COUNTLL - 1; i >= 0; i--)
+	{
+		std::stringstream mystrstr;
+		mystrstr.setf(std::ios_base::right | std::ios_base::uppercase);
+		mystrstr.fill('0');
+		mystrstr.width(width);
+		mystrstr << std::hex << this->mn.num[i];
+		res.append(mystrstr.str());
+	}
+	if (scale > 0)
+	{
+		size_t pos = buflen * COUNTLL - (scale * 2);
+		res.insert(pos, ".");
+	}
+	return res;
+
+}
+std::string ScaledNumber::to_string_octal_base() const
+{
+	std::string res;
+	return res;
+}
+std::string ScaledNumber::to_string_decimal_base() const
+{
+	std::string res;
+	const int IntegerStringLength = static_cast<int>(std::ceil((NSIZE - scale * 8) * 0.30102999566398119521373889472449)); // log(2)
+	res.reserve(DecimalStringLength + 3);
+	res.assign(IntegerStringLength, '0');
+	ModNumber tmp = this->mn >> scale * 8;
+	for (int i = 0; i < IntegerStringLength; i++)
+	{
+		lint digit = tmp % 10ul;
+		tmp /= 10ul;
+		res[IntegerStringLength - i - 1] = '0' + (char)digit;
+	}
+	if (scale > 0)
+	{
+		res.append(".");
+		ModNumber tmp(this->mn);
+		ModNumber divisor(1ull);
+		for (int i = 0; i < scale * 2; i++)
+			divisor *= 10ul;
+		tmp = tmp * divisor;
+		tmp >>= scale * 8;
+		tmp %= divisor;
+		ModNumber factor(1ull);
+		for (int i = 0; i < scale * 2; i++)
+		{
+			divisor /= 10ul;
+			ModNumber resTmp = tmp / divisor;
+			lint digit = resTmp % 10ul;
+			res.append(1, '0' + (char)digit);
+		}
+	}
+	return res;
+
+}
+
+
+std::string ScaledNumber::to_string(int base) const
+{
+	if (!(base == 8 || base == 10 || base == 16))
+		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
+	switch (base)
+	{
+	case 16:
+		return to_string_hex_base();
+	case 10:
+		return to_string_decimal_base();
+	case 8:
+		return to_string_octal_base();
+	}
+	std::string res;
+	return res;
+
 }
 
 

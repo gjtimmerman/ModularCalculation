@@ -45,6 +45,8 @@ const int HexStringLength = NCOUNT * 2;
 
 struct RSAParameters;
 
+class ScaledNumber;
+
 class ModNumber
 {
 public:
@@ -73,7 +75,7 @@ public:
 	{
 		num[0] = n;
 	}
-	std::string to_string(int base = 10, const int scale = 0) const;
+	std::string to_string(int base = 10) const;
 	static ModNumber stomn(std::string s, int base = 10);
 	static ModNumber gcd(const ModNumber &l,const ModNumber &r);
 	static ModNumber lcm(const ModNumber &l, const ModNumber &r);
@@ -82,13 +84,12 @@ public:
 	template <typename T>
 	static ModNumber fromText(std::basic_string<T> text);
 	ModNumber sqrt() const;
-	ModNumber sqrt(unsigned int precision) const;
 
 private:
 	llint num[COUNTLL] = {};
-	std::string to_string_hex_base(const int scale=0) const;
-	std::string to_string_octal_base(const int scale=0) const;
-	std::string to_string_decimal_base(const int scale=0) const;
+	std::string to_string_hex_base() const;
+	std::string to_string_octal_base() const;
+	std::string to_string_decimal_base() const;
 	static ModNumber stomn_hex_base(std::string s);
 	static ModNumber stomn_decimal_base(std::string s);
 	static ModNumber stomn_octal_base(std::string s);
@@ -138,9 +139,31 @@ private:
 	friend unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 	friend std::tuple<ModNumber, unsigned long> decrypt(const wchar_t *KeyName,const ModNumber& data);
 	friend ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
+	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
 
+};
+
+class ScaledNumber
+{
+public:
+	ScaledNumber(ModNumber mn, int scale) :  scale(scale)
+	{
+		this->mn = mn << scale * 8;
+	}
+	ScaledNumber sqrt();
+	std::string to_string(int base = 10) const;
+private:
+	ScaledNumber()
+	{}
+	std::string to_string_hex_base() const;
+	std::string to_string_octal_base() const;
+	std::string to_string_decimal_base() const;
+
+	ModNumber mn;
+	int scale;
+	friend bool operator ==(ScaledNumber l, ScaledNumber r);
 };
 
 class MultGroupMod
@@ -234,6 +257,7 @@ ModNumber operator* (const ModNumber& l, const ModNumber& r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
+bool operator ==(ScaledNumber l, ScaledNumber r);
 
 
 template <typename T>

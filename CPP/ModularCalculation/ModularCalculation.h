@@ -251,6 +251,7 @@ ModNumber& operator >>= (ModNumber& n, unsigned int i);
 std::ostream& operator<<(std::ostream& out,const ModNumber& n);
 std::istream& operator>>(std::istream& in, ModNumber& n);
 ModNumber operator* (const ModNumber& l, const ModNumber& r);
+ModNumber& operator*=(ModNumber& l, const ModNumber& r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);

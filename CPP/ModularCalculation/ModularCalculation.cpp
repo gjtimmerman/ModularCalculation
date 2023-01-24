@@ -674,6 +674,13 @@ ModNumber operator* (const ModNumber& l, const ModNumber& r)
 	return res;
 }
 
+ModNumber& operator*=(ModNumber& l, const ModNumber& r)
+{
+	ModNumber mres = l * r;
+	l = mres;
+	return l;
+}
+
 std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 {
 	if (scalar == 0)
@@ -1121,7 +1128,7 @@ std::string ScaledNumber::to_string_decimal_base() const
 		ModNumber divisor(1ull);
 		for (int i = 0; i < scale * 2; i++)
 			divisor *= 10ul;
-		tmp = tmp * divisor;
+		tmp *= divisor;
 		tmp >>= scale * 8;
 		tmp %= divisor;
 		ModNumber factor(1ull);

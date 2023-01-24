@@ -469,10 +469,12 @@ bool operator < (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
+		{
 			if (l.num[i] == r.num[i])
 				continue;
 			else
 				return l.num[i] < r.num[i];
+		}
 	return false;
 }
 
@@ -490,10 +492,12 @@ bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
 		if (l.num[i] || r.num[i])
+		{
 			if (l.num[i] == r.num[i])
 				continue;
 			else
 				return l.num[i] > r.num[i];
+		}
 	return false;
 }
 

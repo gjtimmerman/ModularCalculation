@@ -1971,9 +1971,20 @@ namespace ModularUnitTests
 			ScaledNumber sn(ml, 6);
 			std::string res = sn.to_string(8);
 			std::string exp;
-			exp.reserve(OctalStringLength);
-			exp.assign(OctalStringLength - 17, '0');
-			exp.append("10.000000000000000");
+			exp.reserve(OctalStringLength+1);
+			exp.assign(OctalStringLength - 18, '0');
+			exp.append("10.0000000000000000");
+ 			Assert::IsTrue(res == exp);
+		}
+		TEST_METHOD(TestToStringOctalFor0x012345678910Scaled6)
+		{
+			ModNumber ml(0x012345678910);
+			ScaledNumber sn(ml, 6, true);
+			std::string res = sn.to_string(8);
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 16, '0');
+			exp.append(".0022150531704420");
 			Assert::IsTrue(res == exp);
 		}
 
@@ -2001,6 +2012,33 @@ namespace ModularUnitTests
 			}
 			Assert::IsTrue(res == exp);
 		}
+		TEST_METHOD(TestToStringOctalForMaxScaled6)
+		{
+			llint l[COUNTLL];
+			for (int i = 0; i < COUNTLL; i++)
+				l[i] = ~0;
+			ModNumber ml(l);
+			ScaledNumber sn(ml, 6, true);
+			std::string res = sn.to_string(8);
+			std::string exp;
+			exp.reserve(OctalStringLength+1);
+			exp.assign(OctalStringLength - 16, '7');
+			unsigned int left = (NCOUNT-6) * 8 % 3;
+			switch (left)
+			{
+			case 0:
+				exp[0] = '0';
+				break;
+			case 1:
+				exp[0] = '1';
+				break;
+			case 2:
+				exp[0] = '3';
+			}
+			exp.append(".7777777777777777");
+			Assert::IsTrue(res == exp);
+		}
+
 		TEST_METHOD(TestToStringOctalForMaxesAndZeros)
 		{
 			llint l[COUNTLL];
@@ -3897,6 +3935,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision18Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 18);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 3);
+			exp.assign(OctalStringLength - 25, '0');
+			exp.append("1.324047463177167462204262");
+			std::string resStr = res.to_string(8);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision16Of2)
 		{
@@ -3934,6 +3984,19 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision16Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 16);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 3);
+			exp.assign(OctalStringLength - 22, '0');
+			exp.append("1.3240474631771674622040");
+			std::string resStr = res.to_string(8);
+			Assert::IsTrue(exp == resStr);
+		}
+
 		TEST_METHOD(TestSqrtPrecision14Of2)
 		{
 			ModNumber x(2ull);
@@ -3967,6 +4030,18 @@ namespace ModularUnitTests
 			exp.assign(DecimalStringLength - 18, '0');
 			exp.append("1.41421356237309");
 			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision14Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 14);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 20, '0');
+			exp.append("1.3240474631771674622");
+			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
 		}
 
@@ -4005,6 +4080,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision12Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 12);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 17, '0');
+			exp.append("1.3240474631771674");
+			std::string resStr = res.to_string(8);
+			Assert::IsTrue(exp == resStr);
+		}
 
 		TEST_METHOD(TestSqrtPrecision10Of2)
 		{
@@ -4039,6 +4126,18 @@ namespace ModularUnitTests
 			exp.assign(DecimalStringLength - 13, '0');
 			exp.append("1.4142135623");
 			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision10Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 10);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 14, '0');
+			exp.append("1.32404746317714");
+			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
 		}
 
@@ -4077,6 +4176,19 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision8Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 8);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 3);
+			exp.assign(OctalStringLength - 12, '0');
+			exp.append("1.32404746316");
+			std::string resStr = res.to_string(8);
+			Assert::IsTrue(exp == resStr);
+		}
+
 		TEST_METHOD(TestSqrtPrecision4Of2)
 		{
 			ModNumber x(2ull);
@@ -4112,6 +4224,18 @@ namespace ModularUnitTests
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
 		}
+		TEST_METHOD(TestSqrtPrecision4Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 4);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 6, '0');
+			exp.append("1.324044");
+			std::string resStr = res.to_string(8);
+			Assert::IsTrue(exp == resStr);
+		}
 		TEST_METHOD(TestSqrtPrecision2Of2)
 		{
 			ModNumber x(2ull);
@@ -4145,6 +4269,18 @@ namespace ModularUnitTests
 			exp.assign(DecimalStringLength - 3, '0');
 			exp.append("1.41");
 			std::string resStr = res.to_string(10);
+			Assert::IsTrue(exp == resStr);
+		}
+		TEST_METHOD(TestSqrtPrecision2Of2StrOctal)
+		{
+			ModNumber x(2ull);
+			ScaledNumber sn(x, 2);
+			ScaledNumber res = sn.sqrt();
+			std::string exp;
+			exp.reserve(OctalStringLength + 1);
+			exp.assign(OctalStringLength - 4, '0');
+			exp.append("1.324");
+			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
 		}
 

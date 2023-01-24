@@ -1029,8 +1029,7 @@ std::string ScaledNumber::to_string_hex_base() const
 std::string ScaledNumber::to_string_octal_base() const
 {
 	std::string res;
-	res.reserve(OctalStringLength+1);
-	res.assign(OctalStringLength+1, '0');
+	res.reserve(OctalStringLength+3);
 	lint mask = 7;
 	int wordsToSkip = scale / LSIZE;
 	int bitsToSkip = (scale % LSIZE) * 8;
@@ -1040,8 +1039,10 @@ std::string ScaledNumber::to_string_octal_base() const
 	buf[0] = pLint[0];
 	buf[1] = pLint[1];
 	int tripleCount = 0;
-	int digitsToSkip = (scale * 8) / 3;
-	res[OctalStringLength - digitsToSkip + 1] = '.';
+	int digitsToSkip = (scale * 8 % 3 == 0) ? (scale * 8 / 3):((scale * 8) / 3) + 1;
+	int digitsLeft = ((NCOUNT - scale) * 8) % 3 == 0 ? (NCOUNT - scale) * 8 / 3 : (NCOUNT - scale) * 8 / 3 + 1;
+	res.assign(digitsToSkip + digitsLeft + 1, '0');
+	res[digitsLeft] = '.';
 	int wordCount = bitsToSkip;
 	(*shiftBuf) >>= bitsToSkip;
 	for (int i = scale * 8; i < NSIZE; i++)
@@ -1058,49 +1059,38 @@ std::string ScaledNumber::to_string_octal_base() const
 			lint numToPrint = buf[0] & mask;
 			std::stringstream mystrstr;
 			mystrstr << std::oct << numToPrint;
-			res[(OctalStringLength)-(tripleCount / 3) - digitsToSkip] = mystrstr.str()[0];
+			res[(digitsLeft)-(tripleCount / 3) -1] = mystrstr.str()[0];
 		}
 		(*shiftBuf) >>= 1;
 	}
-	if (bitsToSkip == 0)
+
+
+	buf[1] = pLint[0];
+	if (wordsToSkip > 0)
 	{
-		if (wordsToSkip > 0)
-			buf[1] = pLint[-1];
-		else
-			buf[1] = 0;
-		if (wordsToSkip > 1)
-			buf[0] = pLint[-2];
-		else
-			buf[0] = 0;
+		buf[0] = pLint[-1];
 	}
 	else
-	{
-		buf[1] = pLint[0];
-		if (wordsToSkip > 0)
-		{
-			buf[0] = pLint[-1];
-		}
-		else
-			buf[0] = 0;
-		(*shiftBuf) <<= (LSIZE * 8) - bitsToSkip;
-	}
-	wordCount = ((8 * LSIZE) - bitsToSkip) + 1;
+		buf[0] = 0;
+	(*shiftBuf) <<= (LSIZE * 8) - bitsToSkip;
+
+	wordCount = ((8 * LSIZE) - bitsToSkip);
 	tripleCount = 0;
 	for (int i = 0; i < scale * 8; i++)
 	{
 		if ((wordCount++ % (8 * LSIZE)) == 0)
 		{
 			if (wordCount < (wordsToSkip * 8 * LSIZE))
-				buf[0] = pLint[0-(wordCount / (8 * LSIZE))];
+				buf[0] = pLint[-1 -(wordCount/(8 * LSIZE))];
 			else
 				buf[0] = 0;
 		}
 		if ((tripleCount++ % 3) == 0)
 		{
-			lint numToPrint = (buf[1] >> 5) & mask;
+			lint numToPrint = (buf[1] >> (32-3)) & mask;
 			std::stringstream mystrstr;
 			mystrstr << std::oct << numToPrint;
-			res[(OctalStringLength)+(tripleCount / 3) - digitsToSkip] = mystrstr.str()[0];
+			res[digitsLeft+(tripleCount / 3) + 1] = mystrstr.str()[0];
 		}
 		(*shiftBuf) <<= 1;
 

@@ -1971,8 +1971,11 @@ namespace ModularUnitTests
 			ScaledNumber sn(ml, 6);
 			std::string res = sn.to_string(8);
 			std::string exp;
-			exp.reserve(OctalStringLength+1);
-			exp.assign(OctalStringLength - 18, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = sn.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 2, '0');
 			exp.append("10.0000000000000000");
  			Assert::IsTrue(res == exp);
 		}
@@ -1982,8 +1985,11 @@ namespace ModularUnitTests
 			ScaledNumber sn(ml, 6, true);
 			std::string res = sn.to_string(8);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 16, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = sn.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft, '0');
 			exp.append(".0022150531704420");
 			Assert::IsTrue(res == exp);
 		}
@@ -2002,7 +2008,6 @@ namespace ModularUnitTests
 			switch (left)
 			{
 			case 0:
-				exp[0] = '0';
 				break;
 			case 1:
 				exp[0] = '1';
@@ -2021,13 +2026,15 @@ namespace ModularUnitTests
 			ScaledNumber sn(ml, 6, true);
 			std::string res = sn.to_string(8);
 			std::string exp;
-			exp.reserve(OctalStringLength+1);
-			exp.assign(OctalStringLength - 16, '7');
+			std::tuple<unsigned int, unsigned int> octalLengths = sn.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight +1);
+			exp.assign(digitsLeft, '7');
 			unsigned int left = (NCOUNT-6) * 8 % 3;
 			switch (left)
 			{
 			case 0:
-				exp[0] = '0';
 				break;
 			case 1:
 				exp[0] = '1';
@@ -3928,9 +3935,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 18);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(18 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 23, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.414213562373095048");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -3940,9 +3949,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 18);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(18 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 3);
-			exp.assign(OctalStringLength - 25, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.324047463177167462204262");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -3977,9 +3990,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 16);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(16 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 20, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.4142135623730950");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -3989,9 +4004,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 16);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(16 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 3);
-			exp.assign(OctalStringLength - 22, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.3240474631771674622040");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4025,9 +4044,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 14);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(14 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 18, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.41421356237309");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4037,9 +4058,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 14);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(14 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 20, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.3240474631771674622");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4073,9 +4098,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 12);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(12 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 15, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.414213562373");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4085,9 +4112,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 12);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(12 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 17, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.3240474631771674");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4121,9 +4152,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 10);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(10 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 13, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.4142135623");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4133,9 +4166,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 10);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(10 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 14, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.32404746317714");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4169,9 +4206,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 8);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(8 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 11, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.41421356");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4181,9 +4220,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 8);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(8 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 3);
-			exp.assign(OctalStringLength - 12, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.32404746316");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4217,9 +4260,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 4);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(4 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 6, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.4141");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4229,9 +4274,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 4);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(4 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 6, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.324044");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -4264,9 +4313,11 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 2);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(2 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(DecimalStringLength + 1);
-			exp.assign(DecimalStringLength - 3, '0');
+			unsigned int integerStringLength = res.calculateDecimalStringLengthLeft();
+			exp.reserve(DecimalStringLength + 3);
+			exp.assign(integerStringLength - 1, '0');
 			exp.append("1.41");
 			std::string resStr = res.to_string(10);
 			Assert::IsTrue(exp == resStr);
@@ -4276,9 +4327,13 @@ namespace ModularUnitTests
 			ModNumber x(2ull);
 			ScaledNumber sn(x, 2);
 			ScaledNumber res = sn.sqrt();
+			Assert::IsTrue(2 / 2 == res.scale);
 			std::string exp;
-			exp.reserve(OctalStringLength + 1);
-			exp.assign(OctalStringLength - 4, '0');
+			std::tuple<unsigned int, unsigned int> octalLengths = res.calculateOctalStringLength();
+			unsigned int digitsLeft = std::get<0>(octalLengths);
+			unsigned int digitsRight = std::get<1>(octalLengths);
+			exp.reserve(digitsLeft + digitsRight + 1);
+			exp.assign(digitsLeft - 1, '0');
 			exp.append("1.324");
 			std::string resStr = res.to_string(8);
 			Assert::IsTrue(exp == resStr);
@@ -6117,26 +6172,26 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSADecryptSymmetricKey)
 		{
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2-4096", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", false);
 			RSA myRsa(rsaParameters);
-			ModNumber encryptedSymKey = ModNumber::stomn("20F60E687940478C94AE9D70D7844A01335FCFB653D508CCDB49212EC15721BD2D62D8DEF3D5AF60618715447307A8054516C5E29040002E220C39808D393DB57A503503FE0C744B082AD4D84BC1148F1C04D12D93AC22F9C405CC15F0C138FAA485154C4F77AE26A703358DDE652155DEFC8C395BBE9D2BE2EDC8A49573D80A520EF2184CE83D1A88B61A1A083080E2B728E1E7D955C2D9863C8AF4F7F421A78F286C0757881A4C843EE48BBC337AF75CA10B5482C9165F93F9B771ADD628514819DFEB107AD621FBE89738F22522A0CCB221357C9C5534403CE30E95DD2A706332009C931044170FC99C61176611A8B6C98DF06940151D4B0695173BC0CC8532DC8EE037A16C3D494AD31D3B4A3E84FDFB0D724473680693D76AC58D16F04C84080C51FB105415D7166CA2EA8ED4401ECA776E09E52D0CA61B97ABA61A833AAC579A0C28BF47DECB4D05F34EF5A550818C2B3350B824CC823FE6179FE095DC85B514EF90D1FBFA10F7DA869DC4B69F47C1FE0F53F7DED5E2F4705A983A0652FFB5C48CCA73F1DC9E3E24F5A9C3233E5D90E1C67B242DFB457D99B0E7DD9E017B971B833DD192CF64AF3E6EF675B07DBE9998C534F0C2BEB4C77E5BFF4A46E4F2CD7F73CEE9A78A7954911279F3850FDAC3584775BB00D034697602B56236E7E14A01F0375D20CAFC42B19F0F57B47F6B1180FD8441EA7C01EDC016A0335C02", 16);
 			ModNumber symmetricKey = ModNumber::stomn("DB278FB45AE1C1D78FA27EBEA3730432DA100140A40F0CCE71A7F95D027C2D15", 16);
+			ModNumber encryptedSymKey = encrypt(L"MyCoolKey4096", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 
 #elif (MAXMOD == 2048/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2-2048", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", false);
 			RSA myRsa(rsaParameters);
-			ModNumber encryptedSymKey = ModNumber::stomn("B13197724249FD32DC454BC59A1017C1CA37E4502887686602BBA14549486347379EBF19B892D5BDAFF5CFBDE724D51240CC95368EE70AA47BD10E2B2045CEBDE34DF981EE90E2F67D97E317B3078819ABCCDE39955149520741BAE18C67F4A40DA3F4C7DCF6285D7D0B9DB0CED87DFFE5A0F0EDEE83A8D92E32A36977357617BDF852E0AC69C793BF10785C7F6DAF9241927F9545FB027F2E66088715EFC0C7CD6E34522F30148FBC2A76AE9A9BF055448C471A5E93CEC81499D663C6CA1A0E9841D39D8DCBF1B2D3BB4B6551C133A7AF6AE253D0459E241B9E96C97B8B98CA64DC58D3E63354EF2F71E28406048ED371CFD17A186A86425A0A14330E2DB6AF", 16);
 			ModNumber symmetricKey = ModNumber::stomn("98C978B8C1DF5C313100F2CA4CC08B3844E4B5D7E05FB70F374AE684B9AB80EB", 16);
+			ModNumber encryptedSymKey  = encrypt(L"MyCoolKey2048", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 
 #elif (MAXMOD == 1024/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
 			RSA myRsa(rsaParameters);
-			ModNumber encryptedSymKey = ModNumber::stomn("127306035CE4FBAA5A36589404A5E8F482E0435DB7A12F9A29CCF864237193C05D20DECCA455BE16F9623132B252F104DF584705ABB1FEC36786C8CF75EDFADE7DB69CF658403F052E0FDB1FEE6F7FFEF77968E975BB5B8AA59E884E9183F0B6175FE21BD7101E89CFF98C214E9F212008148A5CB886CB46F43E818E21224464", 16);
 			ModNumber symmetricKey = ModNumber::stomn("6C698A9323B751181E0F076B7B8148C56CEDA3296A15D603028199B70F47F015", 16);
+			ModNumber encryptedSymKey = encrypt(L"MyCoolKey1024", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 #endif
@@ -6151,7 +6206,7 @@ namespace ModularUnitTests
 				std::string message = "Dit is een test";
 				ModNumber convertedMessage = ModNumber::fromText(message);
 				ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey", encryptedMessage);
+				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey4096", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
 #elif (MAXMOD == 2048/8)
@@ -6179,11 +6234,11 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSADecrypt)
 		{
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey", true);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
-			ModNumber encryptedMessage = encrypt(L"MyCoolKey", convertedMessage);
+			ModNumber encryptedMessage = encrypt(L"MyCoolKey4096", convertedMessage);
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);

@@ -39,7 +39,7 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 
 const llint	lintmask = ~0ul;
 
-const int OctalStringLength = NSIZE / 3 + 1;
+const int OctalStringLength = (NSIZE % 3 == 0) ? (NSIZE / 3) : (NSIZE / 3 + 1);
 const int DecimalStringLength = static_cast<int>(std::ceil(NSIZE * 0.30102999566398119521373889472449)); // log(2)
 const int HexStringLength = NCOUNT * 2;
 
@@ -153,13 +153,15 @@ public:
 	}
 	ScaledNumber sqrt();
 	std::string to_string(int base = 10) const;
+	std::tuple<unsigned int, unsigned int> calculateOctalStringLength() const;
+	unsigned int calculateDecimalStringLengthLeft() const;
+	int scale;
 private:
 	std::string to_string_hex_base() const;
 	std::string to_string_octal_base() const;
 	std::string to_string_decimal_base() const;
 
 	ModNumber mn;
-	int scale;
 	friend bool operator ==(ScaledNumber l, ScaledNumber r);
 };
 

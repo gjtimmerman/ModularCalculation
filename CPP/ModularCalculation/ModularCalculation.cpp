@@ -1037,6 +1037,12 @@ std::string ScaledNumber::to_string_hex_base() const
 	return res;
 
 }
+
+std::tuple<unsigned int, unsigned int> ScaledNumber::calculateOctalStringLength() const
+{
+	return std::make_tuple<unsigned int, unsigned int>(((NCOUNT - scale) * 8) % 3 == 0 ? (NCOUNT - scale) * 8 / 3 : (NCOUNT - scale) * 8 / 3 + 1, (scale * 8 % 3 == 0) ? (scale * 8 / 3) : ((scale * 8) / 3) + 1);
+}
+
 std::string ScaledNumber::to_string_octal_base() const
 {
 	std::string res;
@@ -1050,8 +1056,9 @@ std::string ScaledNumber::to_string_octal_base() const
 	buf[0] = pLint[0];
 	buf[1] = pLint[1];
 	int tripleCount = 0;
-	int digitsToSkip = (scale * 8 % 3 == 0) ? (scale * 8 / 3):((scale * 8) / 3) + 1;
-	int digitsLeft = ((NCOUNT - scale) * 8) % 3 == 0 ? (NCOUNT - scale) * 8 / 3 : (NCOUNT - scale) * 8 / 3 + 1;
+	std::tuple<unsigned int, unsigned int> octalLengths = calculateOctalStringLength();
+	unsigned int digitsLeft = std::get<0>(octalLengths);
+	unsigned int digitsToSkip = std::get<1>(octalLengths);
 	res.assign(digitsToSkip + digitsLeft + 1, '0');
 	res[digitsLeft] = '.';
 	int wordCount = bitsToSkip;
@@ -1108,10 +1115,16 @@ std::string ScaledNumber::to_string_octal_base() const
 	}
 	return res;
 }
+
+unsigned int ScaledNumber::calculateDecimalStringLengthLeft() const
+{
+	return static_cast<int>(std::ceil((NSIZE - scale * 8) * 0.30102999566398119521373889472449)); // log(2)
+}
+
 std::string ScaledNumber::to_string_decimal_base() const
 {
 	std::string res;
-	const int IntegerStringLength = static_cast<int>(std::ceil((NSIZE - scale * 8) * 0.30102999566398119521373889472449)); // log(2)
+	const int IntegerStringLength = calculateDecimalStringLengthLeft();
 	res.reserve(DecimalStringLength + 3);
 	res.assign(IntegerStringLength, '0');
 	ModNumber tmp = this->mn >> scale * 8;

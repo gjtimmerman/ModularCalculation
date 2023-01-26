@@ -741,7 +741,7 @@ std::string ModNumber::to_string_hex_base() const
 std::string ModNumber::to_string_octal_base() const
 {
 	std::string res;
-	res.reserve(OctalStringLength);
+ 	res.reserve(OctalStringLength);
 	res.assign(OctalStringLength, '0');
 	lint mask = 7;
 	lint* pLint = (lint*)num;
@@ -1400,6 +1400,64 @@ ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
 
 }
 
+std::tuple<ModNumber,int> RSA::RemovePKCS1SignatureMask(const ModNumber& m) const
+{
+	unsigned char* pMaskedNumber = (unsigned char*)m.num;
+	int i;
+	for (i = MAXMOD - 1; i >= 0; i--)
+	{
+		if (pMaskedNumber[i])
+			break;
+	}
+	if (pMaskedNumber[i + 1] != 0x00u || pMaskedNumber[i] != 0x01u)
+		throw std::domain_error("Not a valid PKCS1 Signature Mask");
+	while (pMaskedNumber[--i] == 0xFF and i >= 0)
+		i--;
+	if (i > 0 && pMaskedNumber[i--] != 0x00u)
+		throw std::domain_error("Not a valid PKCS1 Signature Mask");
+	if (i > 0 && pMaskedNumber[i--] != 0x30)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x31)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x30)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x0D)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x06)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x09)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x60)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x86)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x48)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x01)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x65)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x03)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x04)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x02)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x01)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x05)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x00)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x04)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	if (i > 0 && pMaskedNumber[i--] != 0x20)
+		throw std::domain_error("Not a valid RSA SHA256 OID");
+	ModNumber res(pMaskedNumber, i + 1);
+	return std::make_tuple(res, i + 1);
+
+}
+
 ModNumber RSA::Encrypt(const ModNumber& m) const
 {
 	ModNumber masked = GetPKCS1Mask(m);
@@ -1423,11 +1481,52 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	ModNumber hq = mgmn.Mult(h,Prime2);
 	ModNumber res =  mgmn.Add(m2, hq);
 	return RemovePKCS1Mask(res);
+	return res;
+}
+
+ModNumber RSA::DecryptSignature(const ModNumber signature) const
+{
+	MultGroupMod mgm(Modulus);
+	ModNumber decryptedSignature = mgm.Exp(signature, pubExp);
+	std::tuple<ModNumber, int> result = RemovePKCS1SignatureMask(decryptedSignature);
+	ModNumber hashBigEndian = std::get<0>(result);
+	int hashLen = std::get<1>(result);
+	unsigned char* pHashBigEndian = (unsigned char*)hashBigEndian.num;
+	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
+	return ModNumber(pHashLittleEndian, hashLen);
 }
 
 
 
 #ifdef _WIN32 
+
+
+int evaluateStatus(SECURITY_STATUS status)
+{
+	if (status == ERROR_SUCCESS)
+		return 0;
+
+	switch (status)
+	{
+	case NTE_BAD_FLAGS:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_FLAGS");
+	case NTE_BAD_KEY_STATE:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_KEY_STATE");
+	case NTE_BAD_TYPE:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_TYPE");
+	case NTE_INVALID_HANDLE:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_INVALID_HANDLE");
+	case NTE_INVALID_PARAMETER:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_INVALID_PARAMETER");
+	case NTE_NOT_SUPPORTED:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_NOT_SUPPORTED");
+
+	default:
+		throw std::runtime_error("CryptEncrypt returned unknown error code");
+
+	}
+
+}
 
 NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
 {
@@ -1450,26 +1549,7 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 		throw std::runtime_error("CryptSetProperty returned error code");
 	policy = MAXMOD*8;
 	status = NCryptSetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
-	if (status != ERROR_SUCCESS)
-		switch (status)
-		{
-		case NTE_BAD_FLAGS:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_FLAGS");
-		case NTE_BAD_KEY_STATE:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_KEY_STATE");
-		case NTE_BAD_TYPE:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_BAD_TYPE");
-		case NTE_INVALID_HANDLE:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_INVALID_HANDLE");
-		case NTE_INVALID_PARAMETER:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_INVALID_PARAMETER");
-		case NTE_NOT_SUPPORTED:
-			throw std::runtime_error("CryptSetProperty returned error code: NTE_NOT_SUPPORTED");
-
-		default:
-			throw std::runtime_error("CryptSetProperty returned unknown error code");
-
-		}
+	evaluateStatus(status);
 	status = NCryptFinalizeKey(keyHandle, 0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptFinalizeKey returned error code");
@@ -1512,28 +1592,7 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
 	unsigned char *rawKeyData = new unsigned char[size];
 	pkeyData = (BCRYPT_RSAKEY_BLOB*)rawKeyData;
 	status = NCryptExportKey(keyHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, NULL, (PBYTE)pkeyData, size, &size, 0);
-	if (status != ERROR_SUCCESS)
-	{
-		switch (status)
-		{
-			case NTE_BAD_FLAGS:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_FLAGS");
-			case NTE_BAD_KEY_STATE:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_KEY_STATE");
-			case NTE_BAD_TYPE:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_TYPE");
-			case NTE_INVALID_HANDLE:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_HANDLE");
-			case NTE_INVALID_PARAMETER:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_PARAMETER");
-			case NTE_NOT_SUPPORTED:
-				throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_NOT_SUPPORTED");
-
-			default:
-				throw std::runtime_error("CryptOpenStorageProvider returned unknown error code");
-
-		}
-	}
+	evaluateStatus(status);
 	status = NCryptFreeObject(keyHandle);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptFreeObject returned error code");
@@ -1626,28 +1685,7 @@ void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters)
 	bufferDesc.ulVersion = NCRYPTBUFFER_VERSION;
 	NCRYPT_KEY_HANDLE keyHandle;
 	status = NCryptImportKey(provHandle, 0, BCRYPT_RSAFULLPRIVATE_BLOB, &bufferDesc,&keyHandle, (PBYTE)pkeyData, size, NCRYPT_DO_NOT_FINALIZE_FLAG);
-	if (status != ERROR_SUCCESS)
-	{
-		switch (status)
-		{
-		case NTE_BAD_FLAGS:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_FLAGS");
-		case NTE_BAD_KEY_STATE:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_KEY_STATE");
-		case NTE_BAD_TYPE:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_BAD_TYPE");
-		case NTE_INVALID_HANDLE:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_HANDLE");
-		case NTE_INVALID_PARAMETER:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_INVALID_PARAMETER");
-		case NTE_NOT_SUPPORTED:
-			throw std::runtime_error("CryptOpenStorageProvider returned error code: NTE_NOT_SUPPORTED");
-
-		default:
-			throw std::runtime_error("CryptOpenStorageProvider returned unknown error code");
-
-		}
-	}
+	evaluateStatus(status);
 	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
 	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
 	if (status != ERROR_SUCCESS)
@@ -1678,26 +1716,7 @@ std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data
 	unsigned char* pDataDecrypted;
 	DWORD cbResult;
 	status = NCryptDecrypt(keyHandle, pDataBigEndian, cbData, nullptr, pDataDecryptedBigEndian, cbData, &cbResult, NCRYPT_PAD_PKCS1_FLAG);
-	if (status != ERROR_SUCCESS)
-		switch (status)
-		{
-		case NTE_BAD_FLAGS:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_BAD_FLAGS");
-		case NTE_BAD_KEY_STATE:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_BAD_KEY_STATE");
-		case NTE_BAD_TYPE:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_BAD_TYPE");
-		case NTE_INVALID_HANDLE:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_INVALID_HANDLE");
-		case NTE_INVALID_PARAMETER:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_INVALID_PARAMETER");
-		case NTE_NOT_SUPPORTED:
-			throw std::runtime_error("CryptDecrypt returned error code: NTE_NOT_SUPPORTED");
-
-		default:
-			throw std::runtime_error("CryptDecrypt returned unknown error code");
-
-		}
+	evaluateStatus(status);
 	pDataDecrypted = ConvertEndianess(pDataDecryptedBigEndian, cbResult);
 	ModNumber res(pDataDecrypted, cbResult);
 	delete[] pDataDecryptedBigEndian;
@@ -1711,6 +1730,7 @@ std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data
 
 	return std::make_tuple(res, cbResult);
 }
+
 
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 {
@@ -1729,26 +1749,7 @@ ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 	unsigned char* pDataEncrypted;
 	DWORD cbResult;
 	status = NCryptEncrypt(keyHandle, pDataBigEndian, cbData, NULL, pDataEncryptedBigEndian, MAXMOD, &cbResult, NCRYPT_PAD_PKCS1_FLAG);
-	if (status != ERROR_SUCCESS)
-		switch (status)
-		{
-		case NTE_BAD_FLAGS:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_FLAGS");
-		case NTE_BAD_KEY_STATE:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_KEY_STATE");
-		case NTE_BAD_TYPE:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_TYPE");
-		case NTE_INVALID_HANDLE:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_INVALID_HANDLE");
-		case NTE_INVALID_PARAMETER:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_INVALID_PARAMETER");
-		case NTE_NOT_SUPPORTED:
-			throw std::runtime_error("CryptEncrypt returned error code: NTE_NOT_SUPPORTED");
-
-		default:
-			throw std::runtime_error("CryptEncrypt returned unknown error code");
-
-		}
+	evaluateStatus(status);
 	pDataEncrypted = ConvertEndianess(pDataEncryptedBigEndian, cbResult);
 	ModNumber res(pDataEncrypted, cbResult);
 	delete[] pDataEncrypted;
@@ -1759,5 +1760,89 @@ ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptFreeObject returned error code");
 	return res;
+}
+
+int evaluateBStatus(NTSTATUS status)
+{
+	if (status == ERROR_SUCCESS)
+		return 0;
+	switch (status)
+	{
+	case STATUS_INVALID_HANDLE:
+		throw std::runtime_error("Cryptographic function returned error code: STATUS_INVALID_HANDLE");
+	case STATUS_INVALID_PARAMETER:
+		throw std::runtime_error("Cryptographic function returned error code: STATUS_INVALID_PARAMETER");
+	case STATUS_NO_MEMORY:
+		throw std::runtime_error("Cryptographic function returned error code: STATUS_NO_MEMORY");
+	default:
+		throw std::runtime_error("Cryptographic function returned unknown error code");
+	}
+
+}
+
+std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count)
+{
+	BCRYPT_ALG_HANDLE algHandle;
+	NTSTATUS bStatus;
+	bStatus = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_SHA256_ALGORITHM, NULL, 0);
+	evaluateBStatus(bStatus);
+	ULONG hashLength;
+	ULONG cbHashLength = sizeof(ULONG);
+	ULONG cbHashLengthReturned;
+	bStatus = BCryptGetProperty(algHandle, BCRYPT_HASH_LENGTH, (PUCHAR)&hashLength, cbHashLength, &cbHashLengthReturned, 0);
+	evaluateBStatus(bStatus);
+	BCRYPT_HASH_HANDLE hashHandle;
+	bStatus = BCryptCreateHash(algHandle, &hashHandle, NULL, 0, NULL, 0, 0);
+	evaluateBStatus(bStatus);
+	bStatus = BCryptCloseAlgorithmProvider(algHandle, 0);
+	evaluateBStatus(bStatus);
+	bStatus = BCryptHashData(hashHandle, data, (ULONG)count, 0);
+	evaluateBStatus(bStatus);
+	unsigned char* hash = new unsigned char[hashLength];
+	bStatus = BCryptFinishHash(hashHandle, hash, hashLength, 0);
+	evaluateBStatus(bStatus);
+	bStatus = BCryptDestroyHash(hashHandle);
+	evaluateBStatus(bStatus);
+	return std::make_tuple(hash, hashLength);
+}
+
+ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength)
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status;
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
+	evaluateStatus(status);
+	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
+	unsigned char signature[128];
+	ULONG cbResult;
+	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
+	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
+	status = NCryptSignHash(keyHandle, &paddingInfo, hash, hashLength, signature, 128, &cbResult, BCRYPT_PAD_PKCS1);
+	evaluateStatus(status);
+	status = NCryptFreeObject(keyHandle);
+	evaluateStatus(status);
+	unsigned char *pSignatureLittleEndian = ConvertEndianess(signature, cbResult);
+	ModNumber retvalue(pSignatureLittleEndian, cbResult);
+	return retvalue; 
+}
+
+bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature)
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status;
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
+	evaluateStatus(status);
+	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
+	unsigned char *littleEndianSignature = (unsigned char *)signature.num;
+	unsigned char *bigEndiansignature = ConvertEndianess(littleEndianSignature,SIGNATURESIZE);
+	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
+	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
+	status = NCryptVerifySignature(keyHandle, &paddingInfo, hash, hashLength, bigEndiansignature, SIGNATURESIZE, BCRYPT_PAD_PKCS1);
+	evaluateStatus(status);
+	status = NCryptFreeObject(keyHandle);
+	evaluateStatus(status);
+	return status == ERROR_SUCCESS;
 }
 #endif

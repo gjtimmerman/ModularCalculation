@@ -36,6 +36,7 @@ static_assert(LLSIZE == LSIZE * 2, "Sizes are not suitable");
 //static_assert(COUNTL == 128, "COUNTL is not 128");
 //static_assert(COUNTLL == 64, "COUNTLL is not 64");
 
+#define SIGNATURESIZE 128
 
 const llint	lintmask = ~0ul;
 
@@ -139,6 +140,7 @@ private:
 	friend unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 	friend std::tuple<ModNumber, unsigned long> decrypt(const wchar_t *KeyName,const ModNumber& data);
 	friend ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
+	friend bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature);
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
@@ -217,8 +219,10 @@ public:
 	}
 	ModNumber GetPKCS1Mask(const ModNumber& m) const;
 	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
+	std::tuple<ModNumber, int> RemovePKCS1SignatureMask(const ModNumber& m) const;
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;
+	ModNumber DecryptSignature(const ModNumber signature) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;
@@ -308,6 +312,8 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data);
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
+ModNumber sign(const wchar_t* keyName,unsigned char* hash, int count);
+std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count);
 #endif
 
 

@@ -44,6 +44,12 @@ const int OctalStringLength = (NSIZE % 3 == 0) ? (NSIZE / 3) : (NSIZE / 3 + 1);
 const int DecimalStringLength = static_cast<int>(std::ceil(NSIZE * 0.30102999566398119521373889472449)); // log(2)
 const int HexStringLength = NCOUNT * 2;
 
+enum class ASNElementType : unsigned char
+{
+	OBJECT_IDENTIFIER = 0x06,
+	SEQUENCE = 0x10
+};
+
 struct RSAParameters;
 
 class ScaledNumber;
@@ -219,7 +225,8 @@ public:
 	}
 	ModNumber GetPKCS1Mask(const ModNumber& m) const;
 	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
-	std::tuple<ModNumber, int> RemovePKCS1SignatureMask(const ModNumber& m) const;
+	std::tuple<ModNumber, int> ParseBERASNString(const ModNumber& m) const;
+	std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i) const;
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;
 	ModNumber DecryptSignature(const ModNumber signature) const;

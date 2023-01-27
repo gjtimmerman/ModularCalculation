@@ -1389,10 +1389,20 @@ ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
 		if (pMaskedNumber[i])
 			break;
 	}
-	if (pMaskedNumber[i+1] != 0x00u || pMaskedNumber[i] != 0x02u)
+	if (pMaskedNumber[i+1] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
-	while (pMaskedNumber[i] != 0x00u and i >= 0)
-		i--;
+	if (pMaskedNumber[i] == 0x01u)
+	{
+		while (pMaskedNumber[--i] == 0xFF && i >= 0)
+			;
+	}
+	else if (pMaskedNumber[i] == 0x02u)
+	{
+		while (pMaskedNumber[i] != 0x00u && i >= 0)
+			i--;
+	}
+	else
+		throw std::domain_error("Not a valid PKCS1 Mask");
 	if (pMaskedNumber[i] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
 	ModNumber res(pMaskedNumber, i);
@@ -1400,59 +1410,126 @@ ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
 
 }
 
-std::tuple<ModNumber,int> RSA::RemovePKCS1SignatureMask(const ModNumber& m) const
+std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsigned char* p, unsigned int i) const
+{
+	if (i <= 0)
+		throw std::domain_error("Not a valid BER encoding!");
+	switch (p[i] >> 6)
+	{
+	case 0:
+	{
+		switch (p[i] >> 5)
+		{
+			case 1:
+			{
+				unsigned char mask = 0x1Fu;
+				unsigned char masked = p[i] & mask;
+				switch (masked)
+				{
+					case (int)ASNElementType::SEQUENCE:
+					{
+						switch (p[i-1] >> 7)
+						{
+						case 0:
+						{
+							unsigned char mask = 0x7F;
+							unsigned char masked = p[i - 1] & mask;
+							return std::make_tuple(ASNElementType::SEQUENCE, masked, i - 2);
+						}
+						default:
+							throw std::domain_error("Not a short length specifier!");
+
+						}
+					}
+					case (int)ASNElementType::OBJECT_IDENTIFIER:
+					{
+						switch (p[i - 1] >> 7)
+						{
+						case 0:
+						{
+							unsigned char mask = 0x7F;
+							unsigned char masked = p[i - 1] & mask;
+							return std::make_tuple(ASNElementType::OBJECT_IDENTIFIER, masked, i - 2);
+						}
+						default:
+							throw std::domain_error("Not a short length specifier!");
+						}
+					}
+					default:
+						throw std::domain_error("Not an expected ASN Type");
+
+				}
+			}
+			default:
+				throw std::domain_error("Not a constructed ASN.1 type!");
+		}
+	}
+	default:
+		throw std::domain_error("Not a native ASN.1 type!");
+
+	}
+
+}
+
+std::tuple<ModNumber,int> RSA::ParseBERASNString(const ModNumber& m) const
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
-	int i;
+	unsigned int i;
 	for (i = MAXMOD - 1; i >= 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
 	}
-	if (pMaskedNumber[i + 1] != 0x00u || pMaskedNumber[i] != 0x01u)
-		throw std::domain_error("Not a valid PKCS1 Signature Mask");
-	while (pMaskedNumber[--i] == 0xFF and i >= 0)
-		i--;
-	if (i > 0 && pMaskedNumber[i--] != 0x00u)
-		throw std::domain_error("Not a valid PKCS1 Signature Mask");
-	if (i > 0 && pMaskedNumber[i--] != 0x30)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x31)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x30)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x0D)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x06)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x09)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x60)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x86)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x48)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x01)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x65)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x03)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x04)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x02)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x01)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x05)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x00)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x04)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
-	if (i > 0 && pMaskedNumber[i--] != 0x20)
-		throw std::domain_error("Not a valid RSA SHA256 OID");
+	std::tuple<ASNElementType,unsigned int, unsigned int> ASNElement  = ReadASNElement(pMaskedNumber,i);
+	if (std::get<0>(ASNElement) == ASNElementType::SEQUENCE)
+	{
+		ASNElement = ReadASNElement(pMaskedNumber,std::get<2>(ASNElement));
+		if (std::get<0>(ASNElement) == ASNElementType::SEQUENCE)
+		{
+			ASNElement = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement));
+
+		}
+
+	}
+
+	//if (i > 0 && pMaskedNumber[i--] != 0x30)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x31)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x30)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x0D)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x06)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x09)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x60)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x86)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x48)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x01)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x65)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x03)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x04)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x02)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x01)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x05)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x00)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x04)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
+	//if (i > 0 && pMaskedNumber[i--] != 0x20)
+	//	throw std::domain_error("Not a valid RSA SHA256 OID");
 	ModNumber res(pMaskedNumber, i + 1);
 	return std::make_tuple(res, i + 1);
 
@@ -1488,7 +1565,8 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 {
 	MultGroupMod mgm(Modulus);
 	ModNumber decryptedSignature = mgm.Exp(signature, pubExp);
-	std::tuple<ModNumber, int> result = RemovePKCS1SignatureMask(decryptedSignature);
+	ModNumber removedMask = RemovePKCS1Mask(decryptedSignature);
+	std::tuple<ModNumber, int> result = ParseBERASNString(removedMask);
 	ModNumber hashBigEndian = std::get<0>(result);
 	int hashLen = std::get<1>(result);
 	unsigned char* pHashBigEndian = (unsigned char*)hashBigEndian.num;

@@ -16,9 +16,9 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-#define MAXMOD (1024/8)
+//#define MAXMOD (1024/8)
 //#define MAXMOD (2048/8)
-//#define MAXMOD (4096/8)
+#define MAXMOD (4096/8)
 
 #define NSIZE (NCOUNT*8)
 
@@ -225,13 +225,15 @@ public:
 		Coefficient = rsaParameters.Coefficient;
 		PrivExp = rsaParameters.PrivExp;
 	}
-	ModNumber GetPKCS1Mask(const ModNumber& m) const;
+	ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false) const;
 	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
+	ModNumber CreateBERASNString(std::list<std::string> content) const;
 	std::list<std::string> ParseBERASNString(const ModNumber& m) const;
 	std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i) const;
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;
 	ModNumber DecryptSignature(const ModNumber signature) const;
+	ModNumber EncryptSignature(std::string hashBigEndian) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;
@@ -272,6 +274,7 @@ std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNu
 unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 bool operator ==(ScaledNumber l, ScaledNumber r);
 
+unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
 
 template <typename T>
 ModNumber ModNumber::fromText(std::basic_string<T> text)

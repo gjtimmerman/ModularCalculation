@@ -1324,7 +1324,7 @@ unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned ch
 	return pDest + cbsize;
 }
 
-ModNumber RSA::GetPKCS1Mask(const ModNumber& m) const
+ModNumber RSA::GetPKCS1Mask(const ModNumber& m, bool stable) const
 {
 	unsigned long keyByteSize = GetByteCount(Modulus);
 	unsigned long mSize = GetByteCount(m);
@@ -1338,14 +1338,14 @@ ModNumber RSA::GetPKCS1Mask(const ModNumber& m) const
 	unsigned long totalNumWords = keyByteSize / LLSIZE;
 	if (totalBytesLeft > 1)
 		totalNumWords++;
-	llint tmp = 0x0002;
+	llint tmp = stable ? 0x0001 : 0x0002;
 	unsigned long totalBytesShift = totalBytesLeft;
 	if (totalBytesLeft < 2)
 		totalBytesShift += 8;
 	for (unsigned int i = 0; i < totalBytesShift - 2; i++)
 	{
 		tmp <<= 8;
-		unsigned char mask = (unsigned char)rand() % 0x100;
+		unsigned char mask = stable ? 0xFF : ((unsigned char)rand() % 0xFF) + 1u;
 		tmp |= mask;
 	}
 	res.num[totalNumWords - 1] = tmp;
@@ -1358,7 +1358,7 @@ ModNumber RSA::GetPKCS1Mask(const ModNumber& m) const
 		for (int j = 0; j < LLSIZE; j++)
 		{
 			tmp <<= 8;
-			unsigned char mask = ((unsigned char)rand() % 0xFF) + 1u;
+			unsigned char mask = stable ? 0xFF : ((unsigned char)rand() % 0xFF) + 1u;
 			tmp |= mask;
 		}
 		res.num[totalNumWords - i - 2] = tmp;
@@ -1366,7 +1366,7 @@ ModNumber RSA::GetPKCS1Mask(const ModNumber& m) const
 	tmp = 0;
 	for (unsigned int j = 0; j < padLeftOver; j++)
 	{
-		unsigned char mask = (unsigned char)rand() % 0x100;
+		unsigned char mask = stable ? 0xFF : ((unsigned char)rand() % 0xFF) + 1u;
 		tmp |= mask;
 		tmp <<= 8;
 	}
@@ -1489,12 +1489,80 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 
 }
 
+ModNumber RSA::CreateBERASNString(std::list<std::string> content) const
+{
+	std::string result;
+	std::string outerASN;
+	std::string innerASN;
+	std::string encodedOid;
+	std::list<std::string>::iterator myIterator = content.begin();
+	std::string plainOid = *myIterator++;
+	std::string hash = *myIterator++;
+	std::stringstream oidStream(plainOid, std::ios::in);
+	int countSeparators = 0;
+	for (std::string::iterator it = plainOid.begin(); it != plainOid.end(); it++)
+		if (*it == '.')
+			countSeparators++;
+	std::list<unsigned int> oidNumbers;
+	unsigned int number;
+	char dot;
+	oidStream >> number;
+	oidNumbers.push_back(number);
+	for (int i = 0; i < countSeparators; i++)
+	{
+		oidStream >> dot;
+		oidStream >> number;
+		oidNumbers.push_back(number);
+	}
+	std::list<unsigned int>::iterator numberIterator = oidNumbers.begin();
+	unsigned int first = *numberIterator++ * 40;
+	first += *numberIterator++;
+	encodedOid.append(1, first);
+	for (; numberIterator != oidNumbers.end(); numberIterator++)
+	{
+		unsigned int oidPart = *numberIterator;
+		unsigned char divisor = 0x80;
+		unsigned char mask = 0x7F;
+		std::list<char> oidCharList;
+		unsigned char oidChar = (oidPart % divisor);
+		oidCharList.push_back(oidChar);
+		oidPart >>= 7;
+		while (oidPart > 0)
+		{
+			oidChar = (oidPart & mask) | divisor;
+			oidCharList.push_back(oidChar);
+			oidPart >>= 7;
+		}
+		for (std::list<char>::reverse_iterator it = oidCharList.rbegin(); it != oidCharList.rend(); it++)
+			encodedOid.append(1, *it);
+	}
+
+	innerASN.append(1, (unsigned char)ASNElementType::OBJECT_IDENTIFIER);
+	innerASN.append(1, (unsigned char)encodedOid.length());
+	innerASN.append(encodedOid);
+	innerASN.append(1, (unsigned char)ASNElementType::NULL_VALUE);
+	innerASN.append(1, (unsigned char)'\0');
+	outerASN.append(1, (unsigned char)ASNElementType::SEQUENCE | 0x20);
+	outerASN.append(1, (unsigned char)innerASN.length());
+	outerASN.append(innerASN);
+	outerASN.append(1, (unsigned char)ASNElementType::OCTET_STRING);
+	outerASN.append(1, (unsigned char)hash.length());
+	outerASN.append(hash);
+	result.append(1, (unsigned char)ASNElementType::SEQUENCE | 0x20);
+	result.append(1, (unsigned char)(outerASN.length()));
+	result.append(outerASN);
+	unsigned char* resLittleEndian = ConvertEndianess((const unsigned char*)result.c_str(), (unsigned int)result.length());
+	ModNumber res(resLittleEndian, (unsigned int)result.length());
+	return res;
+
+}
+
 std::list<std::string> RSA::ParseBERASNString(const ModNumber& m) const
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
 	std::list<std::string> result;
 	unsigned int i;
-	for (i = MAXMOD - 1; i >= 0; i--)
+	for (i = MAXMOD - 1; i > 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
@@ -1547,48 +1615,8 @@ std::list<std::string> RSA::ParseBERASNString(const ModNumber& m) const
 				result.push_back(resultStr);
 			}
 		}
-		return result;
 	}
-
-	//if (i > 0 && pMaskedNumber[i--] != 0x30)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x31)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x30)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x0D)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x06)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x09)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x60)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x86)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x48)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x01)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x65)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x03)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x04)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x02)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x01)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x05)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x00)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x04)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	//if (i > 0 && pMaskedNumber[i--] != 0x20)
-	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-
+	return result;
 }
 
 ModNumber RSA::Encrypt(const ModNumber& m) const
@@ -1614,7 +1642,6 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	ModNumber hq = mgmn.Mult(h,Prime2);
 	ModNumber res =  mgmn.Add(m2, hq);
 	return RemovePKCS1Mask(res);
-	return res;
 }
 
 ModNumber RSA::DecryptSignature(const ModNumber signature) const
@@ -1626,10 +1653,33 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 	std::list<std::string>::iterator resultIterator = result.begin();
 	resultIterator++;
 	ModNumber hashBigEndian((const unsigned char *)resultIterator->c_str());
-	int hashLen = resultIterator->size();
+	unsigned int hashLen = (unsigned int)resultIterator->size();
 	unsigned char* pHashBigEndian = (unsigned char*)hashBigEndian.num;
-//	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
-	return ModNumber(pHashBigEndian, hashLen);
+	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
+	return ModNumber(pHashLittleEndian, hashLen);
+}
+
+ModNumber RSA::EncryptSignature(std::string hashBigEndian) const
+{
+	std::list<std::string> myList;
+	myList.push_back("2.16.840.1.101.3.4.2.1");
+	myList.push_back(hashBigEndian);
+	ModNumber unmaskedResult = CreateBERASNString(myList);
+	ModNumber maskedResult = GetPKCS1Mask(unmaskedResult, true);
+	MultGroupMod mgmp(Prime1);
+	MultGroupMod mgmq(Prime2);
+	MultGroupMod mgmn(Modulus);
+	ModNumber m1;
+	ModNumber m2;
+	std::thread th1([&m1, &mgmp, &maskedResult, this]() {m1 = mgmp.Exp(maskedResult, Exp1); });
+	std::thread th2([&m2, &mgmq, &maskedResult, this]() {m2 = mgmq.Exp(maskedResult, Exp2); });
+	th1.join();
+	th2.join();
+	ModNumber diff = mgmp.Diff(m1, m2);
+	ModNumber h = mgmp.Mult(Coefficient, diff);
+	ModNumber hq = mgmn.Mult(h, Prime2);
+	ModNumber res = mgmn.Add(m2, hq);
+	return res;
 }
 
 
@@ -1639,7 +1689,7 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 
 int evaluateStatus(SECURITY_STATUS status)
 {
-	if (status == ERROR_SUCCESS)
+	if (status == ERROR_SUCCESS || status == NTE_BAD_SIGNATURE)
 		return 0;
 
 	switch (status)
@@ -1950,11 +2000,11 @@ ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength)
 	status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
 	evaluateStatus(status);
 	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
-	unsigned char signature[128];
+	unsigned char signature[MAXMOD];
 	ULONG cbResult;
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
 	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
-	status = NCryptSignHash(keyHandle, &paddingInfo, hash, hashLength, signature, 128, &cbResult, BCRYPT_PAD_PKCS1);
+	status = NCryptSignHash(keyHandle, &paddingInfo, hash, hashLength, signature, MAXMOD, &cbResult, BCRYPT_PAD_PKCS1);
 	evaluateStatus(status);
 	status = NCryptFreeObject(keyHandle);
 	evaluateStatus(status);
@@ -1972,13 +2022,12 @@ bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumb
 	evaluateStatus(status);
 	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
 	unsigned char *littleEndianSignature = (unsigned char *)signature.num;
-	unsigned char *bigEndiansignature = ConvertEndianess(littleEndianSignature,SIGNATURESIZE);
+	unsigned char *bigEndiansignature = ConvertEndianess(littleEndianSignature,MAXMOD);
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
 	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
-	status = NCryptVerifySignature(keyHandle, &paddingInfo, hash, hashLength, bigEndiansignature, SIGNATURESIZE, BCRYPT_PAD_PKCS1);
+	status = NCryptVerifySignature(keyHandle, &paddingInfo, hash, hashLength, bigEndiansignature, MAXMOD, BCRYPT_PAD_PKCS1);
 	evaluateStatus(status);
-	status = NCryptFreeObject(keyHandle);
-	evaluateStatus(status);
+	NCryptFreeObject(keyHandle);
 	return status == ERROR_SUCCESS;
 }
 #endif

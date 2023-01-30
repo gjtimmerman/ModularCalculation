@@ -15,4 +15,5 @@
 #include <stdexcept>
 #include <cmath>
 #include <tuple>
+#include <list>
 #endif //PCH_H

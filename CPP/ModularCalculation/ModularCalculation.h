@@ -46,6 +46,8 @@ const int HexStringLength = NCOUNT * 2;
 
 enum class ASNElementType : unsigned char
 {
+	OCTET_STRING = 0x04,
+	NULL_VALUE = 0x05,
 	OBJECT_IDENTIFIER = 0x06,
 	SEQUENCE = 0x10
 };
@@ -225,7 +227,7 @@ public:
 	}
 	ModNumber GetPKCS1Mask(const ModNumber& m) const;
 	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
-	std::tuple<ModNumber, int> ParseBERASNString(const ModNumber& m) const;
+	std::list<std::string> ParseBERASNString(const ModNumber& m) const;
 	std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i) const;
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;

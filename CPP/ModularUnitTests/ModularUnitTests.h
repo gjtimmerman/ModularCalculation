@@ -6267,14 +6267,13 @@ namespace ModularUnitTests
 		{
 			char *message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
 			std::tuple<unsigned char*,ULONG> result  = hash((unsigned char *)message, strlen(message) + 1);
-			unsigned char* pHash = std::get<0>(result);
+			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
-			ModNumber signature = sign(L"MyCoolKey1024", pHash, len);
+			ModNumber signature = sign(L"MyCoolKey1024", pHashBigEndian, len);
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
-
-			ModNumber originalHash(pHash,len);
+			ModNumber originalHash(pHashBigEndian,len);
 			Assert::IsTrue(originalHash == decryptedHash);
 		}
 #endif

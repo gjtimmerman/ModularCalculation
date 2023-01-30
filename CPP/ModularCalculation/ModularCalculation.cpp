@@ -1420,7 +1420,8 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 	{
 		switch (p[i] >> 5)
 		{
-			case 1:
+		case 0:
+		case 1:
 			{
 				unsigned char mask = 0x1Fu;
 				unsigned char masked = p[i] & mask;
@@ -1455,6 +1456,23 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 							throw std::domain_error("Not a short length specifier!");
 						}
 					}
+					case (int)ASNElementType::NULL_VALUE:
+						if (p[i - 1] != 0)
+							throw std::domain_error("Not a valid NULL Object");
+						return std::make_tuple(ASNElementType::NULL_VALUE, p[i - 1], i - 2);
+					case (int)ASNElementType::OCTET_STRING:
+						switch (p[i - 1] >> 7)
+						{
+						case 0:
+						{
+							unsigned char mask = 0x7F;
+							unsigned char masked = p[i - 1] & mask;
+							return std::make_tuple(ASNElementType::OCTET_STRING, masked, i - 2);
+						}
+						default:
+							throw std::domain_error("Not a short length specifier!");
+						}
+
 					default:
 						throw std::domain_error("Not an expected ASN Type");
 
@@ -1471,25 +1489,65 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 
 }
 
-std::tuple<ModNumber,int> RSA::ParseBERASNString(const ModNumber& m) const
+std::list<std::string> RSA::ParseBERASNString(const ModNumber& m) const
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
+	std::list<std::string> result;
 	unsigned int i;
 	for (i = MAXMOD - 1; i >= 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
 	}
-	std::tuple<ASNElementType,unsigned int, unsigned int> ASNElement  = ReadASNElement(pMaskedNumber,i);
-	if (std::get<0>(ASNElement) == ASNElementType::SEQUENCE)
+	std::tuple<ASNElementType,unsigned int, unsigned int> ASNElement1  = ReadASNElement(pMaskedNumber,i);
+	if (std::get<0>(ASNElement1) == ASNElementType::SEQUENCE)
 	{
-		ASNElement = ReadASNElement(pMaskedNumber,std::get<2>(ASNElement));
-		if (std::get<0>(ASNElement) == ASNElementType::SEQUENCE)
+		std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement2 = ReadASNElement(pMaskedNumber,std::get<2>(ASNElement1));
+		if (std::get<0>(ASNElement2) == ASNElementType::SEQUENCE)
 		{
-			ASNElement = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement));
-
+			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement3 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement2));
+			if (std::get<0>(ASNElement3) == ASNElementType::OBJECT_IDENTIFIER)
+			{
+				unsigned int len = std::get<1>(ASNElement3);
+				unsigned int index = std::get<2>(ASNElement3);
+				char c = pMaskedNumber[index];
+				std::stringstream stringStr;
+				stringStr << (int)c / 40;
+				stringStr << '.';
+				stringStr << (int)c % 40;
+				stringStr << '.';
+				llint number = 0;
+				for (unsigned int i = 1; i < len; i++)
+				{
+					unsigned char mask = 0x80;
+					c = pMaskedNumber[index - i];
+					number <<= 7;
+					number |= c & ((unsigned char)~mask);
+					if (!(c & mask))
+					{
+						stringStr << number;
+						stringStr << '.';
+						number = 0;
+					}
+				}
+				std::string resultStr = stringStr.str();
+				result.push_back(resultStr);
+			}
+			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement4 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement3) - std::get<1>(ASNElement3));
+			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement5 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement4));
+			if (std::get<0>(ASNElement5) == ASNElementType::OCTET_STRING)
+			{
+				unsigned int len = std::get<1>(ASNElement5);
+				unsigned int index = std::get<2>(ASNElement5);
+				std::string resultStr = "";
+				for (unsigned int i = 0; i < len; i++)
+				{
+					resultStr.append(1, pMaskedNumber[index - i]);
+				}
+				result.push_back(resultStr);
+			}
 		}
-
+		return result;
 	}
 
 	//if (i > 0 && pMaskedNumber[i--] != 0x30)
@@ -1530,8 +1588,6 @@ std::tuple<ModNumber,int> RSA::ParseBERASNString(const ModNumber& m) const
 	//	throw std::domain_error("Not a valid RSA SHA256 OID");
 	//if (i > 0 && pMaskedNumber[i--] != 0x20)
 	//	throw std::domain_error("Not a valid RSA SHA256 OID");
-	ModNumber res(pMaskedNumber, i + 1);
-	return std::make_tuple(res, i + 1);
 
 }
 
@@ -1566,12 +1622,14 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 	MultGroupMod mgm(Modulus);
 	ModNumber decryptedSignature = mgm.Exp(signature, pubExp);
 	ModNumber removedMask = RemovePKCS1Mask(decryptedSignature);
-	std::tuple<ModNumber, int> result = ParseBERASNString(removedMask);
-	ModNumber hashBigEndian = std::get<0>(result);
-	int hashLen = std::get<1>(result);
+	std::list<std::string> result = ParseBERASNString(removedMask);
+	std::list<std::string>::iterator resultIterator = result.begin();
+	resultIterator++;
+	ModNumber hashBigEndian((const unsigned char *)resultIterator->c_str());
+	int hashLen = resultIterator->size();
 	unsigned char* pHashBigEndian = (unsigned char*)hashBigEndian.num;
-	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
-	return ModNumber(pHashLittleEndian, hashLen);
+//	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
+	return ModNumber(pHashBigEndian, hashLen);
 }
 
 

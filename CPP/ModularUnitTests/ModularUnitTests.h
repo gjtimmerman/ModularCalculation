@@ -6318,7 +6318,7 @@ namespace ModularUnitTests
 
 #endif
 		}
-		TEST_METHOD(TestSignatureVerify)
+		TEST_METHOD(TestSignatureVerifySHA256)
 		{
 			char *message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
 			std::tuple<unsigned char*,ULONG> result  = hash((unsigned char *)message, strlen(message));
@@ -6341,7 +6341,7 @@ namespace ModularUnitTests
 			Assert::IsTrue(originalHash == decryptedHash);
 		}
 
-		TEST_METHOD(TestSignatureCreate)
+		TEST_METHOD(TestSignatureCreateSHA256)
 		{
 			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
 			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
@@ -6367,6 +6367,57 @@ namespace ModularUnitTests
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
 			Assert::IsTrue(verify(L"MyCoolKey1024",(unsigned char *)hashBigEndian.c_str(),(unsigned int)hashBigEndian.length(),encryptedSignature));
+#endif
+		}
+
+		TEST_METHOD(TestSignatureVerifySHA512)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message), L"SHA512");
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+#if (MAXMOD == 4096/8)
+			ModNumber signature = sign(L"MyCoolKey4096", pHashBigEndian, len, L"SHA512");
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", false);
+#elif (MAXMOD == 2048/8)
+			ModNumber signature = sign(L"MyCoolKey2048", pHashBigEndian, len, L"SHA512");
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", false);
+#elif (MAXMOD == 1024/8)
+			ModNumber signature = sign(L"MyCoolKey1024", pHashBigEndian, len, L"SHA512");
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
+#endif
+			RSA myRsa(rsaParameters);
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
+			ModNumber originalHash(pHashLittleEndian, len);
+			Assert::IsTrue(originalHash == decryptedHash);
+		}
+		TEST_METHOD(TestSignatureCreateSHA512)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message), L"SHA512");
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			std::string hashBigEndian((const char*)pHashBigEndian, len);
+			ModNumber hashBigEndianModNumber(pHashBigEndian, len);
+
+#if (MAXMOD == 4096/8)
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", false);
+			RSA myRsa(rsaParameters);
+			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
+			Assert::IsTrue(verify(L"MyCoolKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), encryptedSignature, L"SHA512"));
+
+#elif (MAXMOD == 2048/8)
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", false);
+			RSA myRsa(rsaParameters);
+			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
+			Assert::IsTrue(verify(L"MyCoolKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), encryptedSignature, L"SHA512"));
+
+#elif (MAXMOD == 1024/8)
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
+			RSA myRsa(rsaParameters);
+			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
+			Assert::IsTrue(verify(L"MyCoolKey1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), encryptedSignature, L"SHA512"));
 #endif
 		}
 

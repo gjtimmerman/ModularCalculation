@@ -1966,11 +1966,11 @@ int evaluateBStatus(NTSTATUS status)
 
 }
 
-std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count)
+std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm)
 {
 	BCRYPT_ALG_HANDLE algHandle;
 	NTSTATUS bStatus;
-	bStatus = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_SHA256_ALGORITHM, NULL, 0);
+	bStatus = BCryptOpenAlgorithmProvider(&algHandle, hashAlgorithm, NULL, 0);
 	evaluateBStatus(bStatus);
 	ULONG hashLength;
 	ULONG cbHashLength = sizeof(ULONG);
@@ -1992,7 +1992,7 @@ std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count)
 	return std::make_tuple(hash, hashLength);
 }
 
-ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength)
+ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength, const wchar_t *hashAlgorithm)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status;
@@ -2003,7 +2003,7 @@ ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength)
 	unsigned char signature[MAXMOD];
 	ULONG cbResult;
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
-	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
+	paddingInfo.pszAlgId = hashAlgorithm;
 	status = NCryptSignHash(keyHandle, &paddingInfo, hash, hashLength, signature, MAXMOD, &cbResult, BCRYPT_PAD_PKCS1);
 	evaluateStatus(status);
 	status = NCryptFreeObject(keyHandle);
@@ -2013,7 +2013,7 @@ ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength)
 	return retvalue; 
 }
 
-bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature)
+bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t *hashAlgorithm )
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status;
@@ -2024,7 +2024,7 @@ bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumb
 	unsigned char *littleEndianSignature = (unsigned char *)signature.num;
 	unsigned char *bigEndiansignature = ConvertEndianess(littleEndianSignature,MAXMOD);
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
-	paddingInfo.pszAlgId = BCRYPT_SHA256_ALGORITHM;
+	paddingInfo.pszAlgId = hashAlgorithm;
 	status = NCryptVerifySignature(keyHandle, &paddingInfo, hash, hashLength, bigEndiansignature, MAXMOD, BCRYPT_PAD_PKCS1);
 	evaluateStatus(status);
 	NCryptFreeObject(keyHandle);

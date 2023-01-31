@@ -148,7 +148,7 @@ private:
 	friend unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 	friend std::tuple<ModNumber, unsigned long> decrypt(const wchar_t *KeyName,const ModNumber& data);
 	friend ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
-	friend bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature);
+	friend bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t *hashAlgorithm);
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
@@ -324,8 +324,9 @@ RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data);
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
-ModNumber sign(const wchar_t* keyName,unsigned char* hash, int count);
-std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count);
+ModNumber sign(const wchar_t* keyName,unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
+bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t* hashAlgorithm = L"SHA256");
+std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 #endif
 
 

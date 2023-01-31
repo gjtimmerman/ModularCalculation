@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <list>
 
 
 #ifndef _WIN32

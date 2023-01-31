@@ -1659,10 +1659,10 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 	return ModNumber(pHashLittleEndian, hashLen);
 }
 
-ModNumber RSA::EncryptSignature(std::string hashBigEndian) const
+ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) const
 {
 	std::list<std::string> myList;
-	myList.push_back("2.16.840.1.101.3.4.2.1");
+	myList.push_back(hashOid);
 	myList.push_back(hashBigEndian);
 	ModNumber unmaskedResult = CreateBERASNString(myList);
 	ModNumber maskedResult = GetPKCS1Mask(unmaskedResult, true);

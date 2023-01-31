@@ -233,7 +233,7 @@ public:
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;
 	ModNumber DecryptSignature(const ModNumber signature) const;
-	ModNumber EncryptSignature(std::string hashBigEndian) const;
+	ModNumber EncryptSignature(std::string hashBigEndian, std::string hashOid) const;
 private:
 	ModNumber pubExp;
 	ModNumber Modulus;

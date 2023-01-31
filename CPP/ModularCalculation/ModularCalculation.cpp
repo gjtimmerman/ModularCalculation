@@ -1324,9 +1324,9 @@ unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned ch
 	return pDest + cbsize;
 }
 
-ModNumber RSA::GetPKCS1Mask(const ModNumber& m, bool stable) const
+ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize)
 {
-	unsigned long keyByteSize = GetByteCount(Modulus);
+	unsigned long keyByteSize = modulusSize;
 	unsigned long mSize = GetByteCount(m);
 	unsigned long mCount = mSize / LLSIZE;
 	if (keyByteSize - 11u < mSize)
@@ -1380,7 +1380,7 @@ ModNumber RSA::GetPKCS1Mask(const ModNumber& m, bool stable) const
 	return res;
 }
 
-ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
+ModNumber RemovePKCS1Mask(const ModNumber& m)
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
 	int i;
@@ -1410,7 +1410,7 @@ ModNumber RSA::RemovePKCS1Mask(const ModNumber& m) const
 
 }
 
-std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsigned char* p, unsigned int i) const
+std::tuple<ASNElementType,unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i)
 {
 	if (i <= 0)
 		throw std::domain_error("Not a valid BER encoding!");
@@ -1472,7 +1472,20 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 						default:
 							throw std::domain_error("Not a short length specifier!");
 						}
-
+					case (int)ASNElementType::INTEGER_VALUE:
+					{
+						switch (p[i - 1] >> 7)
+						{
+						case 0:
+						{
+							unsigned char mask = 0x7F;
+							unsigned char masked = p[i - 1] & mask;
+							return std::make_tuple(ASNElementType::INTEGER_VALUE, masked, i - 2);
+						}
+						default:
+							throw std::domain_error("Not a short length specifier!");
+						}
+					}
 					default:
 						throw std::domain_error("Not an expected ASN Type");
 
@@ -1489,7 +1502,7 @@ std::tuple<ASNElementType,unsigned int, unsigned int> RSA::ReadASNElement(unsign
 
 }
 
-ModNumber RSA::CreateBERASNString(std::list<std::string> content) const
+ModNumber CreateBERASNString(std::list<std::string> content)
 {
 	std::string result;
 	std::string outerASN;
@@ -1557,7 +1570,7 @@ ModNumber RSA::CreateBERASNString(std::list<std::string> content) const
 
 }
 
-std::list<std::string> RSA::ParseBERASNString(const ModNumber& m) const
+std::list<std::string> ParseBERASNString(const ModNumber& m)
 {
 	unsigned char* pMaskedNumber = (unsigned char*)m.num;
 	std::list<std::string> result;
@@ -1607,12 +1620,36 @@ std::list<std::string> RSA::ParseBERASNString(const ModNumber& m) const
 			{
 				unsigned int len = std::get<1>(ASNElement5);
 				unsigned int index = std::get<2>(ASNElement5);
-				std::string resultStr = "";
+				std::string resultStr;
 				for (unsigned int i = 0; i < len; i++)
 				{
 					resultStr.append(1, pMaskedNumber[index - i]);
 				}
 				result.push_back(resultStr);
+			}
+		}
+		else if (std::get<0>(ASNElement2) == ASNElementType::INTEGER_VALUE)
+		{
+			unsigned int len = std::get<1>(ASNElement2);
+			unsigned int index = std::get<2>(ASNElement2);
+			std::string resultStr;
+			for (unsigned int i = 0; i < len; i++)
+			{
+				resultStr.append(1, pMaskedNumber[index - i]);
+			}
+			result.push_back(resultStr);
+			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement3 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement2));
+			if (std::get<0>(ASNElement3) == ASNElementType::INTEGER_VALUE)
+			{
+				unsigned int len = std::get<1>(ASNElement3);
+				unsigned int index = std::get<2>(ASNElement3);
+				std::string resultStr;
+				for (unsigned int i = 0; i < len; i++)
+				{
+					resultStr.append(1, pMaskedNumber[index - i]);
+				}
+				result.push_back(resultStr);
+
 			}
 		}
 	}
@@ -1714,7 +1751,7 @@ int evaluateStatus(SECURITY_STATUS status)
 
 }
 
-NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle)
+NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle, const wchar_t *algorithm, int usage)
 {
 	NCRYPT_KEY_HANDLE keyHandle;
 	NCRYPT_PROV_HANDLE tmpProvHandle = NULL;
@@ -1726,7 +1763,7 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 		if (status != ERROR_SUCCESS)
 			throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	}
-	status = NCryptCreatePersistedKey(provHandle, &keyHandle, BCRYPT_RSA_ALGORITHM, KeyName, AT_KEYEXCHANGE, 0);
+	status = NCryptCreatePersistedKey(provHandle, &keyHandle, algorithm, KeyName, usage, 0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptCreateKey returned error code");
 	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;

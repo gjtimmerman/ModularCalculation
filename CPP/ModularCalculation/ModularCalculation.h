@@ -46,6 +46,7 @@ const int HexStringLength = NCOUNT * 2;
 
 enum class ASNElementType : unsigned char
 {
+	INTEGER_VALUE = 0x02,
 	OCTET_STRING = 0x04,
 	NULL_VALUE = 0x05,
 	OBJECT_IDENTIFIER = 0x06,
@@ -152,6 +153,11 @@ private:
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
+	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
+	friend ModNumber RemovePKCS1Mask(const ModNumber& m);
+	friend ModNumber CreateBERASNString(std::list<std::string> content);
+	friend std::list<std::string> ParseBERASNString(const ModNumber& m);
+	friend std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
 
 };
 
@@ -225,11 +231,6 @@ public:
 		Coefficient = rsaParameters.Coefficient;
 		PrivExp = rsaParameters.PrivExp;
 	}
-	ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false) const;
-	ModNumber RemovePKCS1Mask(const ModNumber& m) const;
-	ModNumber CreateBERASNString(std::list<std::string> content) const;
-	std::list<std::string> ParseBERASNString(const ModNumber& m) const;
-	std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i) const;
 	ModNumber Encrypt(const ModNumber& m) const;
 	ModNumber Decrypt(const ModNumber& c) const;
 	ModNumber DecryptSignature(const ModNumber signature) const;
@@ -276,6 +277,13 @@ bool operator ==(ScaledNumber l, ScaledNumber r);
 
 unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
 
+ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false, int modulusSize = MAXMOD);
+ModNumber RemovePKCS1Mask(const ModNumber& m);
+ModNumber CreateBERASNString(std::list<std::string> content);
+std::list<std::string> ParseBERASNString(const ModNumber& m);
+std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
+
+
 template <typename T>
 ModNumber ModNumber::fromText(std::basic_string<T> text)
 {
@@ -320,11 +328,12 @@ std::basic_string<T> ModNumber::getText() const
 
 
 #ifdef _WIN32
+NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle, const wchar_t* algorithm = L"RSA", int usage = AT_KEYEXCHANGE);
 RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data);
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
-ModNumber sign(const wchar_t* keyName,unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
+ModNumber sign(const wchar_t* keyName, unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
 bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t* hashAlgorithm = L"SHA256");
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 #endif

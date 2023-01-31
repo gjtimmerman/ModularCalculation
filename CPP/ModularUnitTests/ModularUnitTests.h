@@ -2066,8 +2066,8 @@ namespace ModularUnitTests
 			int startvalue = OctalStringLength % 128;
 			for (int i = startvalue; i < OctalStringLength; i += 128)
 			{
-				exp.append(64, (((OctalStringLength % 2)+ 7) % 8) * 7 + '0');
-				exp.append(64, (OctalStringLength % 2) * 7 + '0');
+				exp.append(64, '0');
+				exp.append(64, '7');
 			}
 			Assert::IsTrue(res == exp);
 		}
@@ -2417,7 +2417,19 @@ namespace ModularUnitTests
 			std::string s;
 			s.reserve(OctalStringLength);
 			s.assign(OctalStringLength, '7');
-			s[0] = '3';
+			switch (NSIZE % 3)
+			{
+			case 0:
+				s[0] = '7';
+				break;
+			case 1:
+				s[0] = '1';
+				break;
+			case 2:
+				s[0] = '3';
+				break;
+
+			}
 			ModNumber mres = ModNumber::stomn(s, 8);
 			Assert::IsTrue(mexp == mres);
 		}
@@ -2425,7 +2437,7 @@ namespace ModularUnitTests
 		{
 			std::string s;
 			s.reserve(OctalStringLength);
-			for (int i = 0; i < OctalStringLength; i += 16)
+			for (int i = 0; i < OctalStringLength + 1; i += 16)
 				s.append("0706050403020100");
 			Assert::ExpectException<std::domain_error>([s]() {ModNumber::stomn(s, 8); });
 

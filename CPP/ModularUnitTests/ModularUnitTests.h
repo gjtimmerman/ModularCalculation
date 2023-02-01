@@ -6110,6 +6110,56 @@ namespace ModularUnitTests
 			Assert::IsTrue(exp2Str == *myListIterator++);
 			Assert::IsTrue(myListIterator == results.end());
 		}
+		TEST_METHOD(TestDSAParameters)
+		{
+			DSAParameters dsaParameters;
+			dsaParameters.P = ModNumber::stomn("C18006893BCE75DC77605271C0AA43F5BFF9FD7B24F3DE9817A1B8230650542B1B30B66727EA3D44FBB476451D96B869555780D447729A7DC1ED7216B4F5C6A1A544F361723C3ACACBEFFA393389F42A7DE7F42106A30C04B0275DE550C8FF91392AA44FFBEBA94FE07CD19B50C5D66814BB31D741628503B0E579C76D32FF2D", 16);
+			dsaParameters.Q = ModNumber::stomn("859D7C3729301E8865F41654C0041A3C562A682F", 16);
+			dsaParameters.g = ModNumber::stomn("847AE11402C2FF443350DE8EB7665060DEC027A5AC1103C98C7F2CCD9C88D127185B7A0189F1674A0039FBD5DCFF4AE152F6C100D122ABF3B3E177F5693673408A0457C35667A3C80E51350F94F9696E8C5AC376FFC51E8CA9FD38169E6A1D0025EA1747D434C8DC8DE47B61E39AE13FCD8AB9ADEBEC982E5B3D249618CAD307", 16);
+			dsaParameters.x = ModNumber::stomn("334F55231BC70F896CE4BB081583812440110F1A", 16);
+			dsaParameters.y = ModNumber::stomn("3C7E5B1749C4D012C70A78D303CF9ED5C765DFDC0DB94DB0780704ABC0659B4D00BC13E02BE8CCB4F63E90EE76391CAFF69FCE225094275C912987AECCC21A52C3D2FE5FD338093CCFDEB35D097390609FC44AA8059CA745E161BB96A80AC0F93D6FDDEB2D0520AE3A6C8F7DBA4140B4057AF54C8AD5004FED3327FAB91136B9", 16);
+			MultGroupMod mgm(dsaParameters.P);
+			ModNumber computedY = mgm.Exp(dsaParameters.g, dsaParameters.x);
+			Assert::IsTrue(dsaParameters.y == computedY);
+			ModNumber pModQ = dsaParameters.P % dsaParameters.Q;
+			ModNumber mone(1ull);
+			Assert::IsTrue(mone == pModQ);
+			ModNumber pMinusOne = dsaParameters.P;
+			ModNumber computedGPowQ = mgm.Exp(dsaParameters.g, dsaParameters.Q);
+			Assert::IsTrue(mone == computedGPowQ);
+		}
+		TEST_METHOD(TestVerifyDSASignature)
+		{
+			DSAParameters dsaParameters;
+			dsaParameters.P = ModNumber::stomn("C18006893BCE75DC77605271C0AA43F5BFF9FD7B24F3DE9817A1B8230650542B1B30B66727EA3D44FBB476451D96B869555780D447729A7DC1ED7216B4F5C6A1A544F361723C3ACACBEFFA393389F42A7DE7F42106A30C04B0275DE550C8FF91392AA44FFBEBA94FE07CD19B50C5D66814BB31D741628503B0E579C76D32FF2D", 16);
+			dsaParameters.Q = ModNumber::stomn("859D7C3729301E8865F41654C0041A3C562A682F", 16);
+			dsaParameters.g = ModNumber::stomn("847AE11402C2FF443350DE8EB7665060DEC027A5AC1103C98C7F2CCD9C88D127185B7A0189F1674A0039FBD5DCFF4AE152F6C100D122ABF3B3E177F5693673408A0457C35667A3C80E51350F94F9696E8C5AC376FFC51E8CA9FD38169E6A1D0025EA1747D434C8DC8DE47B61E39AE13FCD8AB9ADEBEC982E5B3D249618CAD307", 16);
+			dsaParameters.x = ModNumber::stomn("334F55231BC70F896CE4BB081583812440110F1A", 16);
+			dsaParameters.y = ModNumber::stomn("3C7E5B1749C4D012C70A78D303CF9ED5C765DFDC0DB94DB0780704ABC0659B4D00BC13E02BE8CCB4F63E90EE76391CAFF69FCE225094275C912987AECCC21A52C3D2FE5FD338093CCFDEB35D097390609FC44AA8059CA745E161BB96A80AC0F93D6FDDEB2D0520AE3A6C8F7DBA4140B4057AF54C8AD5004FED3327FAB91136B9", 16);
+			MultGroupMod mgm(dsaParameters.P);
+			ModNumber mHashLong = ModNumber::stomn("25BDECAE5C8BC7905CBBDA89485AFEC7C607D60AC0B1D4EA66C3CA01D7593D87", 16);
+			ModNumber mHash = GetLeftMostBytes(mHashLong, GetByteCount(dsaParameters.Q));
+			ModNumber mSignature = ModNumber::stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
+			std::list<std::string> results = ParseBERASNString(mSignature);
+			std::list<std::string>::iterator myListIterator = results.begin();
+			std::string r = *myListIterator++;
+			std::string s = *myListIterator++;
+			unsigned char* rLittleEndian = ConvertEndianess((const unsigned char *)r.c_str(), (unsigned int)r.length());
+			unsigned char* sLittleEndian = ConvertEndianess((const unsigned char *)s.c_str(), (unsigned int)s.length());
+			ModNumber mr(rLittleEndian, (unsigned int)r.length());
+			ModNumber ms(sLittleEndian, (unsigned int)s.length());
+			Assert::IsTrue(mr < dsaParameters.Q);
+			Assert::IsTrue(ms < dsaParameters.Q);
+			MultGroupMod mgmq(dsaParameters.Q);
+			ModNumber sInverse = mgmq.Inverse(ms);
+			ModNumber sInverseTimesS = mgmq.Mult(ms, sInverse);
+			ModNumber u1 = mgmq.Mult(mHash, sInverse);
+			ModNumber u2 = mgmq.Mult(mr, sInverse);
+			ModNumber mv1 = mgm.Exp(dsaParameters.g, u1);
+			ModNumber mv2 = mgm.Exp(dsaParameters.y, u2);
+			ModNumber mv = mgm.Mult(mv1, mv2) % dsaParameters.Q;
+			Assert::IsTrue(mr == mv);
+		}
 		TEST_METHOD(TestRSAEncryptAndDecrypt)
 		{
 			RSAParameters rsaParameters;

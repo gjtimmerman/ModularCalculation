@@ -153,6 +153,8 @@ private:
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
+	friend unsigned char* ConvertEndianess(ModNumber m);
+	friend ModNumber GetLeftMostBytes(ModNumber m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
 	friend ModNumber RemovePKCS1Mask(const ModNumber& m);
 	friend ModNumber CreateBERASNString(std::list<std::string> content);
@@ -247,6 +249,33 @@ private:
 
 };
 
+struct DSAParameters
+{
+public:
+	ModNumber Q;
+	ModNumber P;
+	ModNumber g;
+	ModNumber x;
+	ModNumber y;
+
+};
+
+class DSA
+{
+public:
+	DSA(DSAParameters p) : Q(p.Q), P(p.P), g(p.g),x(p.x), y(p.y)
+	{
+
+	}
+	bool Verify(std::string hash, std::string signature);
+private:
+	ModNumber Q;
+	ModNumber P;
+	ModNumber g;
+	ModNumber x;
+	ModNumber y;
+};
+
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
 ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
@@ -276,6 +305,8 @@ unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned ch
 bool operator ==(ScaledNumber l, ScaledNumber r);
 
 unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
+unsigned char* ConvertEndianess(ModNumber m);
+ModNumber GetLeftMostBytes(ModNumber m, unsigned int n);
 
 ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false, int modulusSize = MAXMOD);
 ModNumber RemovePKCS1Mask(const ModNumber& m);

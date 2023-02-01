@@ -1306,6 +1306,20 @@ unsigned char *ConvertEndianess(const unsigned char* p, unsigned int cb)
 	return res;
 }
 
+unsigned char* ConvertEndianess(ModNumber m)
+{
+	unsigned char* p = (unsigned char *)m.num;
+	unsigned int n = GetByteCount(m);
+	return ConvertEndianess(p, n);
+}
+
+ModNumber GetLeftMostBytes(ModNumber m, unsigned int leftBytes)
+{
+	unsigned int n = GetByteCount(m);
+	unsigned char* p = (unsigned char*)m.num;
+	ModNumber res(p + (n - leftBytes), leftBytes);
+	return res;
+}
 unsigned int GetByteCount(const ModNumber& mn)
 {
 	unsigned char* p = (unsigned char *)mn.num;

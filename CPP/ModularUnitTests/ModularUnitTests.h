@@ -5768,18 +5768,12 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageTooLong)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFFFFFF",16);
 			Assert::ExpectException<std::domain_error>([message] {GetPKCS1Mask(message, false, 16); });
 
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageEmptyModulus26Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message;
 			ModNumber res = GetPKCS1Mask(message, false, 13);
 			std::string resstr = res.to_string(16);
@@ -5789,9 +5783,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageFourFsModulus26Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 13);
 			std::string resstr = res.to_string(16);
@@ -5801,9 +5792,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageSixFsModulus28Fs)
 		{
-//			RSAParameters rsaParameters;
-//			rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-//			RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 14);
 			std::string resstr = res.to_string(16);
@@ -5813,9 +5801,6 @@ namespace ModularUnitTests
 		}
  		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus30Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 15);
 			std::string resstr = res.to_string(16);
@@ -5825,9 +5810,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus32Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 16);
 			std::string resstr = res.to_string(16);
@@ -5837,9 +5819,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageEightFsModulus34Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 17);
 			std::string resstr = res.to_string(16);
@@ -5849,9 +5828,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageTenFsModulus36Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 18);
 			std::string resstr = res.to_string(16);
@@ -5861,9 +5837,6 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestGetPKCS1MaskMessageTwentyFsModulus72Fs)
 		{
-			//RSAParameters rsaParameters;
-			//rsaParameters.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
-			//RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFF", 16);
 			ModNumber res = GetPKCS1Mask(message, false, 36);
 			std::string resstr = res.to_string(16);

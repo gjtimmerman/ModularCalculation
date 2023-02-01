@@ -1638,7 +1638,7 @@ std::list<std::string> ParseBERASNString(const ModNumber& m)
 				resultStr.append(1, pMaskedNumber[index - i]);
 			}
 			result.push_back(resultStr);
-			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement3 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement2));
+			std::tuple<ASNElementType, unsigned int, unsigned int> ASNElement3 = ReadASNElement(pMaskedNumber, std::get<2>(ASNElement2)-std::get<1>(ASNElement2));
 			if (std::get<0>(ASNElement3) == ASNElementType::INTEGER_VALUE)
 			{
 				unsigned int len = std::get<1>(ASNElement3);

@@ -6097,7 +6097,19 @@ namespace ModularUnitTests
 			std::wstring res = mn.getText<wchar_t>();
 			Assert::IsTrue(exp == res);
 		}
-
+		TEST_METHOD(TestReadDSASignature)
+		{
+			ModNumber mSignature = ModNumber::stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
+			std::list<std::string> results = ParseBERASNString(mSignature);
+			std::list<std::string>::iterator myListIterator = results.begin();
+			char exp1[] = {'\x27', '\xFB', '\xE1', '\x36','\x28', '\xA0', '\xAA', '\x70', '\x53', '\xE3', '\xC1', '\x1C', '\xE6','\xB4', '\xE7','\xF4', '\x06', '\x24', '\xC1', '\x8F'};
+			char exp2[] = { '\x6D', '\x9F', '\x22', '\xC0','\xAA', '\x16', '\x84', '\x1B', '\x26', '\x96', '\x91', '\x66', '\xC6','\x92', '\xE9','\x2B', '\x41', '\x17', '\x62', '\x32' };
+			std::string exp1Str(exp1,20);
+			std::string exp2Str(exp2, 20);
+			Assert::IsTrue(exp1Str == *myListIterator++);
+			Assert::IsTrue(exp2Str == *myListIterator++);
+			Assert::IsTrue(myListIterator == results.end());
+		}
 		TEST_METHOD(TestRSAEncryptAndDecrypt)
 		{
 			RSAParameters rsaParameters;
@@ -6186,11 +6198,11 @@ namespace ModularUnitTests
 			RSA myRsa(rsaParameters);
 #endif
 
-			unsigned char hashBigEndian[] = { 0x87,0x3D,0x59,0xD7,0x01,0xCA,0xC3,0x66,0xEA,0xD4,0xB1,0xC0,0x0A,0xD6,0x07,0xC6,0xC7,0xFE,0x5A,0x48,0x89,0xDA,0xBB,0x5C,0x90,0xC7,0x8B,0x5C,0xAE,0xEC,0xBD,0x25 };
+			char hashBigEndian[] = { '\x87','\x3D', '\x59', '\xD7', '\x01', '\xCA', '\xC3', '\x66', '\xEA', '\xD4', '\xB1', '\xC0', '\x0A', '\xD6', '\x07', '\xC6', '\xC7', '\xFE', '\x5A', '\x48', '\x89', '\xDA', '\xBB', '\x5C', '\x90', '\xC7', '\x8B', '\x5C', '\xAE', '\xEC', '\xBD', '\x25'};
 			std::string hashBigEndianStr((char *)hashBigEndian, 32);
 			ModNumber signature = myRsa.EncryptSignature(hashBigEndianStr, "2.16.840.1.101.3.4.2.1");
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
-			unsigned char* pHashLittleEndian = ConvertEndianess(hashBigEndian, 32);
+			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char *)hashBigEndian, 32);
 			ModNumber originalHash(pHashLittleEndian, 32);
 			Assert::IsTrue(originalHash == decryptedHash);
 		}

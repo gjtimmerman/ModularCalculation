@@ -267,7 +267,7 @@ public:
 	{
 
 	}
-	bool Verify(std::string hash, std::string signature) const;
+	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
 private:
 	ModNumber Q;
 	ModNumber P;
@@ -360,12 +360,13 @@ std::basic_string<T> ModNumber::getText() const
 
 #ifdef _WIN32
 NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle, const wchar_t* algorithm = L"RSA", int usage = AT_KEYEXCHANGE);
-RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists);
+RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists, int usage = AT_KEYEXCHANGE);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
+DSAParameters GetDSAKey(const wchar_t* KeyName, bool createIfNotExists);
 std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data);
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
-ModNumber sign(const wchar_t* keyName, unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
-bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t* hashAlgorithm = L"SHA256");
+std::string sign(const wchar_t* keyName, unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
+bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::string signature, const wchar_t* hashAlgorithm = L"SHA256");
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 #endif
 

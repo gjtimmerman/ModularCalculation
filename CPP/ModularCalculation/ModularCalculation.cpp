@@ -1733,21 +1733,32 @@ ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) 
 	return res;
 }
 
-bool DSA::Verify(std::string hash, std::string signature) const
+bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
 {
 	MultGroupMod mgm(P);
-	ModNumber mHash = ModNumber::stomn(hash, 16);
+	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
+	ModNumber mHash(pHashLittleEndian,hashLen);
 	unsigned int bcQ = GetByteCount(Q);
-	if (hash.length()/2 > bcQ)
+	if (hashLen > bcQ)
 		mHash = GetLeftMostBytes(mHash, bcQ);
-
-	ModNumber mSignature = ModNumber::stomn(signature, 16);
-	std::list<std::string> results = ParseBERASNString(mSignature);
+	std::list<std::string> results;
+	if (DerEncoded)
+	{
+		ModNumber mSignature = ModNumber::stomn(signature, 16);
+		results = ParseBERASNString(mSignature);
+	}
+	else
+	{
+		results.push_back(signature.substr(0, signature.length() / 2));
+		results.push_back(signature.substr(signature.length() / 2, signature.length() / 2));
+	}
 	std::list<std::string>::iterator myListIterator = results.begin();
 	std::string r = *myListIterator++;
 	std::string s = *myListIterator++;
 	unsigned char* rLittleEndian = ConvertEndianess((const unsigned char*)r.c_str(), (unsigned int)r.length());
 	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
+	//ModNumber mr((const unsigned char*)r.c_str(), (unsigned int)r.length());
+	//ModNumber ms((const unsigned char*)s.c_str(), (unsigned int)s.length());
 	ModNumber mr(rLittleEndian, (unsigned int)r.length());
 	ModNumber ms(sLittleEndian, (unsigned int)s.length());
 
@@ -1832,17 +1843,17 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 
 }
 
-RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists)
+RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists, int usage)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle,NULL,0);
 	if (status != ERROR_SUCCESS)
 		throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	NCRYPT_KEY_HANDLE keyHandle;
-	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_KEYEXCHANGE, 0);
+	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, usage, 0);
 	if (status == NTE_BAD_KEYSET && createIfNotExists)
 	{
-		keyHandle = GenerateKey(KeyName, provHandle);
+		keyHandle = GenerateKey(KeyName, provHandle, L"RSA", usage);
 	}
 	else if (status == NTE_BAD_KEYSET && !createIfNotExists)
 	{
@@ -1968,6 +1979,114 @@ void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters)
 	delete[] rawKeyData;
 }
 
+DSAParameters GetDSAKey(const wchar_t* KeyName, bool createIfNotExists)
+{
+	NCRYPT_PROV_HANDLE provHandle;
+	SECURITY_STATUS status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenStorageProvider returned error code");
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenKey(provHandle, &keyHandle, KeyName, AT_SIGNATURE, 0);
+	if (status == NTE_BAD_KEYSET && createIfNotExists)
+	{
+		keyHandle = GenerateKey(KeyName, provHandle,L"DSA", AT_SIGNATURE);
+	}
+	else if (status == NTE_BAD_KEYSET && !createIfNotExists)
+	{
+		throw std::runtime_error("Key does not exist!");
+	}
+	else if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptOpenKey returned error code");
+	DWORD keyLength;
+	DWORD keyLengthSize;
+	status = NCryptGetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (unsigned char*)&keyLength, sizeof(DWORD), &keyLengthSize, 0);
+	if (keyLength > MAXMOD * 8)
+		throw std::domain_error("KeyLength not less or equal to MAXMOD");
+	DSAParameters dsaParameters;
+#if (MAXMOD == 1024/8)
+	BCRYPT_DSA_KEY_BLOB* pkeyData;
+	DWORD size;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_DSA_PRIVATE_BLOB, NULL, NULL, 0, &size, 0);
+	unsigned char* rawKeyData = new unsigned char[size];
+	pkeyData = (BCRYPT_DSA_KEY_BLOB*)rawKeyData;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_DSA_PRIVATE_BLOB, NULL, (PBYTE)pkeyData, size, &size, 0);
+	evaluateStatus(status);
+	status = NCryptFreeObject(keyHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+	status = NCryptFreeObject(provHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+
+	if (pkeyData->dwMagic != BCRYPT_DSA_PRIVATE_MAGIC)
+		throw std::runtime_error("Key structure not of type DSA Private");
+	if (pkeyData->cbKey != MAXMOD)
+		throw std::runtime_error("Key Bitsize not correct!");
+	unsigned char* pQ = ConvertEndianess(pkeyData->q, 20 );
+	dsaParameters.Q = ModNumber(pQ, 20);
+	unsigned char* p = rawKeyData + sizeof(BCRYPT_DSA_KEY_BLOB);
+	unsigned char* pP = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.P = ModNumber(pP, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pG = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.g = ModNumber(pG, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pY = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.y = ModNumber(pY, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pX = ConvertEndianess(p, 20);
+	dsaParameters.x = ModNumber(pX, 20);
+	delete[] pQ;
+	delete[] pP;
+	delete[] pG;
+	delete[] pY;
+	delete[] pX;
+	delete[] rawKeyData;
+#elif (MAXMOD == 2048/8)
+	BCRYPT_DSA_KEY_BLOB_V2* pkeyData;
+	DWORD size;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_DSA_PRIVATE_BLOB, NULL, NULL, 0, &size, 0);
+	unsigned char* rawKeyData = new unsigned char[size];
+	pkeyData = (BCRYPT_DSA_KEY_BLOB_V2*)rawKeyData;
+	status = NCryptExportKey(keyHandle, 0, BCRYPT_DSA_PRIVATE_BLOB, NULL, (PBYTE)pkeyData, size, &size, 0);
+	evaluateStatus(status);
+	status = NCryptFreeObject(keyHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+	status = NCryptFreeObject(provHandle);
+	if (status != ERROR_SUCCESS)
+		throw std::runtime_error("CryptFreeObject returned error code");
+
+	if (pkeyData->dwMagic != BCRYPT_DSA_PRIVATE_MAGIC_V2)
+		throw std::runtime_error("Key structure not of type DSA Private");
+	if (pkeyData->cbKey != MAXMOD)
+		throw std::runtime_error("Key Bitsize not correct!");
+	unsigned char* p = rawKeyData + sizeof(BCRYPT_DSA_KEY_BLOB_V2) + pkeyData->cbSeedLength;
+	unsigned char* pQ = ConvertEndianess(p, pkeyData->cbGroupSize);
+	dsaParameters.Q = ModNumber(pQ, pkeyData->cbGroupSize);
+	p += pkeyData->cbGroupSize;
+	unsigned char* pP = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.P = ModNumber(pP, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pG = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.g = ModNumber(pG, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pY = ConvertEndianess(p, pkeyData->cbKey);
+	dsaParameters.y = ModNumber(pY, pkeyData->cbKey);
+	p += pkeyData->cbKey;
+	unsigned char* pX = ConvertEndianess(p, pkeyData->cbGroupSize);
+	dsaParameters.x = ModNumber(pX, pkeyData->cbGroupSize);
+	delete[] pQ;
+	delete[] pP;
+	delete[] pG;
+	delete[] pY;
+	delete[] pX;
+	delete[] rawKeyData;
+
+#endif
+	return dsaParameters;
+}
+
 std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data)
 {
 	NCRYPT_PROV_HANDLE provHandle;
@@ -2075,40 +2194,53 @@ std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const 
 	return std::make_tuple(hash, hashLength);
 }
 
-ModNumber sign(const wchar_t* keyName, unsigned char* hash, int hashLength, const wchar_t *hashAlgorithm)
+std::string sign(const wchar_t* keyName, unsigned char* hash, int hashLength, const wchar_t *hashAlgorithm)
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status;
 	NCRYPT_KEY_HANDLE keyHandle;
 	status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
 	evaluateStatus(status);
-	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
+	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_SIGNATURE, 0);
+	evaluateStatus(status);
+	ULONG keyLength;
+	DWORD cbLength;
+	status = NCryptGetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE) & keyLength, sizeof(ULONG), &cbLength, 0);
+	evaluateStatus(status);
+	if (!hashAlgorithm && keyLength == 0x400)
+	{
+		hashLength = 20;
+	}
 	unsigned char signature[MAXMOD];
 	ULONG cbResult;
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
 	paddingInfo.pszAlgId = hashAlgorithm;
-	status = NCryptSignHash(keyHandle, &paddingInfo, hash, hashLength, signature, MAXMOD, &cbResult, BCRYPT_PAD_PKCS1);
+	status = NCryptSignHash(keyHandle, hashAlgorithm ? &paddingInfo : 0, hash, hashLength, signature, MAXMOD, &cbResult, hashAlgorithm ? BCRYPT_PAD_PKCS1 : 0);
 	evaluateStatus(status);
 	status = NCryptFreeObject(keyHandle);
 	evaluateStatus(status);
-	unsigned char *pSignatureLittleEndian = ConvertEndianess(signature, cbResult);
-	ModNumber retvalue(pSignatureLittleEndian, cbResult);
-	return retvalue; 
+	return std::string((const char *)signature,cbResult); 
 }
 
-bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, ModNumber signature, const wchar_t *hashAlgorithm )
+bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::string signature, const wchar_t *hashAlgorithm )
 {
 	NCRYPT_PROV_HANDLE provHandle;
 	SECURITY_STATUS status;
 	NCRYPT_KEY_HANDLE keyHandle;
 	status = NCryptOpenStorageProvider(&provHandle, NULL, 0);
 	evaluateStatus(status);
-	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_KEYEXCHANGE, 0);
-	unsigned char *littleEndianSignature = (unsigned char *)signature.num;
-	unsigned char *bigEndiansignature = ConvertEndianess(littleEndianSignature,MAXMOD);
+	status = NCryptOpenKey(provHandle, &keyHandle, keyName, AT_SIGNATURE, 0);
+	ULONG keyLength;
+	DWORD cbLength;
+	status = NCryptGetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&keyLength, sizeof(ULONG), &cbLength, 0);
+	evaluateStatus(status);
+	if (!hashAlgorithm && keyLength == 0x400)
+	{
+		hashLength = 20;
+	}
 	BCRYPT_PKCS1_PADDING_INFO paddingInfo;
 	paddingInfo.pszAlgId = hashAlgorithm;
-	status = NCryptVerifySignature(keyHandle, &paddingInfo, hash, hashLength, bigEndiansignature, MAXMOD, BCRYPT_PAD_PKCS1);
+	status = NCryptVerifySignature(keyHandle,hashAlgorithm ? &paddingInfo : 0, hash, hashLength, (PBYTE)signature.c_str(),(DWORD) signature.length(), hashAlgorithm ? BCRYPT_PAD_PKCS1 : 0);
 	evaluateStatus(status);
 	NCryptFreeObject(keyHandle);
 	return status == ERROR_SUCCESS;

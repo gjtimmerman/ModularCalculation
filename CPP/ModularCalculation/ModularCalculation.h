@@ -267,7 +267,7 @@ public:
 	{
 
 	}
-	bool Verify(std::string hash, std::string signature);
+	bool Verify(std::string hash, std::string signature) const;
 private:
 	ModNumber Q;
 	ModNumber P;

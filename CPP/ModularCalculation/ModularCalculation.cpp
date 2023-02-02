@@ -1733,6 +1733,38 @@ ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) 
 	return res;
 }
 
+bool DSA::Verify(std::string hash, std::string signature) const
+{
+	MultGroupMod mgm(P);
+	ModNumber mHash = ModNumber::stomn(hash, 16);
+	unsigned int bcQ = GetByteCount(Q);
+	if (hash.length()/2 > bcQ)
+		mHash = GetLeftMostBytes(mHash, bcQ);
+
+	ModNumber mSignature = ModNumber::stomn(signature, 16);
+	std::list<std::string> results = ParseBERASNString(mSignature);
+	std::list<std::string>::iterator myListIterator = results.begin();
+	std::string r = *myListIterator++;
+	std::string s = *myListIterator++;
+	unsigned char* rLittleEndian = ConvertEndianess((const unsigned char*)r.c_str(), (unsigned int)r.length());
+	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
+	ModNumber mr(rLittleEndian, (unsigned int)r.length());
+	ModNumber ms(sLittleEndian, (unsigned int)s.length());
+
+	if (!(mr < Q && ms < Q))
+		return false;
+
+	MultGroupMod mgmq(Q);
+	ModNumber sInverse = mgmq.Inverse(ms);
+	ModNumber sInverseTimesS = mgmq.Mult(ms, sInverse);
+	ModNumber u1 = mgmq.Mult(mHash, sInverse);
+	ModNumber u2 = mgmq.Mult(mr, sInverse);
+	ModNumber mv1 = mgm.Exp(g, u1);
+	ModNumber mv2 = mgm.Exp(y, u2);
+	ModNumber mv = mgm.Mult(mv1, mv2) % Q;
+	return mv == mr;
+}
+
 
 
 #ifdef _WIN32 

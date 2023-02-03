@@ -16,9 +16,9 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-//#define MAXMOD (1024/8)
+#define MAXMOD (1024/8)
 //#define MAXMOD (2048/8)
-#define MAXMOD (3072/8)
+//#define MAXMOD (3072/8)
 //#define MAXMOD (4096/8)
 
 #define NSIZE (NCOUNT*8)
@@ -268,6 +268,7 @@ public:
 	{
 
 	}
+	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
 	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
 private:
 	ModNumber Q;

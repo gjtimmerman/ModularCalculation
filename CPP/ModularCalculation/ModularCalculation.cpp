@@ -1516,6 +1516,23 @@ std::tuple<ASNElementType,unsigned int, unsigned int> ReadASNElement(unsigned ch
 
 }
 
+std::string CreateBERASNStringForDSASignature(std::list<std::string> content)
+{
+	std::string ASNString;
+	std::list<std::string>::iterator myIterator = content.begin();
+	std::string r = *myIterator++;
+	std::string s = *myIterator++;
+	ASNString.append(1, (unsigned char)ASNElementType::SEQUENCE | 0x20);
+	ASNString.append(1, (unsigned char)(r.length() + 2 + s.length() + 2));
+	ASNString.append(1, (unsigned char)ASNElementType::INTEGER_VALUE);
+	ASNString.append(1, (unsigned char)r.length());
+	ASNString.append(r);
+	ASNString.append(1, (unsigned char)ASNElementType::INTEGER_VALUE);
+	ASNString.append(1, (unsigned char)s.length());
+	ASNString.append(s);
+	return ASNString;
+}
+
 ModNumber CreateBERASNString(std::list<std::string> content)
 {
 	std::string result;
@@ -1731,6 +1748,74 @@ ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) 
 	ModNumber hq = mgmn.Mult(h, Prime2);
 	ModNumber res = mgmn.Add(m2, hq);
 	return res;
+}
+
+std::string DSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
+{
+	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
+	ModNumber mHash(pHashLittleEndian, hashLen);
+	unsigned int bcQ = GetByteCount(Q);
+	if (hashLen > bcQ)
+		mHash = GetLeftMostBytes(mHash, bcQ);
+	llint k[COUNTLL] = {};
+	unsigned char* p = (unsigned char*)k;
+	srand((unsigned int)time(0));
+	ModNumber r;
+	ModNumber s;
+	ModNumber mk;
+	ModNumber mzero;
+	MultGroupMod mgmp(P);
+	MultGroupMod mgmq(Q);
+	do
+	{
+		do
+		{
+			for (unsigned int i = 0; i < bcQ; i++)
+			{
+				p[i] = (unsigned char)(rand() % 0x100);
+			}
+			mk = ModNumber(k);
+			if (mk == mzero)
+			{
+				mk += rand() + 1;
+			}
+			while (mk >= Q)
+			{
+				p[bcQ-1] -= rand() + 1;
+				mk = ModNumber(k);
+			}
+			r = mgmp.Exp(g, mk) % Q;
+		} while (r == mzero);
+		ModNumber kInverse;
+		std::thread th1([&mgmq, &kInverse, &mk] {kInverse = mgmq.Inverse(mk); });
+		ModNumber hashPlusXR;
+		std::thread th2([&mgmq, this,&r, &mHash, &hashPlusXR] {
+			ModNumber xR = mgmq.Mult(x, r);
+			hashPlusXR = mgmq.Add(mHash, xR);
+			});
+		th1.join();
+		th2.join();
+		s = mgmq.Mult(kInverse, hashPlusXR);
+	} while (s == mzero);
+	unsigned char* rBigEndian = ConvertEndianess(r);
+	unsigned char* sBigEndian = ConvertEndianess(s);
+	unsigned int cbR = GetByteCount(r);
+	unsigned int cbS = GetByteCount(s);
+	if (DerEncoded)
+	{
+		std::list<std::string> myList;
+		std::string rStr((const char*)rBigEndian, cbR);
+		myList.push_back(rStr);
+		std::string sStr((const char*)sBigEndian, cbS);
+		myList.push_back(sStr);
+		return CreateBERASNStringForDSASignature(myList);
+	}
+	else
+	{
+		std::string rs((const char*)rBigEndian, cbR);
+		rs.append((const char*)sBigEndian, cbS);
+		return rs;
+	}
 }
 
 bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signature, bool DerEncoded) const

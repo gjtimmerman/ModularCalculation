@@ -16,8 +16,9 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-#define MAXMOD (1024/8)
+//#define MAXMOD (1024/8)
 //#define MAXMOD (2048/8)
+#define MAXMOD (3072/8)
 //#define MAXMOD (4096/8)
 
 #define NSIZE (NCOUNT*8)
@@ -153,8 +154,8 @@ private:
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
-	friend unsigned char* ConvertEndianess(ModNumber m);
-	friend ModNumber GetLeftMostBytes(ModNumber m, unsigned int n);
+	friend unsigned char* ConvertEndianess(const ModNumber& m);
+	friend ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
 	friend ModNumber RemovePKCS1Mask(const ModNumber& m);
 	friend ModNumber CreateBERASNString(std::list<std::string> content);
@@ -166,7 +167,7 @@ private:
 class ScaledNumber
 {
 public:
-	ScaledNumber(ModNumber mn, int scale, bool alreadyScaled = false) : mn(alreadyScaled ? mn : mn << scale * 8), scale(scale)
+	ScaledNumber(const ModNumber& mn, int scale, bool alreadyScaled = false) : mn(alreadyScaled ? mn : mn << scale * 8), scale(scale)
 	{
 	}
 	ScaledNumber sqrt();
@@ -305,8 +306,8 @@ unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned ch
 bool operator ==(ScaledNumber l, ScaledNumber r);
 
 unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
-unsigned char* ConvertEndianess(ModNumber m);
-ModNumber GetLeftMostBytes(ModNumber m, unsigned int n);
+unsigned char* ConvertEndianess(const ModNumber& m);
+ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 
 ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false, int modulusSize = MAXMOD);
 ModNumber RemovePKCS1Mask(const ModNumber& m);

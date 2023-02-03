@@ -1306,14 +1306,14 @@ unsigned char *ConvertEndianess(const unsigned char* p, unsigned int cb)
 	return res;
 }
 
-unsigned char* ConvertEndianess(ModNumber m)
+unsigned char* ConvertEndianess(const ModNumber& m)
 {
 	unsigned char* p = (unsigned char *)m.num;
 	unsigned int n = GetByteCount(m);
 	return ConvertEndianess(p, n);
 }
 
-ModNumber GetLeftMostBytes(ModNumber m, unsigned int leftBytes)
+ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int leftBytes)
 {
 	unsigned int n = GetByteCount(m);
 	unsigned char* p = (unsigned char*)m.num;
@@ -1757,8 +1757,6 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 	std::string s = *myListIterator++;
 	unsigned char* rLittleEndian = ConvertEndianess((const unsigned char*)r.c_str(), (unsigned int)r.length());
 	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
-	//ModNumber mr((const unsigned char*)r.c_str(), (unsigned int)r.length());
-	//ModNumber ms((const unsigned char*)s.c_str(), (unsigned int)s.length());
 	ModNumber mr(rLittleEndian, (unsigned int)r.length());
 	ModNumber ms(sLittleEndian, (unsigned int)s.length());
 
@@ -1767,11 +1765,17 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 
 	MultGroupMod mgmq(Q);
 	ModNumber sInverse = mgmq.Inverse(ms);
-	ModNumber sInverseTimesS = mgmq.Mult(ms, sInverse);
-	ModNumber u1 = mgmq.Mult(mHash, sInverse);
-	ModNumber u2 = mgmq.Mult(mr, sInverse);
-	ModNumber mv1 = mgm.Exp(g, u1);
-	ModNumber mv2 = mgm.Exp(y, u2);
+	ModNumber u1;
+	std::thread th1([&u1, &mgmq, &mHash, &sInverse] {u1 = mgmq.Mult(mHash, sInverse); });
+	
+	ModNumber u2;
+	std::thread th2([&u2, &mgmq, &mr, &sInverse] {u2 = mgmq.Mult(mr, sInverse); });
+	ModNumber mv1;
+	std::thread th3([&mv1, &mgm, this, &u1, &th1] {th1.join(); mv1 = mgm.Exp(g, u1); });
+	ModNumber mv2;
+	std::thread th4([&mv2, &mgm, this, &u2, &th2] {th2.join(); mv2 = mgm.Exp(y, u2); });
+	th3.join();
+	th4.join();
 	ModNumber mv = mgm.Mult(mv1, mv2) % Q;
 	return mv == mr;
 }
@@ -2042,7 +2046,7 @@ DSAParameters GetDSAKey(const wchar_t* KeyName, bool createIfNotExists)
 	delete[] pY;
 	delete[] pX;
 	delete[] rawKeyData;
-#elif (MAXMOD == 2048/8)
+#elif (MAXMOD == 2048/8 || MAXMOD == 3072/8)
 	BCRYPT_DSA_KEY_BLOB_V2* pkeyData;
 	DWORD size;
 	status = NCryptExportKey(keyHandle, 0, BCRYPT_DSA_PRIVATE_BLOB, NULL, NULL, 0, &size, 0);

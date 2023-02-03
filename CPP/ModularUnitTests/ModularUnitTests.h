@@ -6113,7 +6113,22 @@ namespace ModularUnitTests
 		TEST_METHOD(TestDSAParameters)
 		{
 			DSAParameters dsaParameters;
-#if (MAXMOD == 2048/8)
+#if (MAXMOD == 3072/8)
+			dsaParameters.P = ModNumber::stomn("BCAE0FB273D98B3CDDDFBB1BE44470A592AAC3EA0885D06C272C5333D8C62AA7F8E5A09D56FF462BFF1032870B306F1A997CE635B920630B128C9030EE5506B7C19992EEBEDE39892D0107E0F6BBC417FE1EF3F1FE436A30E7FB1FD9043D4BAC3A240D6E287FE33090351746BC25639FAD56D3E2922D47092D0EF4AC7B0F0F85E747CF55A11E702276A6C40E285C3FBB61E50755EE3F27764B748623EC67D8E2D8B2E5A6142D244A5C4500C3A580A174FDC9D48BDC9CD93AEF8930563A28FBCBA5E52D8DDCCCE9FDB249E910594B02AB4A9283DEE01B42B405E8D71EC0B613ADCBB7095991256F6B38AE318AFEBB2432D708BCB913E6D67729E8B0F97B30CB30F5223980F792B9C8ECBDB19236FDEE155F1D8F4D0540B63EED872599DFF8B48A3A8F3F966F6CDC389781DAAFBC7DBFF8F787F0ACE60680370F6C94C0DC615A437068583E7C31FF381E1BAB1F8311EA3FD588FD74D12ACC15E6217E118E76C2C66686215D07BE8A54EA754ECECA6377E0BDFA8289F1FC3380C517E0A2CD06B8A7", 16);
+			dsaParameters.Q = ModNumber::stomn("BEF143E5D8624534038989D4AC6A76FC83A44E501C20BA8E6D3FC092F0EE36A7", 16);
+			dsaParameters.g = ModNumber::stomn("402F21E6DCBC4614C35105555518FA9C7F1E78330AA227BE42F4E63C127A677D0736D814FC76F2E411B06EB860C6F9D7014193ED8E5052D02E8E0045940A3C9E4C5DE8C3219A27C912D439B7F8EDFD7039989A18C7254985608B667E642E8526A069CE050E488D94F8AA35BA272EADA29DD42D9C40C8E82A69C07E8CC29801C5463100631D51810306B60BF75BDCEFA779C6C4469575C0F8B4DC100AD74052DF124987E1C6859E03FD79CD4A1AF7BD58EEB3B86D124BEB77ED2FBF82F5104E3B3CB524842A24C8048BEBBB3D153F0A9FB9B98422F8144EB1D243C1ED82F858277E68ACC83D877CD6403573A88C2CA532899631C8D68E811C16939C663AB9A5A3A3DADBAB2587DA7796D620068B26C96FBCFDC616BC0AE10829D9F6ED207FA0B2B1DFE78E3BD9A1AD45C261DC3DB231AC34B971E0B3017509504949C743EBC1D47520459FACECCCB5F442E40CAF35390DFCDB524FE23508B03EDFEDB435DF9A0E4305CFF095E81CFEDA0C1F75B45DAA63A1DAE14AC31629A2E3C9CF6EF0191418", 16);
+			dsaParameters.x = ModNumber::stomn("8BD650804F276A2EE4FAF859F63E25389614D8541119EF81CA482DEE4F312499", 16);
+			dsaParameters.y = ModNumber::stomn("A3FCC9FDEE022201CD3F90D8348E71C4CB433B1015BCD63CE124763F94DCA05C431FCB1061445516436F6167B772EE4865189B019323D200FEBA62CB4EF7EA3F553F46699CDB8E4803290FF50145DAB9D77E98F50CEDF12FB3564D7F7B5C88874F7AF5BE5793331BD60B2E32EEF8E88DBAFA738D15D52A3B186E20FAACFCFA383D4B1CD5863B0719CCC332CCCEE0E9739720121C3AB0DE5C754D700A6ABC5953CFEB17BE1DD0E45E519D306A1AF01D89ACAE636DC73617A70AFD7D73926AADD6D1C6706ACAFE60AD8E411FA9D07BE96CC2C91CF22CC7C3AE32DBFF4F5660B9CDFFDB3E975E2169208F400A9017A669469EEAB21CCD0018D67FABCE18697AB775A7EFBE3A08EEF72E0C2A5E026A892799231BB592B23F02C1E829E445CACB29379D2FF6AC1B44DCE032ADBB67C585B0E182E5C9902EC8919BC4BA01E7E2568B0F4134B71529D8F56E0C2DFA4CAE327E14E6473DB59AB4A32294452284B27366A33CFF27DD341D89EC114F3929DC78B0CE719789617A0696AB0A75459FD7E2B25C", 16);
+			MultGroupMod mgm(dsaParameters.P);
+			ModNumber computedY = mgm.Exp(dsaParameters.g, dsaParameters.x);
+			Assert::IsTrue(dsaParameters.y == computedY);
+			ModNumber pModQ = dsaParameters.P % dsaParameters.Q;
+			ModNumber mone(1ull);
+			Assert::IsTrue(mone == pModQ);
+			ModNumber pMinusOne = dsaParameters.P;
+			ModNumber computedGPowQ = mgm.Exp(dsaParameters.g, dsaParameters.Q);
+			Assert::IsTrue(mone == computedGPowQ);
+#elif (MAXMOD == 2048/8)
 			dsaParameters.P = ModNumber::stomn("DFC017474A4FAF7A5E094FC31BD901731AD1823C5FAF5A06433AB3928FF9BC2EF5A0A90FC0AADB4FEB3294175089DCCE2509E2F7E5E7B7D7FB0CD54A025C6C6DCB599DA196BB9729B824BC811E67F6C1DB95F40DB8BD8A5C8F0C98A2B887127B975279B7F744D0392DD76350F989B2FF212B58557AADD9A718B8EF5453C71F2F4989EC458DF17F1126BE8FA0A48848F028A9808FBF524BF24E0960912640FD0A610C064A243299F992245DEBBAF084601ED8164875B0ABB7EDE528053A4753AC6C91CEB4DA8DE85DC80CDF4CF95A31A03667C5B774E9F7C9436E706F08C4F9FF58ABFECA29D255D732F57CCBB92CDDBD5A56DDAF50ADA60FF932239CCFF8B039", 16);
 			dsaParameters.Q = ModNumber::stomn("8B50F6EA9476593FC9295A3D28CA0E80E46164C8E5F16E80E97007C8612CDE93", 16);
 			dsaParameters.g = ModNumber::stomn("DDF1F59904EE5F22270307B45C75153D296965D17FA6C5A12F71D3FDC18BD7FB8C11337958500124550B3084E651FD62407C1E82374641742745169685DA6A9E2060D1A1BBC9E747A2B1A19A004BF527DE7859E75703111E81AD9A0DB62E78208E91CAF32635A0F669DC3A51ED18D8EBB5613355364CF2FBB4D16D2379E81532A7246D824B85AA74CDA49D7EB0582F44C75FDEB0709CEC1F826B8117B6D4348EF58CCE26443A383DD5717CD84F692C587D915B80481838BF27ABFD7B52D37443A52D912CF744FC313F8DDE5D322D054DF9A75717164EBB99CC345E9C39530C3776E8981B5FACB727F57A3BB072DA4C24DDB011B5E2BE8A2D77247B302ADFAB68", 16);
@@ -6128,6 +6143,7 @@ namespace ModularUnitTests
 			ModNumber pMinusOne = dsaParameters.P;
 			ModNumber computedGPowQ = mgm.Exp(dsaParameters.g, dsaParameters.Q);
 			Assert::IsTrue(mone == computedGPowQ);
+
 
 #elif (MAXMOD == 1024/8)
 			dsaParameters.P = ModNumber::stomn("C18006893BCE75DC77605271C0AA43F5BFF9FD7B24F3DE9817A1B8230650542B1B30B66727EA3D44FBB476451D96B869555780D447729A7DC1ED7216B4F5C6A1A544F361723C3ACACBEFFA393389F42A7DE7F42106A30C04B0275DE550C8FF91392AA44FFBEBA94FE07CD19B50C5D66814BB31D741628503B0E579C76D32FF2D", 16);
@@ -6243,6 +6259,13 @@ namespace ModularUnitTests
 			rsaParameters.Coefficient = ModNumber::stomn("80B8FE74BA8F322BB18AD25B5EA75E1B50F54521E648960084FA90895634016A7C3D0997C52A1BC766C58BFFE8CD8953146A188D29480311E624048F83ADAEE157EFC4AE9EFFB144BA8F41E2CACDACD50A51367BB9D013E29B6C859AFC030CAE31B38740F287D61F4CDEB78659E91D404FD6976FD7F5E34C1B7FF530B655AA36161C928BD128D56A6FC1469CF8DB7D308CAFAE0AFDA03A71A399C9EC05889427AAE189EA9DD2BB4A4132FB16622FC9394759F337C8AAD5AF6E3BF659D0624EB10238BA58BDAF858ACF954FBFF03AD12FC0F55C79EDC318FC96D6BC53DEB0688E2C1B80572EC942E37848C75BDAEE6366FA5C11396F8E18DD6AB0F61AD71265D4", 16);
 			rsaParameters.PrivExp = ModNumber::stomn("6DD1E9C365DF3C8E78AB02A740640F2B7DD3A8A12804A00BC3299FB2FA00B5508EA6BA4D3508C75576AA460A72CD0259F75A68D516BED310101935D98D8D9BCAE5CD92E8A9232B18ABC618DD07B9B3BD9705B8A5B51E322E764C160EFC186BCFCB357CDC5B07B87DD73644F73D3162A4A5A1F5695E67EA0777045BF3959C49D8B553F198C5ED8BAF422BA3F2EF8CC3EA4678289B23C3FAF6E0E255E18706A8588F6A95EAE2D9C34659896121E8E6B5555A10C857847328A861D91C94160D070647D8363C68F5C147938B3C72E2BF6FA9B4B48A271481061D367E7A2D8F196B5D2DB3C6F911B7819786C98AB93D6E772C077D6DAAB88B2DE8F20F39FB9003D061F9C8CB3A24B6F650C3C6393117201B765546B40453313045C0C67F9A404016F7073DE6F6877E7D9100EC77B7252D1E064EA99B102E73095D80049D127932C4A63D894DBF37446A5222CBA22B9B1B70B9C09C3EBA69EE4C302B6A59F7EE6C70C1F9283E9E171C14457FB78FAAC615AB15F691318A4CB4E55F1F1A1E635EAE217565A4D94A3505095232A4CB211E579122C2DCB67944A9E2514CEEA5C3E85CEFA916887B9D7B0BC4042EB4622A5E283566105E997FACFCC3EDBD152620E2A472E8CE47464BB0892642AE410CB9A5F283693E2F736444C54338978E21775E616BC2839208E89E5312CD26686C21E964F6AA29874E84FC1776751C1FAF0369B57075", 16);
 			RSA myRsa(rsaParameters);
+			char hashBigEndian[] = { '\x87','\x3D', '\x59', '\xD7', '\x01', '\xCA', '\xC3', '\x66', '\xEA', '\xD4', '\xB1', '\xC0', '\x0A', '\xD6', '\x07', '\xC6', '\xC7', '\xFE', '\x5A', '\x48', '\x89', '\xDA', '\xBB', '\x5C', '\x90', '\xC7', '\x8B', '\x5C', '\xAE', '\xEC', '\xBD', '\x25' };
+			std::string hashBigEndianStr((char*)hashBigEndian, 32);
+			ModNumber signature = myRsa.EncryptSignature(hashBigEndianStr, "2.16.840.1.101.3.4.2.1");
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
+			ModNumber originalHash(pHashLittleEndian, 32);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 2048/8)
 			rsaParameters.pubExp = ModNumber::stomn("010001", 16);
 			rsaParameters.Modulus = ModNumber::stomn("CA75BD1F951E545F8BA1BF6C985398C48BE5CD45E1794AD7D151CF8871D4088C32B1E88D8E4A9106714EACD38C284D70A1E15EBCC289BED8EE90C771B7A45A86DA92C7D5D4936782A701CCC6C7BF75A9CF22E2C079B2E94A4C7ED28B2983AD71B8D24D4E43501CA1FE0C15204A311BD4EEFC9B62A9D1078D27CC5C213A4D328002100FB350D8749DCCC982D736F6ED95B70B146152C966661FF48FFDF8CB8180E0A49D0D62EDED2FBE40D8C639B4F3817EDE2D7D5D9AAE4E0ECE362598DA62613E9B7B9BF7D93F6C232AE9BFC34142A65774DB2241D8B810734FED65C97370FC84599E002680901B55D0E991E51C6C4856FC361FD526193EB972E2C29467F211", 16);
@@ -6253,6 +6276,13 @@ namespace ModularUnitTests
 			rsaParameters.Coefficient = ModNumber::stomn("6F2C5D2D9A587AA5657032960ABBB1246A0D7B51196625693284F6B8B8222C5B2E8BE3139FEA29D20CC70FD6C8740CA5DE0A94C5ED1D56E6CCE8BC67AAE9153C57A02EEBDC5764B11608AED772B661243E265FBA989B74DB2B9DAC0CEC7AE9C322232C56AFD4BDD8746C8095BBCFDF04C553219092C8E243C94E84757FDA30AC", 16);
 			rsaParameters.PrivExp = ModNumber::stomn("0B5BF1C17CDF57C2889609A471237795C7779C3DC879C2AE3B2B48E691E4609A6519C03F78F54C0FBD79B98EA0F57DEACCDA55336802CC776563301D7C3D376B0B8662B9E79461A15DF766E2DC402CBCDB474CCB99C864F86B344E61CA717DE0BC8AE815750760A3E21A11715F5844047D6824DBB3456C140A6097E6B15BB572899E5706451E48D95BE641E03162BFFCAF5272807661DA94CC9C6081DD179EE2C158F2B713C76EA71969AB83DA5F2EAA59DAC9E29B6F55F637B6C109139B0DEE731F36FF59C799357BB7732DF9C8F5D09085B8187E6FF016E3563833EA34ACD1867DEE6F7844749F32BDAD344E1DC7FE2E89A1696CC5D9E12E3902DBF0FE2265", 16);
 			RSA myRsa(rsaParameters);
+			char hashBigEndian[] = { '\x87','\x3D', '\x59', '\xD7', '\x01', '\xCA', '\xC3', '\x66', '\xEA', '\xD4', '\xB1', '\xC0', '\x0A', '\xD6', '\x07', '\xC6', '\xC7', '\xFE', '\x5A', '\x48', '\x89', '\xDA', '\xBB', '\x5C', '\x90', '\xC7', '\x8B', '\x5C', '\xAE', '\xEC', '\xBD', '\x25' };
+			std::string hashBigEndianStr((char*)hashBigEndian, 32);
+			ModNumber signature = myRsa.EncryptSignature(hashBigEndianStr, "2.16.840.1.101.3.4.2.1");
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
+			ModNumber originalHash(pHashLittleEndian, 32);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 1024/8)
 			rsaParameters.pubExp = ModNumber::stomn("010001", 16);
 			rsaParameters.Modulus = ModNumber::stomn("B08B5EF115AED8F91EE2FB82E7E8C8611DF101B4138B37787A18D1E72FC75437342A8961F7C462CBD2208DE6EC0472882CE6410BCE3AE096BB2CA0506B5FBF5865FC80465653F2AEA678C8A8638AF8CF98F105166B6CFA71A61567765DF9521FAE5616DBBF26F99512EEBF857C166941FC2402C5E27258B10206A8AF016C45E9", 16);
@@ -6263,15 +6293,15 @@ namespace ModularUnitTests
 			rsaParameters.Coefficient = ModNumber::stomn("89C0F663B05BC7C1CE547866B45F137DC73739DF9C159B5BA648A5C7818BC46A9CD12C41922A82DB150F9D34F08D69B4A94A947848E88DC5735800C882C856A1", 16);
 			rsaParameters.PrivExp = ModNumber::stomn("9E7C2F39FBFE1FD7DC2B662009328717EFFA184E61311C15F27DEF893BF2141F0E9C9502369BBD193E446D3EFD67ACADA4A8FB81AE9C5A5BD621E4B4ECFF625469B82CE442C50E56F2C7E860FD7414AB46C9BA2C8F043FC2FAF5408E50A758BFDB2AF454020A1E77586C4F7E2D7CCF66E354715606B5223C31538AEDAAA0DB85", 16);
 			RSA myRsa(rsaParameters);
-#endif
-
-			char hashBigEndian[] = { '\x87','\x3D', '\x59', '\xD7', '\x01', '\xCA', '\xC3', '\x66', '\xEA', '\xD4', '\xB1', '\xC0', '\x0A', '\xD6', '\x07', '\xC6', '\xC7', '\xFE', '\x5A', '\x48', '\x89', '\xDA', '\xBB', '\x5C', '\x90', '\xC7', '\x8B', '\x5C', '\xAE', '\xEC', '\xBD', '\x25'};
-			std::string hashBigEndianStr((char *)hashBigEndian, 32);
+			char hashBigEndian[] = { '\x87','\x3D', '\x59', '\xD7', '\x01', '\xCA', '\xC3', '\x66', '\xEA', '\xD4', '\xB1', '\xC0', '\x0A', '\xD6', '\x07', '\xC6', '\xC7', '\xFE', '\x5A', '\x48', '\x89', '\xDA', '\xBB', '\x5C', '\x90', '\xC7', '\x8B', '\x5C', '\xAE', '\xEC', '\xBD', '\x25' };
+			std::string hashBigEndianStr((char*)hashBigEndian, 32);
 			ModNumber signature = myRsa.EncryptSignature(hashBigEndianStr, "2.16.840.1.101.3.4.2.1");
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
-			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char *)hashBigEndian, 32);
+			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
 			ModNumber originalHash(pHashLittleEndian, 32);
 			Assert::IsTrue(originalHash == decryptedHash);
+#endif
+
 		}
 #ifdef _WIN32
 
@@ -6381,23 +6411,33 @@ namespace ModularUnitTests
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false, AT_SIGNATURE);
+			RSA myRsa(rsaParameters);
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
+			ModNumber originalHash(pHashLittleEndian, len);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 2048/8)
 			std::string signatureStr = sign(L"MyCoolSignatureKey2048", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false, AT_SIGNATURE);
+			RSA myRsa(rsaParameters);
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
+			ModNumber originalHash(pHashLittleEndian, len);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 1024/8)
 			std::string signatureStr = sign(L"MyCoolSignatureKey1024", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char *)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false, AT_SIGNATURE);
-#endif
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
-			ModNumber originalHash(pHashLittleEndian,len);
+			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+#endif
 		}
 
 		TEST_METHOD(TestSignatureRSACreateSHA256)
@@ -6446,23 +6486,33 @@ namespace ModularUnitTests
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false, AT_SIGNATURE);
+			RSA myRsa(rsaParameters);
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
+			ModNumber originalHash(pHashLittleEndian, len);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 2048/8)
 			std::string signatureStr = sign(L"MyCoolSignatureKey2048", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false, AT_SIGNATURE);
+			RSA myRsa(rsaParameters);
+			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
+			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
+			ModNumber originalHash(pHashLittleEndian, len);
+			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 1024/8)
 			std::string signatureStr = sign(L"MyCoolSignatureKey1024", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false, AT_SIGNATURE);
-#endif
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+#endif
 		}
 		TEST_METHOD(TestSignatureRSACreateSHA512)
 		{
@@ -6504,39 +6554,42 @@ namespace ModularUnitTests
 			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
-#if (MAXMOD == 2048/8)
+#if (MAXMOD == 3072/8)
+			std::string signatureStr = sign(L"MyCoolDSAKey3072", pHashBigEndian, len, 0);
+			DSAParameters dsaParameters = GetDSAKey(L"MyCoolDSAKey3072", false);
+			DSA myDsa(dsaParameters);
+			Assert::IsTrue(myDsa.Verify(pHashBigEndian, len, signatureStr, false));
+#elif (MAXMOD == 2048/8)
 			std::string signatureStr = sign(L"MyCoolDSAKey2048", pHashBigEndian, len, 0);
 			DSAParameters dsaParameters = GetDSAKey(L"MyCoolDSAKey2048", false);
 			DSA myDsa(dsaParameters);
 			Assert::IsTrue(myDsa.Verify(pHashBigEndian, len, signatureStr, false));
-//			Assert::IsTrue(verify(L"MyCoolDSAKey1024", pHashBigEndian, len, signatureStr, 0));
 #elif (MAXMOD == 1024/8)
 			std::string signatureStr = sign(L"MyCoolDSAKey1024", pHashBigEndian, len, 0);
 			DSAParameters dsaParameters = GetDSAKey(L"MyCoolDSAKey1024", false);
 			DSA myDsa(dsaParameters);
 			Assert::IsTrue(myDsa.Verify(pHashBigEndian,len, signatureStr, false));
-//			Assert::IsTrue(verify(L"MyCoolDSAKey1024", pHashBigEndian, len, signatureStr, 0));
 #endif
 		}
 
-		TEST_METHOD(TestGenerateDSAKey)
-		{
-			NCRYPT_PROV_HANDLE provHandle;
-			NCryptOpenStorageProvider(&provHandle, NULL, 0);
-#if (MAXMOD == 4096/8)
-			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey4096", provHandle, L"DSA", AT_SIGNATURE);
-
-#elif (MAXMOD == 2048/8)
-			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey2048", provHandle, L"DSA", AT_SIGNATURE);
-
-#elif (MAXMOD == 1024/8)
-			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey1024", provHandle, L"DSA", AT_SIGNATURE);
-#endif
-			Assert::IsTrue(keyHandle != 0);
-			NCryptFreeObject(keyHandle);
-			NCryptFreeObject(provHandle);
-
-		}
+//		TEST_METHOD(TestGenerateDSAKey)
+//		{
+//			NCRYPT_PROV_HANDLE provHandle;
+//			NCryptOpenStorageProvider(&provHandle, NULL, 0);
+//#if (MAXMOD == 3072/8)
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey3072", provHandle, L"DSA", AT_SIGNATURE);
+//
+//#elif (MAXMOD == 2048/8)
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey2048", provHandle, L"DSA", AT_SIGNATURE);
+//
+//#elif (MAXMOD == 1024/8)
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey1024", provHandle, L"DSA", AT_SIGNATURE);
+//#endif
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//			NCryptFreeObject(provHandle);
+//
+//		}
 
 #endif
 

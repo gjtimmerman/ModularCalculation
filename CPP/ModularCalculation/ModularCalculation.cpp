@@ -1865,6 +1865,29 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 	return mv == mr;
 }
 
+bool operator == (const ECPoint& l, const ECPoint& r)
+{
+	if (l.IsAtInfinity && r.IsAtInfinity)
+		return true;
+	if (l.IsAtInfinity || r.IsAtInfinity)
+		return false;
+	return l.x == r.x && l.y == r.y;
+}
+
+ECPoint EC::Add(ECPoint p, ECPoint q)
+{
+	if (p == q)
+		return Mult(p, ModNumber(2));
+	if (p.IsAtInfinity)
+		return q;
+	if (q.IsAtInfinity)
+		return p;
+	ModNumber xDelta = mgm.Diff(q.x, p.x);
+	ModNumber yDelta = mgm.Diff(q.y, p.y);
+	ModNumber xDeltaInverse = mgm.Inverse(xDelta);
+
+}
+
 
 
 #ifdef _WIN32 

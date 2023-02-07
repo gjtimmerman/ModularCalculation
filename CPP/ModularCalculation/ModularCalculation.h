@@ -278,6 +278,28 @@ private:
 	ModNumber y;
 };
 
+struct ECPoint
+{
+	ModNumber x;
+	ModNumber y;
+	bool IsAtInfinity = false;
+};
+
+class EC
+{
+public:
+	EC(const MultGroupMod& mgm,const ModNumber& g,const ModNumber& n, lint a, lint b) : mgm(mgm), g(g), n(n), a(a), b(b)
+	{}
+	ECPoint Add(ECPoint p, ECPoint q);
+	ECPoint Mult(ECPoint p, ModNumber n);
+private:
+	MultGroupMod mgm;
+	ModNumber g;
+	ModNumber n;
+	lint a;
+	lint b;
+};
+
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
 ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
@@ -305,6 +327,10 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r);
 std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
 unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 bool operator ==(ScaledNumber l, ScaledNumber r);
+
+bool operator == (const ECPoint& l, const ECPoint& r);
+
+
 
 unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
 unsigned char* ConvertEndianess(const ModNumber& m);

@@ -57,6 +57,7 @@ enum class ASNElementType : unsigned char
 struct RSAParameters;
 
 class ScaledNumber;
+class EC;
 
 class ModNumber
 {
@@ -154,6 +155,7 @@ private:
 	friend class ScaledNumber;
 	friend class MultGroupMod;
 	friend class RSA;
+	friend class EC;
 	friend unsigned char* ConvertEndianess(const ModNumber& m);
 	friend ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
@@ -290,8 +292,9 @@ class EC
 public:
 	EC(const MultGroupMod& mgm,const ModNumber& g,const ModNumber& n, lint a, lint b) : mgm(mgm), g(g), n(n), a(a), b(b)
 	{}
-	ECPoint Add(ECPoint p, ECPoint q);
-	ECPoint Mult(ECPoint p, ModNumber n);
+	ECPoint Add(ECPoint p, ECPoint q) const;
+	ECPoint Times2(ECPoint p) const;
+	ECPoint Mult(ECPoint p, ModNumber n) const;
 private:
 	MultGroupMod mgm;
 	ModNumber g;

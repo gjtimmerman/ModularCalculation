@@ -1874,11 +1874,11 @@ bool operator == (const ECPoint& l, const ECPoint& r)
 	return l.x == r.x && l.y == r.y;
 }
 
-ECPoint EC::Add(ECPoint p, ECPoint q)
+ECPoint EC::Add(ECPoint p, ECPoint q) const
 {
 	ECPoint result;
 	if (p == q)
-		return Mult(p, ModNumber(2));
+		return Times2(p);
 	if (p.IsAtInfinity)
 		return q;
 	if (q.IsAtInfinity)
@@ -1892,6 +1892,55 @@ ECPoint EC::Add(ECPoint p, ECPoint q)
 	return result;
 }
 
+ECPoint EC::Times2(ECPoint p) const
+{
+	if (p.IsAtInfinity)
+		return p;
+	ECPoint result;
+	ModNumber mzero;
+
+	if (p.y == mzero)
+	{
+		result.IsAtInfinity = true;
+		return result;
+	}
+	ModNumber xpSquared = mgm.Kwad(p.x);
+	ModNumber xpSquaredTimes3 = mgm.Mult(xpSquared, ModNumber(3ull));
+	ModNumber xpSquaredTime3PlusA = mgm.Add(xpSquaredTimes3, ModNumber(a));
+	ModNumber ypTimes2 = mgm.Mult(p.y, ModNumber(2ull));
+	ModNumber ypTimes2Inverse = mgm.Inverse(ypTimes2);
+	ModNumber lambda = mgm.Mult(xpSquaredTime3PlusA, ypTimes2Inverse);
+	ModNumber xpTimes2 = mgm.Mult(p.x, ModNumber(2ull));
+	ModNumber lambdaSquaredMinusXpTimes2 = mgm.Diff(mgm.Kwad(lambda), xpTimes2);
+	ModNumber xrMinusXp = mgm.Diff(lambdaSquaredMinusXpTimes2, p.x);
+	ModNumber lambdaTimesXrMinusXp = mgm.Mult(lambda, xrMinusXp);
+	ModNumber yPPluslambdaTimesXrMinusXp = mgm.Add(p.y, lambdaTimesXrMinusXp);
+	result.x = lambdaSquaredMinusXpTimes2;
+	result.y = yPPluslambdaTimesXrMinusXp;
+	return result;
+}
+
+
+ECPoint EC::Mult(ECPoint p, ModNumber n) const
+{
+	if (p.IsAtInfinity)
+		return p;
+	ModNumber mzero;
+	ECPoint result;
+	result.IsAtInfinity = true;
+	llint mask = 1ull;
+	while (n > mzero)
+	{
+		result = Times2(result);
+		llint first = n.num[0];
+		if (first & mask)
+		{
+			result = Add(result, p);
+		}
+		n >>= 1;
+	}
+	return result;
+}
 
 
 #ifdef _WIN32 

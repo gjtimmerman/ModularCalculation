@@ -1876,6 +1876,7 @@ bool operator == (const ECPoint& l, const ECPoint& r)
 
 ECPoint EC::Add(ECPoint p, ECPoint q)
 {
+	ECPoint result;
 	if (p == q)
 		return Mult(p, ModNumber(2));
 	if (p.IsAtInfinity)
@@ -1885,7 +1886,10 @@ ECPoint EC::Add(ECPoint p, ECPoint q)
 	ModNumber xDelta = mgm.Diff(q.x, p.x);
 	ModNumber yDelta = mgm.Diff(q.y, p.y);
 	ModNumber xDeltaInverse = mgm.Inverse(xDelta);
-
+	ModNumber lambda = mgm.Mult(yDelta, xDeltaInverse);
+	result.x = mgm.Diff(mgm.Diff(mgm.Kwad(lambda), p.x),q.x);
+	result.y = mgm.Add(p.y, mgm.Mult(lambda, mgm.Diff(result.x, p.x)));
+	return result;
 }
 
 

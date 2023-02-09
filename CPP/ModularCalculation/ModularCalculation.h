@@ -290,17 +290,20 @@ struct ECPoint
 class EC
 {
 public:
-	EC(const MultGroupMod& mgm,const ModNumber& g,const ModNumber& n, lint a, lint b) : mgm(mgm), g(g), n(n), a(a), b(b)
+	EC(const MultGroupMod& mgm,const ECPoint& g,const ModNumber& n, ModNumber a, ModNumber b) : mgm(mgm), g(g), n(n), a(a), b(b)
 	{}
+	bool IsOnCurve(const ECPoint& p) const;
+	ModNumber CalculateRhs(const ModNumber& x) const;
+	ModNumber CalculateY(const ModNumber& x) const;
 	ECPoint Add(ECPoint p, ECPoint q) const;
 	ECPoint Times2(ECPoint p) const;
 	ECPoint Mult(ECPoint p, ModNumber n) const;
 private:
 	MultGroupMod mgm;
-	ModNumber g;
+	ECPoint g;
 	ModNumber n;
-	lint a;
-	lint b;
+	ModNumber a;
+	ModNumber b;
 };
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);

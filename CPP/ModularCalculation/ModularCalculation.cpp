@@ -1269,6 +1269,8 @@ ModNumber MultGroupMod::Inverse(const ModNumber& x) const
 		return mone;
 	if (x == n)
 		throw std::domain_error("Zero does not have an inverse");
+	if (x == mone)
+		return mone;
 	ModNumber r = x % n;
 	ModNumber l = n;
 	std::list<ModNumber> divisors;
@@ -1873,9 +1875,32 @@ bool operator == (const ECPoint& l, const ECPoint& r)
 		return false;
 	return l.x == r.x && l.y == r.y;
 }
+ModNumber EC::CalculateRhs(const ModNumber& x) const
+{
+	ModNumber xPower3 = mgm.Exp(x, ModNumber(3ull));
+	ModNumber aTimesX = mgm.Mult(x, a);
+	ModNumber rhs = mgm.Add(mgm.Add(xPower3, aTimesX), ModNumber(b));
+	return rhs;
+}
+
+bool EC::IsOnCurve(const ECPoint& p) const
+{
+	if (p.IsAtInfinity)
+		return true;
+	ModNumber yKwad = mgm.Kwad(p.y);
+	return yKwad == CalculateRhs(p.x);
+}
+
+ModNumber EC::CalculateY(const ModNumber& x) const
+{
+	return CalculateRhs(x).sqrt();
+}
+
 
 ECPoint EC::Add(ECPoint p, ECPoint q) const
 {
+	if (!IsOnCurve(p) || !IsOnCurve(q))
+		throw std::domain_error("One of the points is not on the curve");
 	ECPoint result;
 	if (p == q)
 		return Times2(p);
@@ -1883,17 +1908,25 @@ ECPoint EC::Add(ECPoint p, ECPoint q) const
 		return q;
 	if (q.IsAtInfinity)
 		return p;
+	if (p.x == q.x)
+	{
+		result.IsAtInfinity = true;
+		return result;
+	}
+	ModNumber mzero;
 	ModNumber xDelta = mgm.Diff(q.x, p.x);
 	ModNumber yDelta = mgm.Diff(q.y, p.y);
 	ModNumber xDeltaInverse = mgm.Inverse(xDelta);
 	ModNumber lambda = mgm.Mult(yDelta, xDeltaInverse);
 	result.x = mgm.Diff(mgm.Diff(mgm.Kwad(lambda), p.x),q.x);
-	result.y = mgm.Add(p.y, mgm.Mult(lambda, mgm.Diff(result.x, p.x)));
+	result.y = mgm.Diff(mzero,mgm.Add(p.y, mgm.Mult(lambda, mgm.Diff(result.x, p.x))));
 	return result;
 }
 
 ECPoint EC::Times2(ECPoint p) const
 {
+	if (!IsOnCurve(p))
+		throw std::domain_error("Fhe point is not on the curve");
 	if (p.IsAtInfinity)
 		return p;
 	ECPoint result;
@@ -1906,7 +1939,7 @@ ECPoint EC::Times2(ECPoint p) const
 	}
 	ModNumber xpSquared = mgm.Kwad(p.x);
 	ModNumber xpSquaredTimes3 = mgm.Mult(xpSquared, ModNumber(3ull));
-	ModNumber xpSquaredTime3PlusA = mgm.Add(xpSquaredTimes3, ModNumber(a));
+	ModNumber xpSquaredTime3PlusA = mgm.Add(xpSquaredTimes3, a);
 	ModNumber ypTimes2 = mgm.Mult(p.y, ModNumber(2ull));
 	ModNumber ypTimes2Inverse = mgm.Inverse(ypTimes2);
 	ModNumber lambda = mgm.Mult(xpSquaredTime3PlusA, ypTimes2Inverse);
@@ -1923,20 +1956,24 @@ ECPoint EC::Times2(ECPoint p) const
 
 ECPoint EC::Mult(ECPoint p, ModNumber n) const
 {
+	if (!IsOnCurve(p))
+		throw std::domain_error("The point is not on the curve");
+
 	if (p.IsAtInfinity)
 		return p;
+	ECPoint pCopy = p;
 	ModNumber mzero;
 	ECPoint result;
 	result.IsAtInfinity = true;
 	llint mask = 1ull;
 	while (n > mzero)
 	{
-		result = Times2(result);
 		llint first = n.num[0];
 		if (first & mask)
 		{
-			result = Add(result, p);
+			result = Add(result, pCopy);
 		}
+		pCopy = Times2(pCopy);
 		n >>= 1;
 	}
 	return result;

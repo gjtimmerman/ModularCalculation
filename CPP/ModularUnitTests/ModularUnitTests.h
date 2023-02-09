@@ -6360,6 +6360,457 @@ namespace ModularUnitTests
 #endif
 
 		}
+		TEST_METHOD(TestECIsOnCurveA0B17Point00isFalse)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			Assert::IsFalse(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17PointMinus2And3isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull) );
+			ECPoint pt;
+			pt.x = p - ModNumber(2ull);
+			pt.y = ModNumber(3ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17PointMinus2AndMinus3isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = p - ModNumber(2ull);
+			pt.y = p - ModNumber(3ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17PointMinus2And4isFalse)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = p - ModNumber(2ull);
+			pt.y = ModNumber(4ull);
+			Assert::IsFalse(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17PointMinus1And4isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = p - ModNumber(1ull);
+			pt.y = ModNumber(4ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17PointMinus1AndMinus4isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = p - ModNumber(1ull);
+			pt.y = p - ModNumber(4ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17Point2And5isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(5ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveA0B17Point2AndMinus5isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = p - ModNumber(5ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveA0B17Point2is5)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ModNumber x(2ull);
+			ModNumber exp(5ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveA0B17Point52is375)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ModNumber x(52ull);
+			ModNumber exp(375ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveA0B17Point5234is378661)
+		{
+			ModNumber p(0x10000000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			ModNumber x(5234ull);
+			ModNumber exp(378661ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveAMinus2B0Point0is0)
+		{
+			ModNumber p(0x10000000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ModNumber exp = mzero;
+			Assert::IsTrue(exp == myEC.CalculateY(mzero));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveAMinus2B0PointMinus1is1)
+		{
+			ModNumber p(0x10000000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ModNumber x = p - ModNumber(1ull);
+			ModNumber exp = ModNumber(1ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveAMinus2B0Point2is2)
+		{
+			ModNumber p(0x10000000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ModNumber x = ModNumber(2ull);
+			ModNumber exp = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECCalculateYOnCurveAMinus2B0Point338is6214)
+		{
+			ModNumber p(0x10000000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ModNumber x = ModNumber(338ull);
+			ModNumber exp = ModNumber(6214ull);
+			Assert::IsTrue(exp == myEC.CalculateY(x));
+		}
+		TEST_METHOD(TestECIsOnCurveAMinus2B0Point338AndMinus6214isTrue)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = ModNumber(338ull);
+			pt.y = p - ModNumber(6214ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECAddCurveAMinus2B0Point00And00isAtInfinity)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			ECPoint exp;
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Add(pt,pt));
+		}
+		TEST_METHOD(TestECAddCurveAMinus2B0Point00AndAtInfinityIs00)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			ECPoint pt2;
+			pt2.IsAtInfinity = true;
+			ECPoint exp;
+			exp.x = mzero;
+			exp.y = mzero;
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECAddCurveAMinus2B0Point00Mult3IsPoint00)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			ECPoint exp;
+			exp.x = mzero;
+			exp.y = mzero;
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+		}
+
+		TEST_METHOD(TestECAddCurveAMinus2B0PointAtInfinityAndAtInfinityIsAtInfinity)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.IsAtInfinity = true;
+			ECPoint pt2;
+			pt2.IsAtInfinity = true;
+			ECPoint exp;
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+
+		TEST_METHOD(TestECAddCurveAMinus2B0Point00AndMinus1And1IsPoint22)
+		{
+			ModNumber p(1000000ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			ECPoint pt2;
+			pt2.x = p - ModNumber(1ull);
+			pt2.y = ModNumber(1ull);
+			ECPoint exp;
+			exp.x = ModNumber(2ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECAddCurveAMinus2B0Point00AndPoint22IsPtMinus1And1)
+		{
+			ModNumber p(65535ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			ECPoint pt;
+			pt.x = mzero;
+			pt.y = mzero;
+			ECPoint pt2;
+			pt2.x = ModNumber(2ull);
+			pt2.y = ModNumber(2ull);
+			ECPoint exp;
+			exp.x = p - ModNumber(1ull);
+			exp.y = ModNumber(1ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECIsOnCurveP19AMinus7B10Point12)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(2ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveP19AMinus7B10Point1And17)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveP19AMinus7B10Point22)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(2ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECIsOnCurveP19AMinus7B10Point2And17)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(17ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point22AndPoint2And17IsPtAtInfinity)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(2ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(2ull);
+			pt2.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point12AndPoint2And17IsPt13And8)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(2ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(2ull);
+			pt2.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(8ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point1And17AndPoint2And17IsPt16And2)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(2ull);
+			pt2.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(16ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point1And17AndPoint22IsPt13And11)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(2ull);
+			pt2.y = ModNumber(2ull);
+			ECPoint exp;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(11ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times2IsPt18And15 )
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(18ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
+		}
+
+
 #ifdef _WIN32
 
 		TEST_METHOD(TestRSADecryptSymmetricKey)
@@ -6597,12 +7048,12 @@ namespace ModularUnitTests
 			Assert::IsTrue(verify(L"MyCoolSignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
 
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignature2Key1024", false,AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			Assert::IsTrue(verify(L"MyCoolSignature2Key1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
 #endif
 		}
 		TEST_METHOD(TestSignatureDSAVerifySHA256)
@@ -6664,7 +7115,7 @@ namespace ModularUnitTests
 //			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey2048", provHandle, L"DSA", AT_SIGNATURE);
 //
 //#elif (MAXMOD == 1024/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey1024", provHandle, L"DSA", AT_SIGNATURE);
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolSignature2Key1024", provHandle, L"RSA", AT_SIGNATURE);
 //#endif
 //			Assert::IsTrue(keyHandle != 0);
 //			NCryptFreeObject(keyHandle);

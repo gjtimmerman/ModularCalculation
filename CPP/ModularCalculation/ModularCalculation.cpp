@@ -1994,6 +1994,8 @@ int evaluateStatus(SECURITY_STATUS status)
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_FLAGS");
 	case NTE_BAD_KEY_STATE:
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_KEY_STATE");
+	case NTE_BAD_KEYSET:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_KEYSET");
 	case NTE_BAD_TYPE:
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_TYPE");
 	case NTE_INVALID_HANDLE:
@@ -2043,6 +2045,18 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 	}
 	return keyHandle;
 
+}
+
+void DeleteKey(const wchar_t *keyName, NCRYPT_PROV_HANDLE provHandle, int usage)
+{
+	SECURITY_STATUS status;
+	NCRYPT_KEY_HANDLE keyHandle;
+	status = NCryptOpenKey(provHandle, &keyHandle, keyName, usage, 0);
+	evaluateStatus(status);
+	status = NCryptDeleteKey(keyHandle, 0);
+	evaluateStatus(status);
+	status = NCryptFreeObject(keyHandle);
+	evaluateStatus(status);
 }
 
 RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists, int usage)

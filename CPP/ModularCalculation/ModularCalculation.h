@@ -394,6 +394,7 @@ std::basic_string<T> ModNumber::getText() const
 
 #ifdef _WIN32
 NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHandle, const wchar_t* algorithm = L"RSA", int usage = AT_KEYEXCHANGE);
+void DeleteKey(const wchar_t* keyName, NCRYPT_PROV_HANDLE provHandle, int usage);
 RSAParameters GetRSAKey(const wchar_t *KeyName, bool createIfNotExists, int usage = AT_KEYEXCHANGE);
 void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 DSAParameters GetDSAKey(const wchar_t* KeyName, bool createIfNotExists);

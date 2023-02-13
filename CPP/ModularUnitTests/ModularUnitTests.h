@@ -6816,26 +6816,26 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSADecryptSymmetricKey)
 		{
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey4096", false);
 			RSA myRsa(rsaParameters);
 			ModNumber symmetricKey = ModNumber::stomn("DB278FB45AE1C1D78FA27EBEA3730432DA100140A40F0CCE71A7F95D027C2D15", 16);
-			ModNumber encryptedSymKey = encrypt(L"MyCoolKey4096", symmetricKey);
+			ModNumber encryptedSymKey = encrypt(L"MyCoolRSAKey4096", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 
 #elif (MAXMOD == 2048/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey2048", false);
 			RSA myRsa(rsaParameters);
 			ModNumber symmetricKey = ModNumber::stomn("98C978B8C1DF5C313100F2CA4CC08B3844E4B5D7E05FB70F374AE684B9AB80EB", 16);
-			ModNumber encryptedSymKey  = encrypt(L"MyCoolKey2048", symmetricKey);
+			ModNumber encryptedSymKey  = encrypt(L"MyCoolRSAKey2048", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey1024", false);
 			RSA myRsa(rsaParameters);
 			ModNumber symmetricKey = ModNumber::stomn("6C698A9323B751181E0F076B7B8148C56CEDA3296A15D603028199B70F47F015", 16);
-			ModNumber encryptedSymKey = encrypt(L"MyCoolKey1024", symmetricKey);
+			ModNumber encryptedSymKey = encrypt(L"MyCoolRSAKey1024", symmetricKey);
 			ModNumber decryptedSymKey = myRsa.Decrypt(encryptedSymKey);
 			Assert::IsTrue(decryptedSymKey == symmetricKey);
 #endif
@@ -6846,32 +6846,32 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSAEncrypt)
 		{
 #if (MAXMOD == 4096/8)
-				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", true);
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey4096", true);
 				RSA myRsa(rsaParameters);
 				std::string message = "Dit is een test";
 				ModNumber convertedMessage = ModNumber::fromText(message);
 				ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey4096", encryptedMessage);
+				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolRSAKey4096", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
 #elif (MAXMOD == 2048/8)
 
-				RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", true);
+				RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey2048", true);
 				RSA myRsa(rsaParameters);
 				std::string message = "Dit is een test";
 				ModNumber convertedMessage = ModNumber::fromText(message);
 				ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey2048", encryptedMessage);
+				std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolRSAKey2048", encryptedMessage);
 				std::string resText = std::get<0>(res).getText<char>();
 				Assert::IsTrue(resText == message);
 #elif (MAXMOD == 1024/8)
 
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", true);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey1024", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
 			ModNumber encryptedMessage = myRsa.Encrypt(convertedMessage);
-			std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolKey1024", encryptedMessage);
+			std::tuple<ModNumber, DWORD> res = decrypt(L"MyCoolRSAKey1024", encryptedMessage);
 			std::string resText = std::get<0>(res).getText<char>();
 			Assert::IsTrue(resText == message);
 #endif
@@ -6879,11 +6879,11 @@ namespace ModularUnitTests
 		TEST_METHOD(TestRSADecrypt)
 		{
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey4096", true);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey4096", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
-			ModNumber encryptedMessage = encrypt(L"MyCoolKey4096", convertedMessage);
+			ModNumber encryptedMessage = encrypt(L"MyCoolRSAKey4096", convertedMessage);
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
@@ -6915,31 +6915,31 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
 #if (MAXMOD == 4096/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey4096", pHashBigEndian, len);
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey4096", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey4096", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 2048/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey2048", pHashBigEndian, len);
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey2048", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 1024/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey1024", pHashBigEndian, len);
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey1024", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char *)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
@@ -6958,28 +6958,28 @@ namespace ModularUnitTests
 			ModNumber hashBigEndianModNumber(pHashBigEndian, len);
 
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey4096", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
 
 #elif (MAXMOD == 2048/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
 
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char *)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey1024",(unsigned char *)hashBigEndian.c_str(),(unsigned int)hashBigEndian.length(),signatureStr));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey1024",(unsigned char *)hashBigEndian.c_str(),(unsigned int)hashBigEndian.length(),signatureStr));
 #endif
 		}
 
@@ -6990,31 +6990,31 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
 #if (MAXMOD == 4096/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey4096", pHashBigEndian, len, L"SHA512");
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey4096", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey4096", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 2048/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey2048", pHashBigEndian, len, L"SHA512");
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey2048", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
 #elif (MAXMOD == 1024/8)
-			std::string signatureStr = sign(L"MyCoolSignatureKey1024", pHashBigEndian, len, L"SHA512");
+			std::string signatureStr = sign(L"MyCoolRSASignatureKey1024", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
 			ModNumber signature(pSignatureLittleEndian, (unsigned int)signatureStr.length());
 
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey1024", false, AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber decryptedHash = myRsa.DecryptSignature(signature);
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
@@ -7032,28 +7032,28 @@ namespace ModularUnitTests
 			ModNumber hashBigEndianModNumber(pHashBigEndian, len);
 
 #if (MAXMOD == 4096/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey4096", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey4096", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
 
 #elif (MAXMOD == 2048/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignatureKey2048", false);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
 
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolSignature2Key1024", false,AT_SIGNATURE);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false,AT_SIGNATURE);
 			RSA myRsa(rsaParameters);
 			ModNumber encryptedSignature = myRsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.3");
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
-			Assert::IsTrue(verify(L"MyCoolSignature2Key1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			Assert::IsTrue(verify(L"MyCoolRSASignatureKey1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
 #endif
 		}
 		TEST_METHOD(TestSignatureDSAVerifySHA256)
@@ -7104,24 +7104,44 @@ namespace ModularUnitTests
 		}
 
 
-//		TEST_METHOD(TestGenerateDSAKey)
+//		TEST_METHOD(TestGenerateKeys)
 //		{
 //			NCRYPT_PROV_HANDLE provHandle;
 //			NCryptOpenStorageProvider(&provHandle, NULL, 0);
-//#if (MAXMOD == 3072/8)
+//#if (MAXMOD == 4096/8)
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSAKey4096", provHandle, L"RSA", AT_KEYEXCHANGE);
+//
+//#elif (MAXMOD == 3072/8)
 //			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey3072", provHandle, L"DSA", AT_SIGNATURE);
 //
 //#elif (MAXMOD == 2048/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey2048", provHandle, L"DSA", AT_SIGNATURE);
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSAKey2048", provHandle, L"RSA", AT_KEYEXCHANGE);
 //
 //#elif (MAXMOD == 1024/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolSignature2Key1024", provHandle, L"RSA", AT_SIGNATURE);
+//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSASignatureKey1024", provHandle, L"RSA", AT_SIGNATURE);
 //#endif
 //			Assert::IsTrue(keyHandle != 0);
 //			NCryptFreeObject(keyHandle);
 //			NCryptFreeObject(provHandle);
 //
 //		}
+//		TEST_METHOD(TestDeleteKeys)
+//		{
+//			NCRYPT_PROV_HANDLE provHandle;
+//			NCryptOpenStorageProvider(&provHandle, NULL, 0);
+//#if (MAXMOD == 3072/8)
+//			DeleteKey(L"MyCoolDSAKey3072", provHandle, AT_SIGNATURE);
+//
+//#elif (MAXMOD == 2048/8)
+//			DeleteKey(L"MyCoolDSAKey2048", provHandle, AT_SIGNATURE);
+//
+//#elif (MAXMOD == 1024/8)
+//			DeleteKey(L"MyCoolDSAKey1024", provHandle, AT_SIGNATURE);
+//#endif
+//			NCryptFreeObject(provHandle);
+//
+//		}
+
 
 #endif
 

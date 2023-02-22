@@ -6177,6 +6177,7 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = ConvertEndianess(mHash);
 			DSA dsa(dsaParameters);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian, GetByteCount(mHash), signature));
+			delete[] pHashBigEndian;
 #elif (MAXMOD == 2048/8)
 			dsaParameters.P = ModNumber::stomn("DFC017474A4FAF7A5E094FC31BD901731AD1823C5FAF5A06433AB3928FF9BC2EF5A0A90FC0AADB4FEB3294175089DCCE2509E2F7E5E7B7D7FB0CD54A025C6C6DCB599DA196BB9729B824BC811E67F6C1DB95F40DB8BD8A5C8F0C98A2B887127B975279B7F744D0392DD76350F989B2FF212B58557AADD9A718B8EF5453C71F2F4989EC458DF17F1126BE8FA0A48848F028A9808FBF524BF24E0960912640FD0A610C064A243299F992245DEBBAF084601ED8164875B0ABB7EDE528053A4753AC6C91CEB4DA8DE85DC80CDF4CF95A31A03667C5B774E9F7C9436E706F08C4F9FF58ABFECA29D255D732F57CCBB92CDDBD5A56DDAF50ADA60FF932239CCFF8B039", 16);
 			dsaParameters.Q = ModNumber::stomn("8B50F6EA9476593FC9295A3D28CA0E80E46164C8E5F16E80E97007C8612CDE93", 16);
@@ -6189,6 +6190,7 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = ConvertEndianess(mHash);
 			DSA dsa(dsaParameters);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian, GetByteCount(mHash), signature));
+			delete[] pHashBigEndian;
 
 #elif (MAXMOD == 1024/8)
 			dsaParameters.P = ModNumber::stomn("C18006893BCE75DC77605271C0AA43F5BFF9FD7B24F3DE9817A1B8230650542B1B30B66727EA3D44FBB476451D96B869555780D447729A7DC1ED7216B4F5C6A1A544F361723C3ACACBEFFA393389F42A7DE7F42106A30C04B0275DE550C8FF91392AA44FFBEBA94FE07CD19B50C5D66814BB31D741628503B0E579C76D32FF2D", 16);
@@ -6202,6 +6204,7 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = ConvertEndianess(mHash);
 			DSA dsa(dsaParameters);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian,GetByteCount(mHash), signature));
+			delete[] pHashBigEndian;
 #endif
 		}
 		TEST_METHOD(TestSignAndVerifyDSASignature)
@@ -6220,6 +6223,7 @@ namespace ModularUnitTests
 			DSA dsa(dsaParameters);
 			std::string signature = dsa.Sign(pHashBigEndian, cbHash, false);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian, cbHash, signature, false));
+			delete[] pHashBigEndian;
 #elif (MAXMOD == 2048/8)
 			dsaParameters.P = ModNumber::stomn("DFC017474A4FAF7A5E094FC31BD901731AD1823C5FAF5A06433AB3928FF9BC2EF5A0A90FC0AADB4FEB3294175089DCCE2509E2F7E5E7B7D7FB0CD54A025C6C6DCB599DA196BB9729B824BC811E67F6C1DB95F40DB8BD8A5C8F0C98A2B887127B975279B7F744D0392DD76350F989B2FF212B58557AADD9A718B8EF5453C71F2F4989EC458DF17F1126BE8FA0A48848F028A9808FBF524BF24E0960912640FD0A610C064A243299F992245DEBBAF084601ED8164875B0ABB7EDE528053A4753AC6C91CEB4DA8DE85DC80CDF4CF95A31A03667C5B774E9F7C9436E706F08C4F9FF58ABFECA29D255D732F57CCBB92CDDBD5A56DDAF50ADA60FF932239CCFF8B039", 16);
 			dsaParameters.Q = ModNumber::stomn("8B50F6EA9476593FC9295A3D28CA0E80E46164C8E5F16E80E97007C8612CDE93", 16);
@@ -6233,6 +6237,7 @@ namespace ModularUnitTests
 			DSA dsa(dsaParameters);
 			std::string signature = dsa.Sign(pHashBigEndian, cbHash, false);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian, cbHash, signature, false));
+			delete[] pHashBigEndian;
 
 #elif (MAXMOD == 1024/8)
 			dsaParameters.P = ModNumber::stomn("C18006893BCE75DC77605271C0AA43F5BFF9FD7B24F3DE9817A1B8230650542B1B30B66727EA3D44FBB476451D96B869555780D447729A7DC1ED7216B4F5C6A1A544F361723C3ACACBEFFA393389F42A7DE7F42106A30C04B0275DE550C8FF91392AA44FFBEBA94FE07CD19B50C5D66814BB31D741628503B0E579C76D32FF2D", 16);
@@ -6247,6 +6252,7 @@ namespace ModularUnitTests
 			DSA dsa(dsaParameters);
 			std::string signature = dsa.Sign(pHashBigEndian, cbHash, false);
 			Assert::IsTrue(dsa.Verify(pHashBigEndian, cbHash , signature, false));
+			delete[] pHashBigEndian;
 #endif
 		}
 
@@ -6323,6 +6329,7 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
 			ModNumber originalHash(pHashLittleEndian, 32);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 2048/8)
 			rsaParameters.pubExp = ModNumber::stomn("010001", 16);
 			rsaParameters.Modulus = ModNumber::stomn("CA75BD1F951E545F8BA1BF6C985398C48BE5CD45E1794AD7D151CF8871D4088C32B1E88D8E4A9106714EACD38C284D70A1E15EBCC289BED8EE90C771B7A45A86DA92C7D5D4936782A701CCC6C7BF75A9CF22E2C079B2E94A4C7ED28B2983AD71B8D24D4E43501CA1FE0C15204A311BD4EEFC9B62A9D1078D27CC5C213A4D328002100FB350D8749DCCC982D736F6ED95B70B146152C966661FF48FFDF8CB8180E0A49D0D62EDED2FBE40D8C639B4F3817EDE2D7D5D9AAE4E0ECE362598DA62613E9B7B9BF7D93F6C232AE9BFC34142A65774DB2241D8B810734FED65C97370FC84599E002680901B55D0E991E51C6C4856FC361FD526193EB972E2C29467F211", 16);
@@ -6340,6 +6347,7 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
 			ModNumber originalHash(pHashLittleEndian, 32);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 1024/8)
 			rsaParameters.pubExp = ModNumber::stomn("010001", 16);
 			rsaParameters.Modulus = ModNumber::stomn("B08B5EF115AED8F91EE2FB82E7E8C8611DF101B4138B37787A18D1E72FC75437342A8961F7C462CBD2208DE6EC0472882CE6410BCE3AE096BB2CA0506B5FBF5865FC80465653F2AEA678C8A8638AF8CF98F105166B6CFA71A61567765DF9521FAE5616DBBF26F99512EEBF857C166941FC2402C5E27258B10206A8AF016C45E9", 16);
@@ -6357,6 +6365,8 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess((unsigned char*)hashBigEndian, 32);
 			ModNumber originalHash(pHashLittleEndian, 32);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
+
 #endif
 
 		}
@@ -6809,6 +6819,160 @@ namespace ModularUnitTests
 			exp.y = ModNumber(15ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
 		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times3IsPt11)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(1ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times4IsPt70)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(7ull);
+			exp.y = ModNumber(0ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(4ull)));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times5IsPt9And12)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(12ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(5ull)));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times6IsPt18And4)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(18ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(6ull)));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times7IsPt9And7)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(7ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(7ull)));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times8IsAtInfinity)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(8ull)));
+		}
+
+		TEST_METHOD(TestECMultCurveP97AMinus7B10Point12IsOnCurve)
+		{
+			ModNumber p(97ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(2ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECMultCurveP97AMinus7B10Point22IsOnCurve)
+		{
+			ModNumber p(97ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(2ull);
+			Assert::IsTrue(myEC.IsOnCurve(pt));
+		}
+		TEST_METHOD(TestECMultCurveP97AMinus7B10Point12Times2IsPt96And4)
+		{
+			ModNumber p(97ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(2ull);
+			ECPoint exp;
+			exp.x = ModNumber(96ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
+		}
+		TEST_METHOD(TestECMultCurveP97AMinus7B10Point12Times3IsPt1And95)
+		{
+			ModNumber p(97ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt;
+			pt.x = ModNumber(1ull);
+			pt.y = ModNumber(2ull);
+			ECPoint exp;
+			exp.x = ModNumber(1ull);
+			exp.y = ModNumber(95ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+		}
 
 
 #ifdef _WIN32
@@ -6924,6 +7088,7 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 2048/8)
 			std::string signatureStr = sign(L"MyCoolRSASignatureKey2048", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
@@ -6934,6 +7099,7 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 1024/8)
 			std::string signatureStr = sign(L"MyCoolRSASignatureKey1024", pHashBigEndian, len);
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char *)signatureStr.c_str(), (unsigned int)signatureStr.length());
@@ -6945,6 +7111,7 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pHashLittleEndian;
 #endif
 		}
 
@@ -6964,6 +7131,7 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
+			delete[] signatureBigEndian;
 
 #elif (MAXMOD == 2048/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
@@ -6972,6 +7140,7 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr));
+			delete[] signatureBigEndian;
 
 #elif (MAXMOD == 1024/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false, AT_SIGNATURE);
@@ -6980,6 +7149,7 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char *)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey1024",(unsigned char *)hashBigEndian.c_str(),(unsigned int)hashBigEndian.length(),signatureStr));
+			delete[] signatureBigEndian;
 #endif
 		}
 
@@ -6999,6 +7169,8 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pSignatureLittleEndian;
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 2048/8)
 			std::string signatureStr = sign(L"MyCoolRSASignatureKey2048", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
@@ -7009,6 +7181,8 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pSignatureLittleEndian;
+			delete[] pHashLittleEndian;
 #elif (MAXMOD == 1024/8)
 			std::string signatureStr = sign(L"MyCoolRSASignatureKey1024", pHashBigEndian, len, L"SHA512");
 			unsigned char* pSignatureLittleEndian = ConvertEndianess((unsigned char*)signatureStr.c_str(), (unsigned int)signatureStr.length());
@@ -7020,6 +7194,9 @@ namespace ModularUnitTests
 			unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, len);
 			ModNumber originalHash(pHashLittleEndian, len);
 			Assert::IsTrue(originalHash == decryptedHash);
+			delete[] pSignatureLittleEndian;
+			delete[] pHashLittleEndian;
+
 #endif
 		}
 		TEST_METHOD(TestSignatureRSACreateSHA512)
@@ -7038,6 +7215,7 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey4096", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			delete[] signatureBigEndian;
 
 #elif (MAXMOD == 2048/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey2048", false, AT_SIGNATURE);
@@ -7046,6 +7224,7 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey2048", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			delete[] signatureBigEndian;
 
 #elif (MAXMOD == 1024/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey1024", false,AT_SIGNATURE);
@@ -7054,6 +7233,8 @@ namespace ModularUnitTests
 			unsigned char* signatureBigEndian = ConvertEndianess(encryptedSignature);
 			std::string signatureStr((char*)signatureBigEndian, GetByteCount(encryptedSignature));
 			Assert::IsTrue(verify(L"MyCoolRSASignatureKey1024", (unsigned char*)hashBigEndian.c_str(), (unsigned int)hashBigEndian.length(), signatureStr, L"SHA512"));
+			delete[] signatureBigEndian;
+
 #endif
 		}
 		TEST_METHOD(TestSignatureDSAVerifySHA256)

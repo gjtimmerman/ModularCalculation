@@ -1599,6 +1599,7 @@ ModNumber CreateBERASNString(std::list<std::string> content)
 	result.append(outerASN);
 	unsigned char* resLittleEndian = ConvertEndianess((const unsigned char*)result.c_str(), (unsigned int)result.length());
 	ModNumber res(resLittleEndian, (unsigned int)result.length());
+	delete[] resLittleEndian;
 	return res;
 
 }
@@ -1726,7 +1727,9 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 	unsigned int hashLen = (unsigned int)resultIterator->size();
 	unsigned char* pHashBigEndian = (unsigned char*)hashBigEndian.num;
 	unsigned char* pHashLittleEndian = ConvertEndianess(pHashBigEndian, hashLen);
-	return ModNumber(pHashLittleEndian, hashLen);
+	ModNumber retValue(pHashLittleEndian, hashLen);
+	delete[] pHashLittleEndian;
+	return retValue;
 }
 
 ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) const
@@ -1756,6 +1759,7 @@ std::string DSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded
 {
 	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
 	ModNumber mHash(pHashLittleEndian, hashLen);
+	delete[] pHashLittleEndian;
 	unsigned int bcQ = GetByteCount(Q);
 	if (hashLen > bcQ)
 		mHash = GetLeftMostBytes(mHash, bcQ);
@@ -1810,12 +1814,16 @@ std::string DSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded
 		myList.push_back(rStr);
 		std::string sStr((const char*)sBigEndian, cbS);
 		myList.push_back(sStr);
+		delete[] rBigEndian;
+		delete[] sBigEndian;
 		return CreateBERASNStringForDSASignature(myList);
 	}
 	else
 	{
 		std::string rs((const char*)rBigEndian, cbR);
 		rs.append((const char*)sBigEndian, cbS);
+		delete[] rBigEndian;
+		delete[] sBigEndian;
 		return rs;
 	}
 }
@@ -1825,6 +1833,7 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 	MultGroupMod mgm(P);
 	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
 	ModNumber mHash(pHashLittleEndian,hashLen);
+	delete[] pHashLittleEndian;
 	unsigned int bcQ = GetByteCount(Q);
 	if (hashLen > bcQ)
 		mHash = GetLeftMostBytes(mHash, bcQ);
@@ -1846,7 +1855,8 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
 	ModNumber mr(rLittleEndian, (unsigned int)r.length());
 	ModNumber ms(sLittleEndian, (unsigned int)s.length());
-
+	delete[] rLittleEndian;
+	delete[] sLittleEndian;
 	if (!(mr < Q && ms < Q))
 		return false;
 
@@ -2356,6 +2366,7 @@ ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 	evaluateStatus(status);
 	pDataEncrypted = ConvertEndianess(pDataEncryptedBigEndian, cbResult);
 	ModNumber res(pDataEncrypted, cbResult);
+	delete[] pDataBigEndian;
 	delete[] pDataEncrypted;
 	status = NCryptFreeObject(keyHandle);
 	if (status != ERROR_SUCCESS)

@@ -7052,20 +7052,20 @@ namespace ModularUnitTests
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
 #elif (MAXMOD == 2048/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey2048", true);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey2048", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
-			ModNumber encryptedMessage = encrypt(L"MyCoolKey2048", convertedMessage);
+			ModNumber encryptedMessage = encrypt(L"MyCoolRSAKey2048", convertedMessage);
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
 #elif (MAXMOD == 1024/8)
-			RSAParameters rsaParameters = GetRSAKey(L"MyCoolKey1024", true);
+			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSAKey1024", true);
 			RSA myRsa(rsaParameters);
 			std::string message = "Dit is een test";
 			ModNumber convertedMessage = ModNumber::fromText(message);
-			ModNumber encryptedMessage = encrypt(L"MyCoolKey1024", convertedMessage);
+			ModNumber encryptedMessage = encrypt(L"MyCoolRSAKey1024", convertedMessage);
 			ModNumber decryptedMessage = myRsa.Decrypt(encryptedMessage);
 			std::string resText = decryptedMessage.getText<char>();
 			Assert::IsTrue(resText == message);
@@ -7289,20 +7289,63 @@ namespace ModularUnitTests
 //		{
 //			NCRYPT_PROV_HANDLE provHandle;
 //			NCryptOpenStorageProvider(&provHandle, NULL, 0);
+//			NCRYPT_KEY_HANDLE keyHandle;
 //#if (MAXMOD == 4096/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSAKey4096", provHandle, L"RSA", AT_KEYEXCHANGE);
-//
-//#elif (MAXMOD == 3072/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolDSAKey3072", provHandle, L"DSA", AT_SIGNATURE);
-//
-//#elif (MAXMOD == 2048/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSAKey2048", provHandle, L"RSA", AT_KEYEXCHANGE);
-//
-//#elif (MAXMOD == 1024/8)
-//			NCRYPT_KEY_HANDLE keyHandle = GenerateKey(L"MyCoolRSASignatureKey1024", provHandle, L"RSA", AT_SIGNATURE);
-//#endif
+//			keyHandle = GenerateKey(L"MyCoolRSASignatureKey4096", provHandle, L"RSA", AT_SIGNATURE);
 //			Assert::IsTrue(keyHandle != 0);
 //			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 3072/8)
+//			keyHandle = GenerateKey(L"MyCoolRSASignatureKey3072", provHandle, L"RSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 2048/8)
+//			keyHandle = GenerateKey(L"MyCoolRSASignatureKey2048", provHandle, L"RSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 1024/8)
+//			keyHandle = GenerateKey(L"MyCoolRSASignatureKey1024", provHandle, L"RSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//#endif
+//#if (MAXMOD == 4096/8)
+//			keyHandle = GenerateKey(L"MyCoolRSAKey4096", provHandle, L"RSA", AT_KEYEXCHANGE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 3072/8)
+//			keyHandle = GenerateKey(L"MyCoolRSAKey3072", provHandle, L"RSA", AT_KEYEXCHANGE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 2048/8)
+//			keyHandle = GenerateKey(L"MyCoolRSAKey2048", provHandle, L"RSA", AT_KEYEXCHANGE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 1024/8)
+//			keyHandle = GenerateKey(L"MyCoolRSAKey1024", provHandle, L"RSA", AT_KEYEXCHANGE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//#endif
+//#if (MAXMOD == 3072/8)
+//			keyHandle = GenerateKey(L"MyCoolDSAKey3072", provHandle, L"DSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 2048/8)
+//			keyHandle = GenerateKey(L"MyCoolDSAKey2048", provHandle, L"DSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//
+//#elif (MAXMOD == 1024/8)
+//			keyHandle = GenerateKey(L"MyCoolDSAKey1024", provHandle, L"DSA", AT_SIGNATURE);
+//			Assert::IsTrue(keyHandle != 0);
+//			NCryptFreeObject(keyHandle);
+//#endif
+//
 //			NCryptFreeObject(provHandle);
 //
 //		}

@@ -6803,7 +6803,7 @@ namespace ModularUnitTests
 			exp.y = ModNumber(11ull);
 			Assert::IsTrue(exp == myEC.Add(pt, pt2));
 		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times2IsPt18And15 )
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point1And17AndPoint97IsPt70)
 		{
 			ModNumber p(19ull);
 			MultGroupMod mgm(p);
@@ -6814,12 +6814,15 @@ namespace ModularUnitTests
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(9ull);
+			pt2.y = ModNumber(7ull);
 			ECPoint exp;
-			exp.x = ModNumber(18ull);
-			exp.y = ModNumber(15ull);
-			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
+			exp.x = ModNumber(7ull);
+			exp.y = ModNumber(0ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
 		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times3IsPt11)
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point1And17Times3EqualToPt1And17AddPt18And15)
 		{
 			ModNumber p(19ull);
 			MultGroupMod mgm(p);
@@ -6831,11 +6834,16 @@ namespace ModularUnitTests
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
 			ECPoint exp;
-			exp.x = ModNumber(1ull);
-			exp.y = ModNumber(2ull);
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(7ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+
+			ECPoint pt2;
+			pt2.x = ModNumber(18ull);
+			pt2.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
 		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times4IsPt70)
+		TEST_METHOD(TestECAddCurveP19AMinus7B10Point1And17Times4EqualToPt1And17AddPt12EqualToPt1And17Times2Times2)
 		{
 			ModNumber p(19ull);
 			MultGroupMod mgm(p);
@@ -6850,24 +6858,19 @@ namespace ModularUnitTests
 			exp.x = ModNumber(7ull);
 			exp.y = ModNumber(0ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(4ull)));
+
+			ECPoint pt2;
+			pt2.x = ModNumber(9ull);
+			pt2.y = ModNumber(7ull);
+			Assert::IsTrue(exp == myEC.Add(pt, pt2));
+			ECPoint pt3;
+			pt3.IsAtInfinity = false;
+			pt3.x = ModNumber(18ull);
+			pt3.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Times2(pt3));
 		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times5IsPt9And12)
-		{
-			ModNumber p(19ull);
-			MultGroupMod mgm(p);
-			ECPoint g;
-			g.IsAtInfinity = true;
-			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
-			ECPoint pt;
-			pt.x = ModNumber(1ull);
-			pt.y = ModNumber(17ull);
-			ECPoint exp;
-			exp.x = ModNumber(9ull);
-			exp.y = ModNumber(12ull);
-			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(5ull)));
-		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times6IsPt18And4)
+
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17SubGroup )
 		{
 			ModNumber p(19ull);
 			MultGroupMod mgm(p);
@@ -6881,25 +6884,140 @@ namespace ModularUnitTests
 			ECPoint exp;
 			exp.x = ModNumber(18ull);
 			exp.y = ModNumber(4ull);
-			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(6ull)));
-		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times7IsPt9And7)
-		{
-			ModNumber p(19ull);
-			MultGroupMod mgm(p);
-			ECPoint g;
-			g.IsAtInfinity = true;
-			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
-			ECPoint pt;
-			pt.x = ModNumber(1ull);
-			pt.y = ModNumber(17ull);
-			ECPoint exp;
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
+			exp.IsAtInfinity = false;
 			exp.x = ModNumber(9ull);
 			exp.y = ModNumber(7ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(7ull);
+			exp.y = ModNumber(0ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(4ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(12ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(5ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(18ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(6ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(1ull);
+			exp.y = ModNumber(2ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(7ull)));
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(8ull)));
 		}
-		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17Times8IsAtInfinity)
+
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17CoSet1)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt1;
+			pt1.x = ModNumber(2ull);
+			pt1.y = ModNumber(2ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(1ull);
+			pt2.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(11ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(10ull);
+			exp.y = ModNumber(16ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(12ull);
+			exp.y = ModNumber(18ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(17ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(5ull);
+			exp.y = ModNumber(10ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(3ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(16ull);
+			exp.y = ModNumber(17ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(2ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point1And17CoSet2)
+		{
+			ModNumber p(19ull);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = true;
+			ModNumber mzero;
+			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			ECPoint pt1;
+			pt1.x = ModNumber(2ull);
+			pt1.y = ModNumber(17ull);
+			ECPoint pt2;
+			pt2.x = ModNumber(1ull);
+			pt2.y = ModNumber(17ull);
+			ECPoint exp;
+			exp.x = ModNumber(16ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(3ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(5ull);
+			exp.y = ModNumber(9ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(17ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(12ull);
+			exp.y = ModNumber(1ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(10ull);
+			exp.y = ModNumber(3ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(8ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+			pt1 = exp;
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(2ull);
+			exp.y = ModNumber(17ull);
+			Assert::IsTrue(exp == myEC.Add(pt1, pt2));
+		}
+		TEST_METHOD(TestECMultCurveP19AMinus7B10Point22SubGroup)
 		{
 			ModNumber p(19ull);
 			MultGroupMod mgm(p);
@@ -6908,11 +7026,98 @@ namespace ModularUnitTests
 			ModNumber mzero;
 			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
 			ECPoint pt;
-			pt.x = ModNumber(1ull);
-			pt.y = ModNumber(17ull);
+			pt.x = ModNumber(2ull);
+			pt.y = ModNumber(2ull);
 			ECPoint exp;
-			exp.IsAtInfinity = true;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(8ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(1ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(16ull);
+			exp.y = ModNumber(17ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(4ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(10ull);
+			exp.y = ModNumber(3ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(5ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(18ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(6ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(3ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(7ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(12ull);
+			exp.y = ModNumber(1ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(8ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(12ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(9ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(5ull);
+			exp.y = ModNumber(10ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(10ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(17ull);
+			exp.y = ModNumber(15ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(11ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(7ull);
+			exp.y = ModNumber(0ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(12ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(17ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(13ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(5ull);
+			exp.y = ModNumber(9ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(14ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(7ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(15ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(12ull);
+			exp.y = ModNumber(18ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(16ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(3ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(17ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(18ull);
+			exp.y = ModNumber(4ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(18ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(10ull);
+			exp.y = ModNumber(16ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(19ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(16ull);
+			exp.y = ModNumber(2ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(20ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(1ull);
+			exp.y = ModNumber(17ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(21ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(13ull);
+			exp.y = ModNumber(11ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(22ull)));
+			exp.IsAtInfinity = false;
+			exp.x = ModNumber(2ull);
+			exp.y = ModNumber(17ull);
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(23ull)));
+			exp.IsAtInfinity = true;
+			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(24ull)));
 		}
 
 		TEST_METHOD(TestECMultCurveP97AMinus7B10Point12IsOnCurve)
@@ -6954,7 +7159,7 @@ namespace ModularUnitTests
 			pt.y = ModNumber(2ull);
 			ECPoint exp;
 			exp.x = ModNumber(96ull);
-			exp.y = ModNumber(4ull);
+			exp.y = ModNumber(93ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(2ull)));
 		}
 		TEST_METHOD(TestECMultCurveP97AMinus7B10Point12Times3IsPt1And95)
@@ -6969,8 +7174,8 @@ namespace ModularUnitTests
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(2ull);
 			ECPoint exp;
-			exp.x = ModNumber(1ull);
-			exp.y = ModNumber(95ull);
+			exp.x = ModNumber(9ull);
+			exp.y = ModNumber(71ull);
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(3ull)));
 		}
 

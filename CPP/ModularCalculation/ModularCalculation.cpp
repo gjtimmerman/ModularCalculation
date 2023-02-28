@@ -1959,7 +1959,7 @@ ECPoint EC::Times2(ECPoint p) const
 	ModNumber lambdaTimesXrMinusXp = mgm.Mult(lambda, xrMinusXp);
 	ModNumber yPPluslambdaTimesXrMinusXp = mgm.Add(p.y, lambdaTimesXrMinusXp);
 	result.x = lambdaSquaredMinusXpTimes2;
-	result.y = yPPluslambdaTimesXrMinusXp;
+	result.y = mgm.Diff(ModNumber(), yPPluslambdaTimesXrMinusXp);
 	return result;
 }
 

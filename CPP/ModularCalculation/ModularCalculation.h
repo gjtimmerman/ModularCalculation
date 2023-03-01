@@ -300,7 +300,7 @@ public:
 	ECPoint Add(ECPoint p, ECPoint q) const;
 	ECPoint Times2(ECPoint p) const;
 	ECPoint Mult(ECPoint p, ModNumber n) const;
-private:
+
 	MultGroupMod mgm;
 	ECPoint g;
 	ModNumber n;
@@ -314,6 +314,31 @@ class ECDSA
 public:
 	ECDSA(const EC& ec, const ModNumber& x, const ECPoint& y = {ModNumber(), ModNumber(), true}) :ec(ec), x(x), y(y)
 	{
+		ModNumber mzero;
+		if (this->x == mzero)
+		{
+			llint x[COUNTLL] = {};
+			unsigned char* p = (unsigned char*)x;
+			srand((unsigned int)time(0));
+			ModNumber mx;
+
+			unsigned int nLen = GetByteCount(ec.n);
+			for (unsigned int i = 0; i < nLen; i++)
+			{
+				p[i] = (unsigned char)(rand() % 0x100);
+			}
+			mx = ModNumber(x);
+			if (mx == mzero)
+			{
+				mx += rand() + 1;
+			}
+			while (mx >= ec.n)
+			{
+				p[nLen - 1] -= rand() + 1;
+				mx = ModNumber(x);
+			}
+			this->x = mx;
+		}
 		if (this->y.IsAtInfinity)
 			this->y = CalcPublicKey(x);
 	}
@@ -326,7 +351,7 @@ public:
 	ECPoint y;
 	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
 	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
-private:
+
 	ModNumber x;
 };
 
@@ -426,6 +451,8 @@ std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& dat
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
 std::string sign(const wchar_t* keyName, unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
 bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::string signature, const wchar_t* hashAlgorithm = L"SHA256");
+std::string signECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLen);
+bool verifyECDsa(const ECDSA &ecDsa, unsigned char* hash, int hashLength, std::string signature);
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 #endif
 

@@ -2595,4 +2595,53 @@ bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::st
 	NCryptFreeObject(keyHandle);
 	return status == ERROR_SUCCESS;
 }
+
+std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength)
+{
+	std::string ret;
+	NTSTATUS status;
+	BCRYPT_ALG_HANDLE algHandle;
+	status = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_ECDSA_ALGORITHM, nullptr, 0);
+	evaluateBStatus(status);
+	status = BCryptSetProperty(algHandle, BCRYPT_ECC_CURVE_NAME, (PUCHAR)BCRYPT_ECC_CURVE_SECP256K1, (ULONG) (wcslen(BCRYPT_ECC_CURVE_SECP256K1) + 1) * sizeof(wchar_t), 0);
+	evaluateBStatus(status);
+	BCRYPT_KEY_HANDLE keyHandle;
+	unsigned int nLen = GetByteCount(ecDsa.ec.n);
+	ULONG blobSize = sizeof(BCRYPT_ECCKEY_BLOB) + nLen * 3;
+	BCRYPT_ECCKEY_BLOB *keyBlob = (BCRYPT_ECCKEY_BLOB*)new char[blobSize];
+	keyBlob->dwMagic = BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC;
+	keyBlob->cbKey = nLen;
+	char* p = (char *)(keyBlob + 1);
+	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecDsa.y.x);
+	memcpy(p, publicKeyXBigEndian, nLen);
+	p += nLen;
+	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecDsa.y.y);
+	memcpy(p, publicKeyYBigEndian, nLen);
+	p += nLen;
+	unsigned char* privateKeyBigEndian = ConvertEndianess(ecDsa.x);
+	memcpy(p, privateKeyBigEndian, nLen);
+	delete[] publicKeyXBigEndian;
+	delete[] publicKeyYBigEndian;
+	delete[] privateKeyBigEndian;
+
+	status = BCryptImportKeyPair(algHandle, 0, BCRYPT_ECCPRIVATE_BLOB, &keyHandle, (PUCHAR)keyBlob, blobSize, 0);
+	evaluateBStatus(status);
+	if (hashLength > nLen)
+		hashLength = nLen;
+	DWORD resultSize;
+	status = BCryptSignHash(keyHandle, 0, (PUCHAR)hash, hashLength, nullptr, 0, &resultSize, 0);
+	evaluateBStatus(status);
+	unsigned char* signature = new unsigned char[resultSize];
+	status = BCryptSignHash(keyHandle, 0, (PUCHAR)hash, hashLength, signature, resultSize, &resultSize, 0);
+	evaluateBStatus(status);
+	status = BCryptDestroyKey(keyHandle);
+	evaluateBStatus(status);
+	status = BCryptCloseAlgorithmProvider(algHandle, 0);
+	return std::string((const char *)signature, resultSize);
+}
+bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, int hashLength, std::string signature)
+{
+	return true;
+}
+
 #endif

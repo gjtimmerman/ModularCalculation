@@ -7664,7 +7664,8 @@ namespace ModularUnitTests
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
 			std::string hashBigEndian((const char *)pHashBigEndian, len);
-			ModNumber hashBigEndianModNumber(pHashBigEndian, len);
+			delete[] pHashBigEndian;
+//			ModNumber hashBigEndianModNumber(pHashBigEndian, len);
 
 #if (MAXMOD == 4096/8)
 			RSAParameters rsaParameters = GetRSAKey(L"MyCoolRSASignatureKey4096", false, AT_SIGNATURE);
@@ -7825,6 +7826,34 @@ namespace ModularUnitTests
 			Assert::IsTrue(verify(L"MyCoolDSAKey1024",pHashBigEndian, len, signature, 0));
 #endif
 		}
+		TEST_METHOD(TestSignatureECDSACreateSHA256)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			//std::string hashBigEndian((const char*)pHashBigEndian, len);
+			//ModNumber hashBigEndianModNumber(pHashBigEndian, len);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = signECDsa(myEcDsa, pHashBigEndian, len);
+			delete[] pHashBigEndian;
+		}
 
 
 //		TEST_METHOD(TestGenerateKeys)
@@ -7887,9 +7916,9 @@ namespace ModularUnitTests
 //			Assert::IsTrue(keyHandle != 0);
 //			NCryptFreeObject(keyHandle);
 //#endif
-//
+// 
 //			NCryptFreeObject(provHandle);
-//
+// 
 //		}
 //		TEST_METHOD(TestDeleteKeys)
 //		{

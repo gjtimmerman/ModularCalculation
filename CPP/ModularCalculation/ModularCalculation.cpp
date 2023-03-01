@@ -1989,6 +1989,129 @@ ECPoint EC::Mult(ECPoint p, ModNumber n) const
 	return result;
 }
 
+std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
+{
+	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
+	ModNumber mHash(pHashLittleEndian, hashLen);
+	delete[] pHashLittleEndian;
+	unsigned int nLen = GetByteCount(ec.n);
+	if (hashLen > nLen)
+		mHash = GetLeftMostBytes(mHash, nLen);
+	llint k[COUNTLL] = {};
+	unsigned char* p = (unsigned char*)k;
+	srand((unsigned int)time(0));
+
+	ModNumber r;
+	ModNumber s;
+	ModNumber mk;
+	ModNumber mzero;
+
+	do
+	{
+		do
+		{
+			for (unsigned int i = 0; i < nLen; i++)
+			{
+				p[i] = (unsigned char)(rand() % 0x100);
+			}
+			mk = ModNumber(k);
+			if (mk == mzero)
+			{
+				mk += rand() + 1;
+			}
+			while (mk >= ec.n)
+			{
+				p[nLen - 1] -= rand() + 1;
+				mk = ModNumber(k);
+			}
+			r = ec.Mult(ec.g, mk).x % ec.n;
+		} while (r == mzero);
+		ModNumber kInverse;
+		MultGroupMod mgmn(ec.n);
+		std::thread th1([&mgmn, &kInverse, &mk] {kInverse = mgmn.Inverse(mk); });
+		ModNumber hashPlusXR;
+		std::thread th2([&mgmn, this, &r, &mHash, &hashPlusXR] {
+			ModNumber xR = mgmn.Mult(x, r);
+			hashPlusXR = mgmn.Add(mHash, xR);
+			});
+		th1.join();
+		th2.join();
+		s = mgmn.Mult(kInverse, hashPlusXR);
+	} while (s == mzero);
+	unsigned char* rBigEndian = ConvertEndianess(r);
+	unsigned char* sBigEndian = ConvertEndianess(s);
+	unsigned int cbR = GetByteCount(r);
+	unsigned int cbS = GetByteCount(s);
+	if (DerEncoded)
+	{
+		std::list<std::string> myList;
+		std::string rStr((const char*)rBigEndian, cbR);
+		myList.push_back(rStr);
+		std::string sStr((const char*)sBigEndian, cbS);
+		myList.push_back(sStr);
+		delete[] rBigEndian;
+		delete[] sBigEndian;
+		return CreateBERASNStringForDSASignature(myList);
+	}
+	else
+	{
+		std::string rs((const char*)rBigEndian, cbR);
+		rs.append((const char*)sBigEndian, cbS);
+		delete[] rBigEndian;
+		delete[] sBigEndian;
+		return rs;
+	}
+}
+bool ECDSA::Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
+{
+	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
+	ModNumber mHash(pHashLittleEndian, hashLen);
+	delete[] pHashLittleEndian;
+	unsigned int nLen = GetByteCount(ec.n);
+	if (hashLen > nLen)
+		mHash = GetLeftMostBytes(mHash, nLen);
+	std::list<std::string> results;
+	if (DerEncoded)
+	{
+		ModNumber mSignature = ModNumber::stomn(signature, 16);
+		results = ParseBERASNString(mSignature);
+	}
+	else
+	{
+		results.push_back(signature.substr(0, signature.length() / 2));
+		results.push_back(signature.substr(signature.length() / 2, signature.length() / 2));
+	}
+	std::list<std::string>::iterator myListIterator = results.begin();
+	std::string r = *myListIterator++;
+	std::string s = *myListIterator++;
+	unsigned char* rLittleEndian = ConvertEndianess((const unsigned char*)r.c_str(), (unsigned int)r.length());
+	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
+	ModNumber mr(rLittleEndian, (unsigned int)r.length());
+	ModNumber ms(sLittleEndian, (unsigned int)s.length());
+	delete[] rLittleEndian;
+	delete[] sLittleEndian;
+	if (!(mr < ec.n && ms < ec.n))
+		return false;
+	MultGroupMod mgmn(ec.n);
+	ModNumber sInverse = mgmn.Inverse(ms);
+	ModNumber u1;
+	std::thread th1([&u1, &mgmn, &mHash, &sInverse] {u1 = mgmn.Mult(mHash, sInverse); });
+
+	ModNumber u2;
+	std::thread th2([&u2, &mgmn, &mr, &sInverse] {u2 = mgmn.Mult(mr, sInverse); });
+	ECPoint pt1;
+	std::thread th3([&pt1, this, &u1, &th1] {th1.join(); pt1 = ec.Mult(ec.g, u1); });
+	ECPoint pt2;
+	std::thread th4([&pt2, this, &u2, &th2] {th2.join(); pt2 = ec.Mult(y, u2); });
+	th3.join();
+	th4.join();
+	ECPoint ptv = ec.Add(pt1, pt2);
+	if (ptv.IsAtInfinity)
+		return false;
+	return ptv.x == mr;
+}
+
+
 
 #ifdef _WIN32 
 

@@ -324,6 +324,8 @@ public:
 	}
 	EC ec;
 	ECPoint y;
+	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
+	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
 private:
 	ModNumber x;
 };

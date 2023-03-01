@@ -287,6 +287,8 @@ struct ECPoint
 	bool IsAtInfinity = false;
 };
 
+class ECDSA;
+
 class EC
 {
 public:
@@ -304,6 +306,26 @@ private:
 	ModNumber n;
 	ModNumber a;
 	ModNumber b;
+	friend class ECDSA;
+};
+
+class ECDSA
+{
+public:
+	ECDSA(const EC& ec, const ModNumber& x, const ECPoint& y = {ModNumber(), ModNumber(), true}) :ec(ec), x(x), y(y)
+	{
+		if (this->y.IsAtInfinity)
+			this->y = CalcPublicKey(x);
+	}
+	ECPoint CalcPublicKey(ModNumber privateKey)
+	{
+		ECPoint retval = ec.Mult(ec.g, privateKey);
+		return retval;
+	}
+	EC ec;
+	ECPoint y;
+private:
+	ModNumber x;
 };
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);

@@ -7481,7 +7481,41 @@ namespace ModularUnitTests
 			exp.IsAtInfinity = true;
 			Assert::IsTrue(exp == myEC.Mult(pt, ModNumber(82ull)));
 		}
-
+		TEST_METHOD(TestECSecp256k1Parameters)
+		{
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			Assert::IsTrue(myEC.IsOnCurve(g));
+			ECPoint gTimesN = myEC.Mult(g, n);
+			Assert::IsTrue(gTimesN.IsAtInfinity);
+		}
+		TEST_METHOD(TestECSecp256k1PublicPrivateKeyPair)
+		{
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECDSA myEcDsa(myEC, privateKey);
+			Assert::IsTrue(myEcDsa.y.x == publicKeyX);
+			Assert::IsTrue(myEcDsa.y.y == publicKeyY);
+		}
 
 #ifdef _WIN32
 

@@ -8063,8 +8063,9 @@ namespace ModularUnitTests
 			ModNumber n = ModNumber::stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
 			ModNumber a = mgm.Diff(mzero,ModNumber(3));
 			ModNumber b = ModNumber::stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00",16);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
 			EC myEC(mgm, g, n, a, b);
-			ECDSA myEcDsa(myEC);
+			ECDSA myEcDsa(myEC, privateKey);
 			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
 			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature, BCRYPT_ECC_CURVE_NISTP521);
 			delete[] pHashBigEndian;
@@ -8090,8 +8091,9 @@ namespace ModularUnitTests
 			ModNumber n = ModNumber::stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
 			ModNumber a = mgm.Diff(mzero, ModNumber(3));
 			ModNumber b = ModNumber::stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
 			EC myEC(mgm, g, n, a, b);
-			ECDSA myEcDsa(myEC);
+			ECDSA myEcDsa(myEC, privateKey);
 			std::string signature = myEcDsa.Sign(pHashBigEndian1, len1, false);
 			bool valid = verifyECDsa(myEcDsa, pHashBigEndian2, len2, signature, BCRYPT_ECC_CURVE_NISTP521);
 			delete[] pHashBigEndian1;

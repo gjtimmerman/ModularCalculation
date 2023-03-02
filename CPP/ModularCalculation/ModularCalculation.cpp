@@ -2578,8 +2578,8 @@ std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hash
 	evaluateBStatus(status);
 	unsigned char* signature = new unsigned char[resultSize];
 	status = BCryptSignHash(keyHandle, 0, (PUCHAR)hash, hashLength, signature, resultSize, &resultSize, 0);
+	BCryptDestroyKey(keyHandle);
 	evaluateBStatus(status);
-	status = BCryptDestroyKey(keyHandle);
 	evaluateBStatus(status);
 	return std::string((const char *)signature, resultSize);
 }
@@ -2593,9 +2593,9 @@ bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLengt
 		hashLength = nLen;
 	unsigned char* pSignature = (unsigned char *)signature.c_str();
 	status = BCryptVerifySignature(keyHandle, nullptr, hash, hashLength, pSignature, (ULONG)signature.length(), 0);
+	BCryptDestroyKey(keyHandle);
 	if (!(status == ERROR_SUCCESS || status == STATUS_INVALID_SIGNATURE))
 		evaluateBStatus(status);
-	BCryptDestroyKey(keyHandle);
 	return status == ERROR_SUCCESS;
 }
 

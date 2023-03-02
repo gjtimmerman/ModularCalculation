@@ -7516,6 +7516,60 @@ namespace ModularUnitTests
 			Assert::IsTrue(myEcDsa.y.x == publicKeyX);
 			Assert::IsTrue(myEcDsa.y.y == publicKeyY);
 		}
+		TEST_METHOD(TestSignatureECDSASignAndVerifySHA256Valid)
+		{
+			unsigned char* pHashBigEndian = (unsigned char *)"\x25\xbd\xec\xae\x5c\x8b\xc7\x90\x5c\xbb\xda\x89\x48\x5a\xfe\xc7\xc6\x07\xd6\x0a\xc0\xb1\xd4\xea\x66\xc3\xca\x01\xd7\x59\x3d\x87";
+			unsigned int len = 32;
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			bool valid = myEcDsa.Verify(pHashBigEndian, len, signature, false);
+			Assert::IsTrue(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignAndVerifySHA256InValid)
+		{
+			unsigned char* pHashBigEndian = (unsigned char*)"\x25\xbd\xec\xae\x5c\x8b\xc7\x90\x5c\xbb\xda\x89\x48\x5a\xfe\xc7\xc6\x07\xd6\x0a\xc0\xb1\xd4\xea\x66\xc3\xca\x01\xd7\x59\x3d\x87";
+			unsigned int len = 32;
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			unsigned char *pWrongHash = new unsigned char[len];
+			memcpy(pWrongHash, pHashBigEndian, len);
+			pWrongHash[0]++;
+			bool valid = myEcDsa.Verify(pWrongHash, len, signature, false);
+			Assert::IsFalse(valid);
+		}
+
 
 #ifdef _WIN32
 
@@ -7826,14 +7880,12 @@ namespace ModularUnitTests
 			Assert::IsTrue(verify(L"MyCoolDSAKey1024",pHashBigEndian, len, signature, 0));
 #endif
 		}
-		TEST_METHOD(TestSignatureECDSACreateSHA256)
+		TEST_METHOD(TestSignatureECDSAVerifySHA256Valid)
 		{
 			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
 			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
-			//std::string hashBigEndian((const char*)pHashBigEndian, len);
-			//ModNumber hashBigEndianModNumber(pHashBigEndian, len);
 			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
 			MultGroupMod mgm(p);
 			ECPoint g;
@@ -7852,9 +7904,200 @@ namespace ModularUnitTests
 			publicKey.y = publicKeyY;
 			ECDSA myEcDsa(myEC, privateKey, publicKey);
 			std::string signature = signECDsa(myEcDsa, pHashBigEndian, len);
+			bool valid = myEcDsa.Verify(pHashBigEndian, len, signature, false);
 			delete[] pHashBigEndian;
+			Assert::IsTrue(valid);
 		}
-
+		TEST_METHOD(TestSignatureECDSAVerifySHA256InValid)
+		{
+			char* message1 = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result1 = hash((unsigned char*)message1, strlen(message1));
+			unsigned char* pHashBigEndian1 = std::get<0>(result1);
+			ULONG len1 = std::get<1>(result1);
+			char* message2 = "Dit is een test om te zien of een signature geverifieerd kan worden.";
+			std::tuple<unsigned char*, ULONG> result2 = hash((unsigned char*)message2, strlen(message2));
+			unsigned char* pHashBigEndian2 = std::get<0>(result2);
+			ULONG len2 = std::get<1>(result2);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = signECDsa(myEcDsa, pHashBigEndian1, len1);
+			bool valid = myEcDsa.Verify(pHashBigEndian2, len2, signature, false);
+			delete[] pHashBigEndian1;
+			delete[] pHashBigEndian2;
+			Assert::IsFalse(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignSHA256Valid)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature);
+			delete[] pHashBigEndian;
+			Assert::IsTrue(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignSHA256InValid)
+		{
+			char* message1 = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result1 = hash((unsigned char*)message1, strlen(message1));
+			unsigned char* pHashBigEndian1 = std::get<0>(result1);
+			ULONG len1 = std::get<1>(result1);
+			char* message2 = "Dit is een test om te zien of een signature geverifieerd kan worden.";
+			std::tuple<unsigned char*, ULONG> result2 = hash((unsigned char*)message2, strlen(message2));
+			unsigned char* pHashBigEndian2 = std::get<0>(result2);
+			ULONG len2 = std::get<1>(result2);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ModNumber publicKeyX = ModNumber::stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+			ModNumber publicKeyY = ModNumber::stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+			ECPoint publicKey;
+			publicKey.x = publicKeyX;
+			publicKey.y = publicKeyY;
+			ECDSA myEcDsa(myEC, privateKey, publicKey);
+			std::string signature = myEcDsa.Sign(pHashBigEndian1, len1, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian2, len2, signature);
+			delete[] pHashBigEndian1;
+			delete[] pHashBigEndian2;
+			Assert::IsFalse(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignSHA256CalculatedPubKey)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ModNumber privateKey = ModNumber::stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+			ECDSA myEcDsa(myEC, privateKey);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature);
+			delete[] pHashBigEndian;
+			Assert::IsTrue(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignSHA256CalculatedPubAndPrivateKey)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			ModNumber p = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+			g.y = ModNumber::stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+			ModNumber n = ModNumber::stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+			ModNumber a;
+			ModNumber b(0x07ull);
+			EC myEC(mgm, g, n, a, b);
+			ECDSA myEcDsa(myEC);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature);
+			delete[] pHashBigEndian;
+			Assert::IsTrue(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignNISTP521SHA256Valid)
+		{
+			char* message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
+			unsigned char* pHashBigEndian = std::get<0>(result);
+			ULONG len = std::get<1>(result);
+			ModNumber mzero;
+			ModNumber p = ModNumber::stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+			g.y = ModNumber::stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+			ModNumber n = ModNumber::stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+			ModNumber a = mgm.Diff(mzero,ModNumber(3));
+			ModNumber b = ModNumber::stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00",16);
+			EC myEC(mgm, g, n, a, b);
+			ECDSA myEcDsa(myEC);
+			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature, BCRYPT_ECC_CURVE_NISTP521);
+			delete[] pHashBigEndian;
+			Assert::IsTrue(valid);
+		}
+		TEST_METHOD(TestSignatureECDSASignNISTP521SHA256InValid)
+		{
+			char* message1 = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+			std::tuple<unsigned char*, ULONG> result1 = hash((unsigned char*)message1, strlen(message1));
+			unsigned char* pHashBigEndian1 = std::get<0>(result1);
+			ULONG len1 = std::get<1>(result1);
+			char* message2 = "Dit is een test om te zien of een signature geverifieerd kan worden.";
+			std::tuple<unsigned char*, ULONG> result2 = hash((unsigned char*)message2, strlen(message2));
+			unsigned char* pHashBigEndian2 = std::get<0>(result2);
+			ULONG len2 = std::get<1>(result2);
+			ModNumber mzero;
+			ModNumber p = ModNumber::stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+			MultGroupMod mgm(p);
+			ECPoint g;
+			g.IsAtInfinity = false;
+			g.x = ModNumber::stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+			g.y = ModNumber::stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+			ModNumber n = ModNumber::stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+			ModNumber a = mgm.Diff(mzero, ModNumber(3));
+			ModNumber b = ModNumber::stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+			EC myEC(mgm, g, n, a, b);
+			ECDSA myEcDsa(myEC);
+			std::string signature = myEcDsa.Sign(pHashBigEndian1, len1, false);
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian2, len2, signature, BCRYPT_ECC_CURVE_NISTP521);
+			delete[] pHashBigEndian1;
+			delete[] pHashBigEndian2;
+			Assert::IsFalse(valid);
+		}
 
 //		TEST_METHOD(TestGenerateKeys)
 //		{

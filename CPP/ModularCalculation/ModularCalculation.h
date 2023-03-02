@@ -1,6 +1,8 @@
 #pragma once
 
 #ifdef _WIN32
+#include <ntstatus.h>
+#define WIN32_NO_STATUS
 #include <windows.h>
 #include <ncrypt.h>
 #include <wincrypt.h>
@@ -252,6 +254,12 @@ private:
 
 };
 
+class DSABase
+{
+public:
+	virtual ModNumber CalcR(const ModNumber& mk) const = 0;
+	std::string CalculateDSASignature(ModNumber q, ModNumber x, unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
+};
 struct DSAParameters
 {
 public:
@@ -263,7 +271,7 @@ public:
 
 };
 
-class DSA
+class DSA : public DSABase
 {
 public:
 	DSA(DSAParameters p) : Q(p.Q), P(p.P), g(p.g),x(p.x), y(p.y)
@@ -272,6 +280,7 @@ public:
 	}
 	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
 	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
+	virtual ModNumber CalcR(const ModNumber& mk) const;
 private:
 	ModNumber Q;
 	ModNumber P;
@@ -309,10 +318,10 @@ public:
 	friend class ECDSA;
 };
 
-class ECDSA
+class ECDSA : public DSABase
 {
 public:
-	ECDSA(const EC& ec, const ModNumber& x, const ECPoint& y = {ModNumber(), ModNumber(), true}) :ec(ec), x(x), y(y)
+	ECDSA(const EC& ec, const ModNumber& x = ModNumber(), const ECPoint& y = {ModNumber(), ModNumber(), true}) :ec(ec), x(x), y(y)
 	{
 		ModNumber mzero;
 		if (this->x == mzero)
@@ -340,7 +349,7 @@ public:
 			this->x = mx;
 		}
 		if (this->y.IsAtInfinity)
-			this->y = CalcPublicKey(x);
+			this->y = CalcPublicKey(this->x);
 	}
 	ECPoint CalcPublicKey(ModNumber privateKey)
 	{
@@ -351,6 +360,7 @@ public:
 	ECPoint y;
 	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
 	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
+	virtual ModNumber CalcR(const ModNumber& mk) const;
 
 	ModNumber x;
 };
@@ -451,9 +461,11 @@ std::tuple<ModNumber, DWORD> decrypt(const wchar_t *KeyName,const ModNumber& dat
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data);
 std::string sign(const wchar_t* keyName, unsigned char* hash, int count, const wchar_t* hashAlgorithm = L"SHA256");
 bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::string signature, const wchar_t* hashAlgorithm = L"SHA256");
-std::string signECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLen);
-bool verifyECDsa(const ECDSA &ecDsa, unsigned char* hash, int hashLength, std::string signature);
+std::string signECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLen, const wchar_t *curveName = BCRYPT_ECC_CURVE_SECP256K1);
+bool verifyECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLength, std::string signature, const wchar_t *curveName = BCRYPT_ECC_CURVE_SECP256K1);
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
+ModNumber encryptECCElgamal(const ECDSA& ecDsa, unsigned char* data, unsigned int len);
+std::list<BCRYPT_ALGORITHM_IDENTIFIER> getAlgorithms();
 #endif
 
 

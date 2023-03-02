@@ -1755,88 +1755,24 @@ ModNumber RSA::EncryptSignature(std::string hashBigEndian, std::string hashOid) 
 	return res;
 }
 
+ModNumber DSA::CalcR(const ModNumber& mk) const
+{
+	MultGroupMod mgmp(P);
+	return mgmp.Exp(g, mk) % Q;
+}
+
 std::string DSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
+{
+	return CalculateDSASignature(Q, x, hash, hashLen, DerEncoded);
+}
+
+std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& q, unsigned int qLen, unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded)
 {
 	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
 	ModNumber mHash(pHashLittleEndian, hashLen);
 	delete[] pHashLittleEndian;
-	unsigned int bcQ = GetByteCount(Q);
-	if (hashLen > bcQ)
-		mHash = GetLeftMostBytes(mHash, bcQ);
-	llint k[COUNTLL] = {};
-	unsigned char* p = (unsigned char*)k;
-	srand((unsigned int)time(0));
-	ModNumber r;
-	ModNumber s;
-	ModNumber mk;
-	ModNumber mzero;
-	MultGroupMod mgmp(P);
-	MultGroupMod mgmq(Q);
-	do
-	{
-		do
-		{
-			for (unsigned int i = 0; i < bcQ; i++)
-			{
-				p[i] = (unsigned char)(rand() % 0x100);
-			}
-			mk = ModNumber(k);
-			if (mk == mzero)
-			{
-				mk += rand() + 1;
-			}
-			while (mk >= Q)
-			{
-				p[bcQ-1] -= rand() + 1;
-				mk = ModNumber(k);
-			}
-			r = mgmp.Exp(g, mk) % Q;
-		} while (r == mzero);
-		ModNumber kInverse;
-		std::thread th1([&mgmq, &kInverse, &mk] {kInverse = mgmq.Inverse(mk); });
-		ModNumber hashPlusXR;
-		std::thread th2([&mgmq, this,&r, &mHash, &hashPlusXR] {
-			ModNumber xR = mgmq.Mult(x, r);
-			hashPlusXR = mgmq.Add(mHash, xR);
-			});
-		th1.join();
-		th2.join();
-		s = mgmq.Mult(kInverse, hashPlusXR);
-	} while (s == mzero);
-	unsigned char* rBigEndian = ConvertEndianess(r);
-	unsigned char* sBigEndian = ConvertEndianess(s);
-	unsigned int cbR = GetByteCount(r);
-	unsigned int cbS = GetByteCount(s);
-	if (DerEncoded)
-	{
-		std::list<std::string> myList;
-		std::string rStr((const char*)rBigEndian, cbR);
-		myList.push_back(rStr);
-		std::string sStr((const char*)sBigEndian, cbS);
-		myList.push_back(sStr);
-		delete[] rBigEndian;
-		delete[] sBigEndian;
-		return CreateBERASNStringForDSASignature(myList);
-	}
-	else
-	{
-		std::string rs((const char*)rBigEndian, cbR);
-		rs.append((const char*)sBigEndian, cbS);
-		delete[] rBigEndian;
-		delete[] sBigEndian;
-		return rs;
-	}
-}
-
-bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
-{
-	MultGroupMod mgm(P);
-	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
-	ModNumber mHash(pHashLittleEndian,hashLen);
-	delete[] pHashLittleEndian;
-	unsigned int bcQ = GetByteCount(Q);
-	if (hashLen > bcQ)
-		mHash = GetLeftMostBytes(mHash, bcQ);
+	if (hashLen > qLen)
+		mHash = GetLeftMostBytes(mHash, qLen);
 	std::list<std::string> results;
 	if (DerEncoded)
 	{
@@ -1857,20 +1793,33 @@ bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signatur
 	ModNumber ms(sLittleEndian, (unsigned int)s.length());
 	delete[] rLittleEndian;
 	delete[] sLittleEndian;
-	if (!(mr < Q && ms < Q))
-		return false;
-
-	MultGroupMod mgmq(Q);
-	ModNumber sInverse = mgmq.Inverse(ms);
+	if (!(mr < q && ms < q))
+		throw std::domain_error("Invalid signature");
+	MultGroupMod mgmn(q);
+	ModNumber sInverse = mgmn.Inverse(ms);
 	ModNumber u1;
-	std::thread th1([&u1, &mgmq, &mHash, &sInverse] {u1 = mgmq.Mult(mHash, sInverse); });
-	
+	std::thread th1([&u1, &mgmn, &mHash, &sInverse] {u1 = mgmn.Mult(mHash, sInverse); });
+
 	ModNumber u2;
-	std::thread th2([&u2, &mgmq, &mr, &sInverse] {u2 = mgmq.Mult(mr, sInverse); });
+	std::thread th2([&u2, &mgmn, &mr, &sInverse] {u2 = mgmn.Mult(mr, sInverse); });
+	th1.join();
+	th2.join();
+	return std::make_tuple(u1, u2, mr);
+}
+
+
+bool DSA::Verify(unsigned char *hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
+{
+	MultGroupMod mgm(P);
 	ModNumber mv1;
-	std::thread th3([&mv1, &mgm, this, &u1, &th1] {th1.join(); mv1 = mgm.Exp(g, u1); });
+	unsigned int bcQ = GetByteCount(Q);
+	std::tuple<ModNumber, ModNumber, ModNumber> u1u2mr = DSACalculateU1U2Mr(Q, bcQ, hash, hashLen, signature, DerEncoded);
+	ModNumber u1 = std::get<0>(u1u2mr);
+	ModNumber u2 = std::get<1>(u1u2mr);
+	ModNumber mr = std::get<2>(u1u2mr);
+	std::thread th3([&mv1, &mgm, this, &u1] {mv1 = mgm.Exp(g, u1); });
 	ModNumber mv2;
-	std::thread th4([&mv2, &mgm, this, &u2, &th2] {th2.join(); mv2 = mgm.Exp(y, u2); });
+	std::thread th4([&mv2, &mgm, this, &u2] {mv2 = mgm.Exp(y, u2); });
 	th3.join();
 	th4.join();
 	ModNumber mv = mgm.Mult(mv1, mv2) % Q;
@@ -1989,12 +1938,12 @@ ECPoint EC::Mult(ECPoint p, ModNumber n) const
 	return result;
 }
 
-std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
+std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
 {
 	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
 	ModNumber mHash(pHashLittleEndian, hashLen);
 	delete[] pHashLittleEndian;
-	unsigned int nLen = GetByteCount(ec.n);
+	unsigned int nLen = GetByteCount(q);
 	if (hashLen > nLen)
 		mHash = GetLeftMostBytes(mHash, nLen);
 	llint k[COUNTLL] = {};
@@ -2019,18 +1968,18 @@ std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncod
 			{
 				mk += rand() + 1;
 			}
-			while (mk >= ec.n)
+			while (mk >= q)
 			{
 				p[nLen - 1] -= rand() + 1;
 				mk = ModNumber(k);
 			}
-			r = ec.Mult(ec.g, mk).x % ec.n;
+			r = CalcR(mk);
 		} while (r == mzero);
 		ModNumber kInverse;
-		MultGroupMod mgmn(ec.n);
+		MultGroupMod mgmn(q);
 		std::thread th1([&mgmn, &kInverse, &mk] {kInverse = mgmn.Inverse(mk); });
 		ModNumber hashPlusXR;
-		std::thread th2([&mgmn, this, &r, &mHash, &hashPlusXR] {
+		std::thread th2([&mgmn, &x, &r, &mHash, &hashPlusXR] {
 			ModNumber xR = mgmn.Mult(x, r);
 			hashPlusXR = mgmn.Add(mHash, xR);
 			});
@@ -2061,48 +2010,32 @@ std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncod
 		delete[] sBigEndian;
 		return rs;
 	}
+
 }
+
+ModNumber ECDSA::CalcR(const ModNumber& mk) const
+{
+	return ec.Mult(ec.g, mk).x % ec.n;
+}
+
+std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
+{
+	return CalculateDSASignature(ec.n, x, hash, hashLen, DerEncoded);
+}
+
+
 bool ECDSA::Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
 {
-	unsigned char* pHashLittleEndian = ConvertEndianess(hash, hashLen);
-	ModNumber mHash(pHashLittleEndian, hashLen);
-	delete[] pHashLittleEndian;
 	unsigned int nLen = GetByteCount(ec.n);
-	if (hashLen > nLen)
-		mHash = GetLeftMostBytes(mHash, nLen);
-	std::list<std::string> results;
-	if (DerEncoded)
-	{
-		ModNumber mSignature = ModNumber::stomn(signature, 16);
-		results = ParseBERASNString(mSignature);
-	}
-	else
-	{
-		results.push_back(signature.substr(0, signature.length() / 2));
-		results.push_back(signature.substr(signature.length() / 2, signature.length() / 2));
-	}
-	std::list<std::string>::iterator myListIterator = results.begin();
-	std::string r = *myListIterator++;
-	std::string s = *myListIterator++;
-	unsigned char* rLittleEndian = ConvertEndianess((const unsigned char*)r.c_str(), (unsigned int)r.length());
-	unsigned char* sLittleEndian = ConvertEndianess((const unsigned char*)s.c_str(), (unsigned int)s.length());
-	ModNumber mr(rLittleEndian, (unsigned int)r.length());
-	ModNumber ms(sLittleEndian, (unsigned int)s.length());
-	delete[] rLittleEndian;
-	delete[] sLittleEndian;
-	if (!(mr < ec.n && ms < ec.n))
-		return false;
-	MultGroupMod mgmn(ec.n);
-	ModNumber sInverse = mgmn.Inverse(ms);
-	ModNumber u1;
-	std::thread th1([&u1, &mgmn, &mHash, &sInverse] {u1 = mgmn.Mult(mHash, sInverse); });
+	std::tuple<ModNumber, ModNumber, ModNumber> u1u2mr = DSACalculateU1U2Mr(ec.n, nLen, hash, hashLen, signature, DerEncoded);
+	ModNumber u1 = std::get<0>(u1u2mr);
+	ModNumber u2 = std::get<1>(u1u2mr);
+	ModNumber mr = std::get<2>(u1u2mr);
 
-	ModNumber u2;
-	std::thread th2([&u2, &mgmn, &mr, &sInverse] {u2 = mgmn.Mult(mr, sInverse); });
 	ECPoint pt1;
-	std::thread th3([&pt1, this, &u1, &th1] {th1.join(); pt1 = ec.Mult(ec.g, u1); });
+	std::thread th3([&pt1, this, &u1] {pt1 = ec.Mult(ec.g, u1); });
 	ECPoint pt2;
-	std::thread th4([&pt2, this, &u2, &th2] {th2.join(); pt2 = ec.Mult(y, u2); });
+	std::thread th4([&pt2, this, &u2] {pt2 = ec.Mult(y, u2); });
 	th3.join();
 	th4.join();
 	ECPoint ptv = ec.Add(pt1, pt2);
@@ -2469,6 +2402,7 @@ std::tuple<ModNumber,DWORD> decrypt(const wchar_t *KeyName,const ModNumber& data
 }
 
 
+
 ModNumber encrypt(const wchar_t* KeyName,const ModNumber& data)
 {
 	NCRYPT_PROV_HANDLE provHandle;
@@ -2512,6 +2446,9 @@ int evaluateBStatus(NTSTATUS status)
 		throw std::runtime_error("Cryptographic function returned error code: STATUS_INVALID_PARAMETER");
 	case STATUS_NO_MEMORY:
 		throw std::runtime_error("Cryptographic function returned error code: STATUS_NO_MEMORY");
+	case STATUS_NOT_SUPPORTED:
+		throw std::runtime_error("Cryptographic function returned error code: STATUS_NOT_SUPPORTED");
+
 	default:
 		throw std::runtime_error("Cryptographic function returned unknown error code");
 	}
@@ -2596,22 +2533,21 @@ bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::st
 	return status == ERROR_SUCCESS;
 }
 
-std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength)
+BCRYPT_KEY_HANDLE importECDsaKey(const ECDSA& ecDsa, const wchar_t *curveName)
 {
-	std::string ret;
 	NTSTATUS status;
 	BCRYPT_ALG_HANDLE algHandle;
 	status = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_ECDSA_ALGORITHM, nullptr, 0);
 	evaluateBStatus(status);
-	status = BCryptSetProperty(algHandle, BCRYPT_ECC_CURVE_NAME, (PUCHAR)BCRYPT_ECC_CURVE_SECP256K1, (ULONG) (wcslen(BCRYPT_ECC_CURVE_SECP256K1) + 1) * sizeof(wchar_t), 0);
+	status = BCryptSetProperty(algHandle, BCRYPT_ECC_CURVE_NAME, (PUCHAR)curveName, (ULONG)(wcslen(curveName) + 1) * sizeof(wchar_t), 0);
 	evaluateBStatus(status);
 	BCRYPT_KEY_HANDLE keyHandle;
 	unsigned int nLen = GetByteCount(ecDsa.ec.n);
 	ULONG blobSize = sizeof(BCRYPT_ECCKEY_BLOB) + nLen * 3;
-	BCRYPT_ECCKEY_BLOB *keyBlob = (BCRYPT_ECCKEY_BLOB*)new char[blobSize];
+	BCRYPT_ECCKEY_BLOB* keyBlob = (BCRYPT_ECCKEY_BLOB*)new char[blobSize];
 	keyBlob->dwMagic = BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC;
 	keyBlob->cbKey = nLen;
-	char* p = (char *)(keyBlob + 1);
+	char* p = (char*)(keyBlob + 1);
 	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecDsa.y.x);
 	memcpy(p, publicKeyXBigEndian, nLen);
 	p += nLen;
@@ -2626,6 +2562,15 @@ std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hash
 
 	status = BCryptImportKeyPair(algHandle, 0, BCRYPT_ECCPRIVATE_BLOB, &keyHandle, (PUCHAR)keyBlob, blobSize, 0);
 	evaluateBStatus(status);
+	status = BCryptCloseAlgorithmProvider(algHandle, 0);
+	return keyHandle;
+}
+
+std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength, const wchar_t *curveName)
+{
+	NTSTATUS status;
+	BCRYPT_KEY_HANDLE keyHandle = importECDsaKey(ecDsa, curveName);
+	unsigned int nLen = GetByteCount(ecDsa.ec.n);
 	if (hashLength > nLen)
 		hashLength = nLen;
 	DWORD resultSize;
@@ -2636,12 +2581,35 @@ std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hash
 	evaluateBStatus(status);
 	status = BCryptDestroyKey(keyHandle);
 	evaluateBStatus(status);
-	status = BCryptCloseAlgorithmProvider(algHandle, 0);
 	return std::string((const char *)signature, resultSize);
 }
-bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, int hashLength, std::string signature)
+
+bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength, std::string signature,const wchar_t *curveName)
 {
-	return true;
+	NTSTATUS status;
+	BCRYPT_KEY_HANDLE keyHandle = importECDsaKey(ecDsa, curveName);
+	unsigned int nLen = GetByteCount(ecDsa.ec.n);
+	if (hashLength > nLen)
+		hashLength = nLen;
+	unsigned char* pSignature = (unsigned char *)signature.c_str();
+	status = BCryptVerifySignature(keyHandle, nullptr, hash, hashLength, pSignature, (ULONG)signature.length(), 0);
+	if (!(status == ERROR_SUCCESS || status == STATUS_INVALID_SIGNATURE))
+		evaluateBStatus(status);
+	BCryptDestroyKey(keyHandle);
+	return status == ERROR_SUCCESS;
 }
 
+
+std::list<BCRYPT_ALGORITHM_IDENTIFIER> getAlgorithms()
+{
+	NTSTATUS status;
+	ULONG cbCount;
+	BCRYPT_ALGORITHM_IDENTIFIER* pAlgorithmList;
+	std::list<BCRYPT_ALGORITHM_IDENTIFIER> myList;
+	status = BCryptEnumAlgorithms(BCRYPT_ASYMMETRIC_ENCRYPTION_OPERATION | BCRYPT_CIPHER_OPERATION, &cbCount, &pAlgorithmList, 0);
+	evaluateBStatus(status);
+	for (unsigned int i = 0; i < cbCount; i++)
+		myList.push_back(pAlgorithmList[i]);
+	return myList;
+}
 #endif

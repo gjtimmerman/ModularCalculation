@@ -1801,7 +1801,7 @@ std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& 
 	std::thread th1([&u1, &mgmn, &mHash, &sInverse] {u1 = mgmn.Mult(mHash, sInverse); });
 
 	ModNumber u2;
-	std::thread th2([&u2, &mgmn, &mr, &sInverse] {u2 = mgmn.Mult(mr, sInverse); });
+	std::thread th2([&u2, &mgmn, mr, sInverse] {u2 = mgmn.Mult(mr, sInverse); });
 	th1.join();
 	th2.join();
 	return std::make_tuple(u1, u2, mr);
@@ -1987,16 +1987,18 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 		th2.join();
 		s = mgmn.Mult(kInverse, hashPlusXR);
 	} while (s == mzero);
+	if (!(s < q))
+		throw std::domain_error("Wrong signature");
 	unsigned char* rBigEndian = ConvertEndianess(r);
 	unsigned char* sBigEndian = ConvertEndianess(s);
-	unsigned int cbR = GetByteCount(r);
-	unsigned int cbS = GetByteCount(s);
+//	unsigned int cbR = GetByteCount(r);
+//	unsigned int cbS = GetByteCount(s);
 	if (DerEncoded)
 	{
 		std::list<std::string> myList;
-		std::string rStr((const char*)rBigEndian, cbR);
+		std::string rStr((const char*)rBigEndian, nLen);
 		myList.push_back(rStr);
-		std::string sStr((const char*)sBigEndian, cbS);
+		std::string sStr((const char*)sBigEndian, nLen);
 		myList.push_back(sStr);
 		delete[] rBigEndian;
 		delete[] sBigEndian;
@@ -2004,8 +2006,8 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 	}
 	else
 	{
-		std::string rs((const char*)rBigEndian, cbR);
-		rs.append((const char*)sBigEndian, cbS);
+		std::string rs((const char*)rBigEndian, nLen);
+		rs.append((const char*)sBigEndian, nLen);
 		delete[] rBigEndian;
 		delete[] sBigEndian;
 		return rs;
@@ -2592,6 +2594,17 @@ bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLengt
 	if (hashLength > nLen)
 		hashLength = nLen;
 	unsigned char* pSignature = (unsigned char *)signature.c_str();
+	//std::ofstream outfile;
+	//outfile.open("signature.txt");
+	//for (int i = 0; i < signature.length(); i++)
+	//{
+	//	outfile << "\\x";
+	//	outfile.fill('0');
+	//	outfile.width(2);
+	//	outfile << std::hex << (int)pSignature[i];
+	//}
+	//outfile << std::endl;
+	//outfile.close();
 	status = BCryptVerifySignature(keyHandle, nullptr, hash, hashLength, pSignature, (ULONG)signature.length(), 0);
 	BCryptDestroyKey(keyHandle);
 	if (!(status == ERROR_SUCCESS || status == STATUS_INVALID_SIGNATURE))

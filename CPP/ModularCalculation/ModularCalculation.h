@@ -158,7 +158,7 @@ private:
 	friend class MultGroupMod;
 	friend class RSA;
 	friend class EC;
-	friend unsigned char* ConvertEndianess(const ModNumber& m);
+	friend unsigned char* ConvertEndianess(const ModNumber& m, unsigned int cb);
 	friend ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
 	friend ModNumber RemovePKCS1Mask(const ModNumber& m);
@@ -398,7 +398,7 @@ bool operator == (const ECPoint& l, const ECPoint& r);
 
 
 unsigned char* ConvertEndianess(const unsigned char* p, unsigned int cb);
-unsigned char* ConvertEndianess(const ModNumber& m);
+unsigned char* ConvertEndianess(const ModNumber& m, unsigned int cb = 0);
 ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 
 ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false, int modulusSize = MAXMOD);

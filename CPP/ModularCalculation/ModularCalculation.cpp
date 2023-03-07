@@ -1784,27 +1784,6 @@ std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& 
 		results.push_back(signature.substr(0, signature.length() / 2));
 		results.push_back(signature.substr(signature.length() / 2, signature.length() / 2));
 	}
-	//std::ofstream outfile;
-	//outfile.open("rs2.txt");
-	//outfile << signature.length();
-	//outfile << std::endl;
-	//outfile << "r: ";
-	//for (unsigned int i = 0; i < signature.length()/2; i++)
-	//{
-	//	outfile.fill('0');
-	//	outfile.width(2);
-	//	outfile << std::hex << (unsigned int)(unsigned char)signature[i];
-	//}
-	//outfile << std::endl;
-	//outfile << "s: ";
-	//for (unsigned int i = signature.length()/2; i < signature.length(); i++)
-	//{
-	//	outfile.fill('0');
-	//	outfile.width(2);
-	//	outfile << std::hex << (unsigned int)(unsigned char)signature[i];
-	//}
-	//outfile << std::endl;
-	//outfile.close();
 
 	std::list<std::string>::iterator myListIterator = results.begin();
 	std::string r = *myListIterator++;
@@ -2013,8 +1992,6 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 		throw std::domain_error("Wrong signature");
 	unsigned char* rBigEndian = ConvertEndianess(r, nLen);
 	unsigned char* sBigEndian = ConvertEndianess(s, nLen);
-//	unsigned int cbR = GetByteCount(r);
-//	unsigned int cbS = GetByteCount(s);
 	if (DerEncoded)
 	{
 		std::list<std::string> myList;
@@ -2032,25 +2009,6 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 		rs.append((const char*)sBigEndian, nLen);
 		delete[] rBigEndian;
 		delete[] sBigEndian;
-		//std::ofstream outfile;
-		//outfile.open("rs.txt");
-		//outfile << "r: ";
-		//for (unsigned int i = 0; i < nLen; i++)
-		//{
-		//	outfile.fill('0');
-		//	outfile.width(2);
-		//	outfile << std::hex << (unsigned int)(unsigned char)rs[i];
-		//}
-		//outfile << std::endl;
-		//outfile << "s: ";
-		//for (unsigned int i = nLen; i < nLen * 2; i++)
-		//{
-		//	outfile.fill('0');
-		//	outfile.width(2);
-		//	outfile << std::hex << (unsigned int)(unsigned char)rs[i];
-		//}
-		//outfile << std::endl;
-		//outfile.close();
 		return rs;
 	}
 
@@ -2591,13 +2549,13 @@ BCRYPT_KEY_HANDLE importECDsaKey(const ECDSA& ecDsa, const wchar_t *curveName)
 	keyBlob->dwMagic = BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC;
 	keyBlob->cbKey = nLen;
 	char* p = (char*)(keyBlob + 1);
-	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecDsa.y.x);
+	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecDsa.y.x,nLen);
 	memcpy(p, publicKeyXBigEndian, nLen);
 	p += nLen;
-	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecDsa.y.y);
+	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecDsa.y.y, nLen);
 	memcpy(p, publicKeyYBigEndian, nLen);
 	p += nLen;
-	unsigned char* privateKeyBigEndian = ConvertEndianess(ecDsa.x);
+	unsigned char* privateKeyBigEndian = ConvertEndianess(ecDsa.x, nLen);
 	memcpy(p, privateKeyBigEndian, nLen);
 	delete[] publicKeyXBigEndian;
 	delete[] publicKeyYBigEndian;
@@ -2635,17 +2593,6 @@ bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLengt
 	if (hashLength > nLen)
 		hashLength = nLen;
 	unsigned char* pSignature = (unsigned char *)signature.c_str();
-	//std::ofstream outfile;
-	//outfile.open("signature.txt");
-	//for (int i = 0; i < signature.length(); i++)
-	//{
-	//	outfile << "\\x";
-	//	outfile.fill('0');
-	//	outfile.width(2);
-	//	outfile << std::hex << (int)pSignature[i];
-	//}
-	//outfile << std::endl;
-	//outfile.close();
 	status = BCryptVerifySignature(keyHandle, nullptr, hash, hashLength, pSignature, (ULONG)signature.length(), 0);
 	BCryptDestroyKey(keyHandle);
 	if (!(status == ERROR_SUCCESS || status == STATUS_INVALID_SIGNATURE))

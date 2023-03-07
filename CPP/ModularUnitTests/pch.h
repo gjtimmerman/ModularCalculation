@@ -16,4 +16,5 @@
 #include <cmath>
 #include <tuple>
 #include <list>
+#include <memory.h>
 #endif //PCH_H

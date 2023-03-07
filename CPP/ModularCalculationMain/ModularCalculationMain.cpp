@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cmath>
 #include <list>
+#include <memory.h>
 
 
 #ifndef _WIN32

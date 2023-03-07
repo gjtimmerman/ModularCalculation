@@ -2016,35 +2016,40 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 
 ModNumber ECDSA::CalcR(const ModNumber& mk) const
 {
-	return ec.Mult(ec.g, mk).x % ec.n;
+	return ecKeyPair.ec.Mult(ecKeyPair.ec.g, mk).x % ecKeyPair.ec.n;
 }
 
 std::string ECDSA::Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const
 {
-	return CalculateDSASignature(ec.n, x, hash, hashLen, DerEncoded);
+	return CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.x, hash, hashLen, DerEncoded);
 }
 
 
 bool ECDSA::Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded) const
 {
-	unsigned int nLen = GetByteCount(ec.n);
-	std::tuple<ModNumber, ModNumber, ModNumber> u1u2mr = DSACalculateU1U2Mr(ec.n, nLen, hash, hashLen, signature, DerEncoded);
+	unsigned int nLen = GetByteCount(ecKeyPair.ec.n);
+	std::tuple<ModNumber, ModNumber, ModNumber> u1u2mr = DSACalculateU1U2Mr(ecKeyPair.ec.n, nLen, hash, hashLen, signature, DerEncoded);
 	ModNumber u1 = std::get<0>(u1u2mr);
 	ModNumber u2 = std::get<1>(u1u2mr);
 	ModNumber mr = std::get<2>(u1u2mr);
 
 	ECPoint pt1;
-	std::thread th3([&pt1, this, &u1] {pt1 = ec.Mult(ec.g, u1); });
+	std::thread th3([&pt1, this, &u1] {pt1 = ecKeyPair.ec.Mult(ecKeyPair.ec.g, u1); });
 	ECPoint pt2;
-	std::thread th4([&pt2, this, &u2] {pt2 = ec.Mult(y, u2); });
+	std::thread th4([&pt2, this, &u2] {pt2 = ecKeyPair.ec.Mult(ecKeyPair.y, u2); });
 	th3.join();
 	th4.join();
-	ECPoint ptv = ec.Add(pt1, pt2);
+	ECPoint ptv = ecKeyPair.ec.Add(pt1, pt2);
 	if (ptv.IsAtInfinity)
 		return false;
 	return ptv.x == mr;
 }
 
+ModNumber CalculateECDHSharedSecret(const ECKeyPair& pair1, const ECKeyPair& pair2)
+{
+	ECPoint resultPt = pair1.ec.Mult(pair1.y, pair2.x);
+	return resultPt.x;
+}
 
 
 #ifdef _WIN32 
@@ -2534,28 +2539,28 @@ bool verify(const wchar_t* keyName, unsigned char* hash, int hashLength, std::st
 	return status == ERROR_SUCCESS;
 }
 
-BCRYPT_KEY_HANDLE importECDsaKey(const ECDSA& ecDsa, const wchar_t *curveName)
+BCRYPT_KEY_HANDLE importECCPrivateKey(const ECKeyPair& ecKeyPair, const wchar_t *curveName, const wchar_t *algorithm, ULONG magic)
 {
 	NTSTATUS status;
 	BCRYPT_ALG_HANDLE algHandle;
-	status = BCryptOpenAlgorithmProvider(&algHandle, BCRYPT_ECDSA_ALGORITHM, nullptr, 0);
+	status = BCryptOpenAlgorithmProvider(&algHandle, algorithm , nullptr, 0);
 	evaluateBStatus(status);
 	status = BCryptSetProperty(algHandle, BCRYPT_ECC_CURVE_NAME, (PUCHAR)curveName, (ULONG)(wcslen(curveName) + 1) * sizeof(wchar_t), 0);
 	evaluateBStatus(status);
 	BCRYPT_KEY_HANDLE keyHandle;
-	unsigned int nLen = GetByteCount(ecDsa.ec.n);
+	unsigned int nLen = GetByteCount(ecKeyPair.ec.n);
 	ULONG blobSize = sizeof(BCRYPT_ECCKEY_BLOB) + nLen * 3;
 	BCRYPT_ECCKEY_BLOB* keyBlob = (BCRYPT_ECCKEY_BLOB*)new char[blobSize];
-	keyBlob->dwMagic = BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC;
+	keyBlob->dwMagic = magic;
 	keyBlob->cbKey = nLen;
 	char* p = (char*)(keyBlob + 1);
-	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecDsa.y.x,nLen);
+	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecKeyPair.y.x,nLen);
 	memcpy(p, publicKeyXBigEndian, nLen);
 	p += nLen;
-	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecDsa.y.y, nLen);
+	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecKeyPair.y.y, nLen);
 	memcpy(p, publicKeyYBigEndian, nLen);
 	p += nLen;
-	unsigned char* privateKeyBigEndian = ConvertEndianess(ecDsa.x, nLen);
+	unsigned char* privateKeyBigEndian = ConvertEndianess(ecKeyPair.x, nLen);
 	memcpy(p, privateKeyBigEndian, nLen);
 	delete[] publicKeyXBigEndian;
 	delete[] publicKeyYBigEndian;
@@ -2563,6 +2568,37 @@ BCRYPT_KEY_HANDLE importECDsaKey(const ECDSA& ecDsa, const wchar_t *curveName)
 
 	status = BCryptImportKeyPair(algHandle, 0, BCRYPT_ECCPRIVATE_BLOB, &keyHandle, (PUCHAR)keyBlob, blobSize, 0);
 	evaluateBStatus(status);
+	delete[] keyBlob;
+	status = BCryptCloseAlgorithmProvider(algHandle, 0);
+	return keyHandle;
+}
+
+BCRYPT_KEY_HANDLE importECCPublicKey(const ECKeyPair& ecKeyPair, const wchar_t* curveName, const wchar_t* algorithm, ULONG magic)
+{
+	NTSTATUS status;
+	BCRYPT_ALG_HANDLE algHandle;
+	status = BCryptOpenAlgorithmProvider(&algHandle, algorithm, nullptr, 0);
+	evaluateBStatus(status);
+	status = BCryptSetProperty(algHandle, BCRYPT_ECC_CURVE_NAME, (PUCHAR)curveName, (ULONG)(wcslen(curveName) + 1) * sizeof(wchar_t), 0);
+	evaluateBStatus(status);
+	BCRYPT_KEY_HANDLE keyHandle;
+	unsigned int nLen = GetByteCount(ecKeyPair.ec.n);
+	ULONG blobSize = sizeof(BCRYPT_ECCKEY_BLOB) + nLen * 2;
+	BCRYPT_ECCKEY_BLOB* keyBlob = (BCRYPT_ECCKEY_BLOB*)new char[blobSize];
+	keyBlob->dwMagic = magic;
+	keyBlob->cbKey = nLen;
+	char* p = (char*)(keyBlob + 1);
+	unsigned char* publicKeyXBigEndian = ConvertEndianess(ecKeyPair.y.x, nLen);
+	memcpy(p, publicKeyXBigEndian, nLen);
+	p += nLen;
+	unsigned char* publicKeyYBigEndian = ConvertEndianess(ecKeyPair.y.y, nLen);
+	memcpy(p, publicKeyYBigEndian, nLen);
+	delete[] publicKeyXBigEndian;
+	delete[] publicKeyYBigEndian;
+
+	status = BCryptImportKeyPair(algHandle, 0, BCRYPT_ECCPUBLIC_BLOB, &keyHandle, (PUCHAR)keyBlob, blobSize, 0);
+	evaluateBStatus(status);
+	delete[] keyBlob;
 	status = BCryptCloseAlgorithmProvider(algHandle, 0);
 	return keyHandle;
 }
@@ -2570,8 +2606,8 @@ BCRYPT_KEY_HANDLE importECDsaKey(const ECDSA& ecDsa, const wchar_t *curveName)
 std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength, const wchar_t *curveName)
 {
 	NTSTATUS status;
-	BCRYPT_KEY_HANDLE keyHandle = importECDsaKey(ecDsa, curveName);
-	unsigned int nLen = GetByteCount(ecDsa.ec.n);
+	BCRYPT_KEY_HANDLE keyHandle = importECCPrivateKey(ecDsa.ecKeyPair, curveName, BCRYPT_ECDSA_ALGORITHM, BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC);
+	unsigned int nLen = GetByteCount(ecDsa.ecKeyPair.ec.n);
 	if (hashLength > nLen)
 		hashLength = nLen;
 	DWORD resultSize;
@@ -2588,8 +2624,8 @@ std::string signECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hash
 bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLength, std::string signature,const wchar_t *curveName)
 {
 	NTSTATUS status;
-	BCRYPT_KEY_HANDLE keyHandle = importECDsaKey(ecDsa, curveName);
-	unsigned int nLen = GetByteCount(ecDsa.ec.n);
+	BCRYPT_KEY_HANDLE keyHandle = importECCPrivateKey(ecDsa.ecKeyPair, curveName, BCRYPT_ECDSA_ALGORITHM, BCRYPT_ECDSA_PRIVATE_GENERIC_MAGIC);
+	unsigned int nLen = GetByteCount(ecDsa.ecKeyPair.ec.n);
 	if (hashLength > nLen)
 		hashLength = nLen;
 	unsigned char* pSignature = (unsigned char *)signature.c_str();
@@ -2598,6 +2634,27 @@ bool verifyECDsa(const ECDSA& ecDsa, unsigned char* hash, unsigned int hashLengt
 	if (!(status == ERROR_SUCCESS || status == STATUS_INVALID_SIGNATURE))
 		evaluateBStatus(status);
 	return status == ERROR_SUCCESS;
+}
+
+ModNumber GetSecretECDHAgreement(const ECKeyPair& pair1, const ECKeyPair& pair2,const wchar_t * curveName)
+{
+	NTSTATUS status;
+	BCRYPT_KEY_HANDLE keyHandle1;
+	BCRYPT_KEY_HANDLE keyHandle2;
+	keyHandle1 = importECCPrivateKey(pair1, curveName,BCRYPT_ECDH_ALGORITHM, BCRYPT_ECDH_PRIVATE_GENERIC_MAGIC);
+	keyHandle2 = importECCPublicKey(pair2, curveName, BCRYPT_ECDH_ALGORITHM, BCRYPT_ECDH_PUBLIC_GENERIC_MAGIC);
+	BCRYPT_SECRET_HANDLE secretHandle;
+	status = BCryptSecretAgreement(keyHandle1, keyHandle2, &secretHandle, 0);
+	evaluateBStatus(status);
+	BCryptDestroyKey(keyHandle1);
+	BCryptDestroyKey(keyHandle2);
+	ULONG cbResult;
+	status = BCryptDeriveKey(secretHandle, BCRYPT_KDF_RAW_SECRET, nullptr, nullptr, 0, &cbResult, 0);
+	unsigned char* pDerivedKey = new unsigned char[cbResult];
+	status = BCryptDeriveKey(secretHandle, BCRYPT_KDF_RAW_SECRET, nullptr, pDerivedKey, cbResult, &cbResult, 0);
+	evaluateBStatus(status);
+	ModNumber result(pDerivedKey, cbResult);
+	return result;
 }
 
 

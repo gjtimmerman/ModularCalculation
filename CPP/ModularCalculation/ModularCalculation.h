@@ -318,10 +318,10 @@ public:
 	friend class ECDSA;
 };
 
-class ECDSA : public DSABase
+class ECKeyPair
 {
 public:
-	ECDSA(const EC& ec, const ModNumber& x = ModNumber(), const ECPoint& y = {ModNumber(), ModNumber(), true}) :ec(ec), x(x), y(y)
+	ECKeyPair(const EC& ec, const ModNumber& x = ModNumber(), const ECPoint& y = { ModNumber(), ModNumber(), true }) :ec(ec), x(x), y(y)
 	{
 		ModNumber mzero;
 		if (this->x == mzero)
@@ -351,6 +351,7 @@ public:
 		if (this->y.IsAtInfinity)
 			this->y = CalcPublicKey(this->x);
 	}
+
 	ECPoint CalcPublicKey(ModNumber privateKey)
 	{
 		ECPoint retval = ec.Mult(ec.g, privateKey);
@@ -358,11 +359,21 @@ public:
 	}
 	EC ec;
 	ECPoint y;
+	ModNumber x;
+
+};
+
+class ECDSA : public DSABase
+{
+public:
+	ECDSA(ECKeyPair ecKeyPair) : ecKeyPair(ecKeyPair)
+	{
+	}
+	ECKeyPair ecKeyPair;
 	std::string Sign(unsigned char* hash, unsigned int hashLen, bool DerEncoded) const;
 	bool Verify(unsigned char* hash, unsigned int hashLen, std::string signature, bool DerEncoded = true) const;
 	virtual ModNumber CalcR(const ModNumber& mk) const;
 
-	ModNumber x;
 };
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
@@ -406,6 +417,8 @@ ModNumber RemovePKCS1Mask(const ModNumber& m);
 ModNumber CreateBERASNString(std::list<std::string> content);
 std::list<std::string> ParseBERASNString(const ModNumber& m);
 std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
+
+ModNumber CalculateECDHSharedSecret(const ECKeyPair& pair1, const ECKeyPair& pair2);
 
 
 template <typename T>
@@ -465,6 +478,8 @@ std::string signECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hash
 bool verifyECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLength, std::string signature, const wchar_t *curveName = BCRYPT_ECC_CURVE_SECP256K1);
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 ModNumber encryptECCElgamal(const ECDSA& ecDsa, unsigned char* data, unsigned int len);
+ModNumber GetSecretECDHAgreement(const ECKeyPair& pair1, const ECKeyPair& pair2, const wchar_t* curveName);
+
 std::list<BCRYPT_ALGORITHM_IDENTIFIER> getAlgorithms();
 #endif
 

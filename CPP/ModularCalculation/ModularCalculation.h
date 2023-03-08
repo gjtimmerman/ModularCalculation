@@ -18,8 +18,8 @@ typedef unsigned int lint;
 #define LLSIZE sizeof(llint)
 #define LSIZE sizeof(lint)
 
-#define MAXMOD (1024/8)
-//#define MAXMOD (2048/8)
+//#define MAXMOD (1024/8)
+#define MAXMOD (2048/8)
 //#define MAXMOD (3072/8)
 //#define MAXMOD (4096/8)
 
@@ -210,6 +210,14 @@ public:
 
 private:
 	ModNumber n;
+};
+
+struct DHParameters
+{
+	ModNumber Modulus;
+	ModNumber Generator;
+	ModNumber Public;
+	ModNumber PrivateExp;
 };
 
 struct RSAParameters
@@ -419,6 +427,9 @@ std::list<std::string> ParseBERASNString(const ModNumber& m);
 std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
 
 ModNumber CalculateECDHSharedSecret(const ECKeyPair& pair1, const ECKeyPair& pair2);
+ModNumber CalculateDHSharedSecret(const DHParameters& publicKey, const DHParameters& privateKey);
+
+ModNumber GenerateDHPrivateKey(const ModNumber& modulus);
 
 
 template <typename T>
@@ -479,6 +490,7 @@ bool verifyECDsa(const ECDSA &ecDsa, unsigned char* hash, unsigned int hashLengt
 std::tuple<unsigned char*, ULONG> hash(unsigned char *data, size_t count, const wchar_t *hashAlgorithm = L"SHA256");
 ModNumber encryptECCElgamal(const ECDSA& ecDsa, unsigned char* data, unsigned int len);
 ModNumber GetSecretECDHAgreement(const ECKeyPair& pair1, const ECKeyPair& pair2, const wchar_t* curveName);
+ModNumber GetSecretDHAgreement(const DHParameters& publicKey, const DHParameters privateKey);
 
 std::list<BCRYPT_ALGORITHM_IDENTIFIER> getAlgorithms();
 #endif

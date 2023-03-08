@@ -7720,7 +7720,7 @@ namespace ModularUnitTests
 			ECKeyPair ecKeyPair2(myEC);
 			ModNumber result1 = CalculateECDHSharedSecret(ecKeyPair1, ecKeyPair2);
 			ModNumber result2 = CalculateECDHSharedSecret(ecKeyPair2, ecKeyPair1);
-			Assert::IsTrue(result1 == result2);
+			Assert::IsTrue(result1 == result2 );
 		}
 
 
@@ -8437,7 +8437,7 @@ namespace ModularUnitTests
 			delete[] pHashBigEndian;
 			Assert::IsTrue(valid);
 		}
-		TEST_METHOD(TestDHSharedSecretNISTP384Bcrypt)
+		TEST_METHOD(TestECDHSharedSecretNISTP384Bcrypt)
 		{
 			ModNumber mzero;
 			ModNumber p = ModNumber::stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
@@ -8456,7 +8456,7 @@ namespace ModularUnitTests
 			ModNumber result = CalculateECDHSharedSecret(ecKeyPair1, ecKeyPair2);
 			Assert::IsTrue(exp == result);
 		}
-		TEST_METHOD(TestDHSharedSecretBrainPoolP192r1Bcrypt)
+		TEST_METHOD(TestECDHSharedSecretBrainPoolP192r1Bcrypt)
 		{
 			ModNumber mzero;
 			ModNumber p = ModNumber::stomn("C302F41D932A36CDA7A3463093D18DB78FCE476DE1A86297", 16);
@@ -8474,6 +8474,47 @@ namespace ModularUnitTests
 			ModNumber exp = GetSecretECDHAgreement(ecKeyPair1, ecKeyPair2, BCRYPT_ECC_CURVE_BRAINPOOLP192R1);
 			ModNumber result = CalculateECDHSharedSecret(ecKeyPair1, ecKeyPair2);
 			Assert::IsTrue(exp == result);
+		}
+
+		TEST_METHOD(TestDHSharedSecretMODP)
+		{
+#if (MAXMOD == 2048/8)
+			DHParameters dhParameters1;
+			dhParameters1.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF", 16);
+			dhParameters1.Generator = ModNumber(2ull);
+			DHParameters dhParameters2;
+			dhParameters2.Modulus = dhParameters1.Modulus;
+			dhParameters2.Generator = dhParameters1.Generator;
+			MultGroupMod mgm(dhParameters1.Modulus);
+			dhParameters1.PrivateExp = GenerateDHPrivateKey(dhParameters1.Modulus);
+			dhParameters1.Public = mgm.Exp(dhParameters1.Generator, dhParameters1.PrivateExp);
+			dhParameters2.PrivateExp = GenerateDHPrivateKey(dhParameters2.Modulus);
+			dhParameters2.Public = mgm.Exp(dhParameters2.Generator, dhParameters2.PrivateExp);
+			ModNumber exp = GetSecretDHAgreement(dhParameters1, dhParameters2);
+			ModNumber calculatedSharedSecret = CalculateDHSharedSecret(dhParameters1, dhParameters2);
+			Assert::IsTrue(exp ==  calculatedSharedSecret);
+#endif
+
+		}
+		TEST_METHOD(TestDHSharedSecretMODPDifferentModuli)
+		{
+#if (MAXMOD == 2048/8)
+			DHParameters dhParameters1;
+			dhParameters1.Modulus = ModNumber::stomn("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF", 16);
+			dhParameters1.Generator = ModNumber(2ull);
+			DHParameters dhParameters2;
+			dhParameters2.Modulus = dhParameters1.Modulus + 1ull;
+			dhParameters2.Generator = dhParameters1.Generator;
+			MultGroupMod mgm(dhParameters1.Modulus);
+			dhParameters1.PrivateExp = GenerateDHPrivateKey(dhParameters1.Modulus);
+//			dhParameters1.Public = mgm.Exp(dhParameters1.Generator, dhParameters1.PrivateExp);
+			dhParameters2.PrivateExp = GenerateDHPrivateKey(dhParameters2.Modulus);
+//			dhParameters2.Public = mgm.Exp(dhParameters2.Generator, dhParameters2.PrivateExp);
+//			ModNumber exp = GetSecretDHAgreement(dhParameters1, dhParameters2);
+			
+			Assert::ExpectException<std::domain_error>([dhParameters1, dhParameters2] {ModNumber calculatedSharedSecret = CalculateDHSharedSecret(dhParameters1, dhParameters2); });
+#endif
+
 		}
 
 

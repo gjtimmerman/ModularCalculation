@@ -7,6 +7,7 @@
 #include <cmath>
 #include <list>
 #include <memory.h>
+#include <thread>
 
 
 #ifndef _WIN32

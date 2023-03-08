@@ -16,4 +16,5 @@
 #include <cmath>
 #include <tuple>
 #include <list>
+#include <thread>
 #endif //PCH_H

@@ -2066,7 +2066,7 @@ ModNumber GenerateDHPrivateKey(const ModNumber& modulus)
 	srand((unsigned int)time(0));
 	llint privKey[COUNTLL] = {};
 	unsigned char* p = (unsigned char*)privKey;
-	for (int i = 0; i < MAXMOD/4; i++)
+	for (int i = 0; i < MAXMOD/2; i++)
 	{
 		p[i] = rand() % 0x100;
 	}

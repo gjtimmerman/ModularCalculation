@@ -2066,7 +2066,7 @@ ModNumber GenerateDHPrivateKey(const ModNumber& modulus)
 	srand((unsigned int)time(0));
 	llint privKey[COUNTLL] = {};
 	unsigned char* p = (unsigned char*)privKey;
-	for (int i = 0; i < MAXMOD/2; i++)
+	for (int i = 0; i < MAXMOD/4; i++)
 	{
 		p[i] = rand() % 0x100;
 	}
@@ -2093,6 +2093,8 @@ int evaluateStatus(SECURITY_STATUS status)
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_KEYSET");
 	case NTE_BAD_TYPE:
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_BAD_TYPE");
+	case NTE_EXISTS:
+		throw std::runtime_error("CryptEncrypt returned error code: NTE_EXISTS");
 	case NTE_INVALID_HANDLE:
 		throw std::runtime_error("CryptEncrypt returned error code: NTE_INVALID_HANDLE");
 	case NTE_INVALID_PARAMETER:
@@ -2120,23 +2122,22 @@ NCRYPT_KEY_HANDLE GenerateKey(const wchar_t* KeyName, NCRYPT_PROV_HANDLE provHan
 			throw std::runtime_error("CryptOpenStorageProvider returned error code");
 	}
 	status = NCryptCreatePersistedKey(provHandle, &keyHandle, algorithm, KeyName, usage, 0);
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptCreateKey returned error code");
+	if (status != NTE_EXISTS)
+		evaluateStatus(status);
+	else
+		return 0;
 	DWORD policy = NCRYPT_ALLOW_PLAINTEXT_EXPORT_FLAG | NCRYPT_ALLOW_EXPORT_FLAG;
 	status = NCryptSetProperty(keyHandle, NCRYPT_EXPORT_POLICY_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptSetProperty returned error code");
+	evaluateStatus(status);
 	policy = MAXMOD*8;
 	status = NCryptSetProperty(keyHandle, NCRYPT_LENGTH_PROPERTY, (PBYTE)&policy, sizeof(DWORD), NCRYPT_PERSIST_FLAG);
 	evaluateStatus(status);
 	status = NCryptFinalizeKey(keyHandle, 0);
-	if (status != ERROR_SUCCESS)
-		throw std::runtime_error("CryptFinalizeKey returned error code");
+	evaluateStatus(status);
 	if (tmpProvHandle != NULL)
 	{
 		status = NCryptFreeObject(tmpProvHandle);
-		if (status != ERROR_SUCCESS)
-			throw std::runtime_error("CryptFreeObject returned error code");
+		evaluateStatus(status);
 	}
 	return keyHandle;
 
@@ -2147,7 +2148,10 @@ void DeleteKey(const wchar_t *keyName, NCRYPT_PROV_HANDLE provHandle, int usage)
 	SECURITY_STATUS status;
 	NCRYPT_KEY_HANDLE keyHandle;
 	status = NCryptOpenKey(provHandle, &keyHandle, keyName, usage, 0);
-	evaluateStatus(status);
+	if (status != NTE_BAD_KEYSET)
+		evaluateStatus(status);
+	else
+		return;
 	status = NCryptDeleteKey(keyHandle, 0);
 	evaluateStatus(status);
 	status = NCryptFreeObject(keyHandle);

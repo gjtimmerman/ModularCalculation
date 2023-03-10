@@ -294,52 +294,40 @@ bool operator==(const ModNumber& l, const ModNumber& r)
 bool operator < (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-//		if (l.num[i] || r.num[i])
-		{
-			if (l.num[i] == r.num[i])
-				continue;
-			else
-				return l.num[i] < r.num[i];
-		}
+		if (l.num[i] == r.num[i])
+			continue;
+		else
+			return l.num[i] < r.num[i];
 	return false;
 }
 
 bool operator <= (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-//		if (l.num[i] || r.num[i])
-		{
-			if (l.num[i] == r.num[i])
-				continue;
-			else
-				return l.num[i] < r.num[i];
-		}
+		if (l.num[i] == r.num[i])
+			continue;
+		else
+			return l.num[i] < r.num[i];
 	return true;
 }
 
 bool operator >= (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-//		if (l.num[i] || r.num[i])
-		{
-			if (l.num[i] == r.num[i])
-				continue;
-			else
-				return l.num[i] > r.num[i];
-		}
+		if (l.num[i] == r.num[i])
+			continue;
+		else
+			return l.num[i] > r.num[i];
 	return true;
 }
 
 bool operator > (const ModNumber& l, const ModNumber& r)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-//		if (l.num[i] || r.num[i])
-		{
-			if (l.num[i] == r.num[i])
-				continue;
-			else
-				return l.num[i] > r.num[i];
-		}
+		if (l.num[i] == r.num[i])
+			continue;
+		else
+			return l.num[i] > r.num[i];
 	return false;
 }
 
@@ -506,12 +494,7 @@ ModNumber operator* (const ModNumber& l, const ModNumber& r)
 	}
 	for (int i = 0; i <= lim; i++)
 	{
-		ModNumber tmp = l * rlint[i];
-		for (int j = 0; j < i; j++)
-		{
-			tmp <<= LSIZE * 8;
-		}
-		res += tmp;
+		res += (l * rlint[i]) << (LSIZE * 8 * i);
 	}
 	return res;
 }
@@ -523,7 +506,7 @@ ModNumber& operator*=(ModNumber& l, const ModNumber& r)
 	return l;
 }
 
-std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
+std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar, bool onlyModulo) const
 {
 	if (scalar == 0)
 		throw std::domain_error("Division by zero not allowed!");
@@ -536,7 +519,8 @@ std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 		*((lint*)&tmp) = nl[i];
 		if (scalar <= tmp)
 		{
-			resl[i] = (lint)(tmp / scalar);
+			if (!onlyModulo)
+				resl[i] = (lint)(tmp / scalar);
 			tmp %= scalar;
 		}
 		tmp <<= LSIZE * 8;
@@ -547,18 +531,18 @@ std::tuple<ModNumber, lint> ModNumber::DivideAndModulo(lint scalar) const
 
 ModNumber operator/ (const ModNumber& n, lint scalar)
 {
-	return std::get<0>(n.DivideAndModulo(scalar));
+	return std::get<0>(n.DivideAndModulo(scalar, false));
 }
 
 ModNumber &operator/= (ModNumber& n, lint scalar)
 {
-	n = std::get<0>(n.DivideAndModulo(scalar));
+	n = std::get<0>(n.DivideAndModulo(scalar, false));
 	return n;
 }
 
 lint operator% (const ModNumber& n, lint scalar)
 {
-	return std::get<1>(n.DivideAndModulo(scalar));
+	return std::get<1>(n.DivideAndModulo(scalar, true));
 }
 
 std::string ModNumber::to_string_hex_base() const

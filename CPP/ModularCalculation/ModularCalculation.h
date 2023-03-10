@@ -109,7 +109,7 @@ private:
 	static ModNumber stomn_octal_base(std::string s);
 	static std::string AdjustStringLength(std::string s, size_t desiredLength);
 	ModNumber& AddAssignScalar(int lpos, lint scalar);
-	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar) const;
+	std::tuple<ModNumber, lint> DivideAndModulo(lint scalar, bool onlyModulo) const;
 
 	unsigned int FindFirstNonZeroBitInWord(unsigned int word) const;
 	void checkMax(int size)

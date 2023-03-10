@@ -187,7 +187,7 @@ ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
 	ModNumber modRes = l;
-	DivideAndModulo(modRes,l, r);
+	DivideAndModulo(modRes,l, r, true);
 	return modRes;
 }
 
@@ -198,92 +198,86 @@ ModNumber& operator%=(ModNumber& l, const ModNumber& r)
 	return l;
 }
 
-ModNumber operator << (const ModNumber& n, unsigned int i)
+void ShiftLeft(ModNumber& res, const ModNumber& n, unsigned int i)
 {
 	int words = 0;
-	if (i >= LSIZE*8)
+	if (i >= LSIZE * 8)
 	{
 		if (i >= NSIZE)
-			return ModNumber();
-		words = i / (LSIZE*8);
-		i %= (LSIZE*8);
+		{
+			res = ModNumber();
+			return;
+		}
+		words = i / (LSIZE * 8);
+		i %= (LSIZE * 8);
 	}
 	const lint* pn = (const lint*)n.num;
-	lint pres[COUNTL] = {};
+	lint *pres = (lint *)res.num;
 	pres[COUNTL - 1] = pn[COUNTL - words - 1] << i;
 	for (int j = COUNTL - 2; j >= words; j--)
 	{
-		llint tmp = ((llint)pn[j-words]) << i;
+		llint tmp = ((llint)pn[j - words]) << i;
 		pres[j + 1] |= ((lint*)(&tmp))[1];
 		pres[j] = ((lint*)(&tmp))[0];
 	}
-	return ModNumber((llint *)pres);
+	if (&res == &n)
+		for (int j = 0; j < words; j++)
+			pres[j] = 0ul;
+
+}
+
+void ShiftRight(ModNumber& res, const ModNumber& n, unsigned int i)
+{
+	int words = 0;
+	if (i >= LSIZE * 8)
+	{
+		if (i >= NSIZE)
+		{
+			res = ModNumber();
+			return;
+		}
+		words = i / (LSIZE * 8);
+		i %= (LSIZE * 8);
+	}
+	const lint* pn = (const lint*)n.num;
+	lint *pres = (lint *)res.num;
+	pres[0] = pn[words] >> i;
+	for (int j = 0; j < COUNTL - words - 1; j++)
+	{
+		llint tmp = ((llint)pn[j + words + 1]) << ((LSIZE * 8) - i);
+		pres[j] |= ((lint*)(&tmp))[0];
+		pres[j + 1] = ((lint*)(&tmp))[1];
+	}
+	if (&res == &n)
+		for (int j = COUNTL - words; j < COUNTL; j++)
+			pres[j] = 0ul;
+
+}
+
+ModNumber operator << (const ModNumber& n, unsigned int i)
+{
+	ModNumber res;
+	ShiftLeft(res, n, i);
+	return res;
 }
 
 ModNumber operator >> (const ModNumber& n, unsigned int i)
 {
-	int words = 0;
-	if (i >= LSIZE * 8)
-	{
-		if (i >= NSIZE)
-			return ModNumber();
-		words = i / (LSIZE * 8);
-		i %= (LSIZE * 8);
-	}
-	const lint* pn = (const lint*)n.num;
-	lint pres[COUNTL] = {};
-	pres[0] = pn[words] >> i;
-	for (int j = 0; j < COUNTL - words - 1; j++)
-	{
-		llint tmp = ((llint)pn[j + words + 1]) << ((LSIZE* 8)-i);
-		pres[j] |= ((lint*)(&tmp))[0];
-		pres[j + 1] = ((lint*)(&tmp))[1];
-	}
-	return ModNumber((llint*)pres);
+	ModNumber res;
+	ShiftRight(res, n, i);
+	return res;
 }
 
 ModNumber& operator <<= (ModNumber& n, unsigned int i)
 {
-	int words = 0;
-	if (i >= LSIZE*8)
-	{
-		if (i >= NSIZE)
-			return n = ModNumber();
-		words = i / (LSIZE*8);
-		i %= (LSIZE*8);
-	}
-	lint* pn = (lint*)n.num;
-	pn[COUNTL - 1] = pn[COUNTL - words - 1] << i;
-	for (int j = COUNTL - 2; j >= words; j--)
-	{
-		llint tmp = ((llint)pn[j-words]) << i;
-		pn[j + 1] |= ((lint*)(&tmp))[1]; 
-		pn[j] = ((lint*)(&tmp))[0];
-	}
-	for (int j = 0; j < words; j++)
-		pn[j] = 0ul;
+
+	ShiftLeft(n, n, i);
 	return n;
 }
 ModNumber& operator >>= (ModNumber& n, unsigned int i)
 {
-	int words = 0;
-	if (i >= LSIZE * 8)
-	{
-		if (i >= NSIZE)
-			return n = ModNumber();
-		words = i / (LSIZE * 8);
-		i %= (LSIZE * 8);
-	}
-	lint* pn = (lint*)n.num;
-	pn[0] = pn[words] >> i;
-	for (int j = 0; j < COUNTL - words - 1; j++)
-	{
-		llint tmp = ((llint)pn[j + words + 1]) << ((LSIZE *8) - i);
-		pn[j] |= ((lint*)(&tmp))[0];
-		pn[j + 1] = ((lint*)(&tmp))[1];
-	}
-	for (int j = COUNTL - words; j < COUNTL; j++)
-		pn[j] = 0ul;
+
+	ShiftRight(n, n, i);
 	return n;
 }
 

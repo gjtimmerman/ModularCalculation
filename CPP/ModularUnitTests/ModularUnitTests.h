@@ -528,7 +528,7 @@ namespace ModularUnitTests
 			ModNumber mexp(0x12345ull);
 			lint l[COUNTL] = {};
 			l[COUNTL - 1] = 0x12345ul;
-			ModNumber ml((llint*)l);
+			ModNumber ml(l);
 			Assert::IsTrue(mexp == (ml >>= (NSIZE - (LSIZE * 8))));
 		}
 		TEST_METHOD(TestShiftRightLSIZEtimes8)

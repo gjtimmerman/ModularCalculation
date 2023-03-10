@@ -33,11 +33,14 @@ ModNumber& operator-=(ModNumber& l, const lint &r)
 	return l;
 }
 
-ModNumber operator-(const ModNumber& l, const ModNumber& r)
+void PerformSubtraction(ModNumber& res, const ModNumber& l, const ModNumber& r)
 {
-	ModNumber res;
+	// res might be equal to l
 	if (l == r)					// Optimization
-		return res;
+	{
+		res = ModNumber();
+		return;
+	}
 
 	const lint* ll = (const lint*)l.num;
 	const lint* rl = (const lint*)r.num;
@@ -58,40 +61,24 @@ ModNumber operator-(const ModNumber& l, const ModNumber& r)
 		}
 		if (ltmp < rtmp)
 		{
-			carry = 1; 
+			carry = 1;
 		}
 		resl[i] = ltmp - rtmp;
 	}
+
+
+}
+
+ModNumber operator-(const ModNumber& l, const ModNumber& r)
+{
+	ModNumber res;
+	PerformSubtraction(res, l, r);
 	return res;
 }
 
 ModNumber &operator-=(ModNumber& l, const ModNumber& r)
 {
-	if (l == r)					// Optimization and prevent selfassignment
-		return l = ModNumber();
-
-	lint* ll = (lint*)l.num;
-	lint* rl = (lint*)r.num;
-	lint carry = 0;
-	for (int i = 0; i < COUNTL; i++)
-	{
-		lint ltmp = ll[i];
-		lint rtmp = rl[i];
-		if (ltmp >= carry)
-		{
-			ltmp -= carry;
-			carry = 0;
-		}
-		else
-		{
-			ltmp -= carry;
-		}
-		if (ltmp < rtmp)
-		{
-			carry = 1;
-		}
-		ll[i] = ltmp - rtmp;
-	}
+	PerformSubtraction(l, l, r);
 	return l;
 }
 
@@ -109,20 +96,45 @@ unsigned int ModNumber::FindFirstNonZeroBitInWord(unsigned int word) const
 
 ModNumber operator/ (const ModNumber& l, const ModNumber& r)
 {
+	ModNumber modRes = l;
+	ModNumber res = DivideAndModulo(modRes, l, r);
+	return res;
+}
+
+
+ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber& r, bool onlyModulo)
+{
 	ModNumber divRes;
 	ModNumber mzero;
 	if (r == mzero)
 		throw std::domain_error("Division by Zero");
 	ModNumber mone(1ull);
 	if (r == mone)		// Just optimization
+	{
+		modRes = mzero;
 		return l;
+	}
 	ModNumber mtwo(2ull);
 	if (r == mtwo)		// Just optimization
-		return l >> 1;
+	{
+		divRes = l >> 1;
+		if (l.num[0] & 0x1ull)
+			modRes = mone;
+		else
+			modRes = mzero;
+		return divRes;
+	}
+	//if (modRes == mzero)
+	//	modRes = l;
 	if (l < r)
+	{
 		return mzero;
+	}
 	if (l == r)
+	{
+		modRes = mzero;
 		return mone;
+	}
 	int li = 0;
 	int ri = 0;
 	for (int i = COUNTLL - 1; i >= 0; i--)
@@ -138,7 +150,6 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r)
 			break;
 		}
 	int diff = li - ri;
-	ModNumber mres(l);
 	divRes = ModNumber();
 	for (int i = 0; i <= diff; i++)
 	{
@@ -151,7 +162,7 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r)
 		divisor[diff - i] = 1ull;
 		ModNumber mtmp(tmp);
 		ModNumber mdivisor(divisor);
-		unsigned int bl = (LLSIZE * 8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
+		unsigned int bl = (LLSIZE * 8 - modRes.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
 		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
 		int bdiff = bl - br;
 		for (int j = 0; j <= bdiff; j++)
@@ -159,11 +170,13 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r)
 			ModNumber mtmp2(mtmp);
 			ModNumber mdivisor2(mdivisor);
 			mtmp2 <<= bdiff - j;
-			mdivisor2 <<= bdiff - j;
-			while (mres >= mtmp2)
+			if (!onlyModulo)
+				mdivisor2 <<= bdiff - j;
+			while (modRes >= mtmp2)
 			{
-				mres -= mtmp2;
-				divRes += mdivisor2;
+				modRes -= mtmp2;
+				if (!onlyModulo)
+					divRes += mdivisor2;
 			}
 		}
 	}
@@ -171,199 +184,18 @@ ModNumber operator/ (const ModNumber& l, const ModNumber& r)
 }
 
 
-std::tuple<ModNumber,ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r)
-{
-	ModNumber divRes;
-	ModNumber mzero;
-	if (r == mzero)
-		throw std::domain_error("Division by Zero");
-	ModNumber mone(1ull);
-	if (r == mone)		// Just optimization
-		return std::make_tuple(l,mzero);
-	ModNumber mtwo(2ull);
-	if (r == mtwo)		// Just optimization
-	{
-		divRes = l >> 1;
-		if (l.num[0] & 0x1ull)
-			return std::make_tuple(divRes,mone);
-		else
-			return std::make_tuple(divRes,mzero);
-	}
-	if (l < r)
-		return std::make_tuple(ModNumber(),l);
-	if (l == r)
-		return std::make_tuple(mone,mzero);
-	int li = 0;
-	int ri = 0;
-	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i])
-		{
-			li = i;
-			break;
-		}
-	for (int i = li; i >= 0; i--)
-		if (r.num[i])
-		{
-			ri = i;
-			break;
-		}
-	int diff = li - ri;
-	ModNumber mres(l);
-	divRes = ModNumber();
-	for (int i = 0; i <= diff; i++)
-	{
-		llint divisor[COUNTLL] = {};
-		llint tmp[COUNTLL] = {};
-		for (int j = 0; j <= ri; j++)
-		{
-			tmp[j + diff - i] = r.num[j];
-		}
-		divisor[diff - i] = 1ull;
-		ModNumber mtmp(tmp);
-		ModNumber mdivisor(divisor);
-		unsigned int bl = (LLSIZE * 8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
-		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
-		int bdiff = bl - br;
-		for (int j = 0; j <= bdiff; j++)
-		{
-			ModNumber mtmp2(mtmp);
-			ModNumber mdivisor2(mdivisor);
-			mtmp2 <<= bdiff - j;
-			mdivisor2 <<= bdiff - j;
-			while (mres >= mtmp2)
-			{
-				mres -= mtmp2;
-				divRes += mdivisor2;
-			}
-		}
-	}
-	return std::make_tuple(divRes,mres);
-}
-
-
 ModNumber operator%(const ModNumber& l, const ModNumber& r)
 {
-	ModNumber mzero;
-	if (r == mzero)
-		throw std::domain_error("Division by Zero");
-	ModNumber mone(1ull);
-	if (r == mone)		// Just optimization
-		return mzero;
-	ModNumber mtwo(2ull);
-	if (r == mtwo)		// Just optimization
-	{
-		if (l.num[0] & 0x1ull)
-			return mone;
-		else
-			return mzero;
-	}
-	if (l < r)
-		return l;
-	if (l == r)
-		return mzero;
-	int li = 0;
-	int ri = 0;
-	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i])
-		{
-			li = i;
-			break;
-		}
-	for (int i = li; i >= 0; i--)
-		if (r.num[i])
-		{
-			ri = i;
-			break;
-		}
-	int diff = li - ri;
-	ModNumber mres(l);
-	for (int i = 0; i <= diff; i++)
-	{
-		llint tmp[COUNTLL] = {};
-		for (int j = 0; j <= ri; j++)
-		{
-			tmp[j + diff - i] = r.num[j];
-		}
-		ModNumber mtmp(tmp);
-		unsigned int bl = (LLSIZE*8 - mres.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE*8;
-		unsigned int br = (LLSIZE*8 - mtmp.FindFirstNonZeroBitInWord(diff+ri-i)) + (diff + ri - i) * LLSIZE * 8;
-		int bdiff = bl - br;
-		for (int j = 0; j <= bdiff; j++)
-		{
-			ModNumber mtmp2(mtmp);
-			mtmp2 <<= bdiff - j;
-			while (mres >= mtmp2)
-			{
-				mres -= mtmp2;
-			}
-		}
-	}
-	return mres;
+	ModNumber modRes = l;
+	DivideAndModulo(modRes,l, r);
+	return modRes;
 }
 
 ModNumber& operator%=(ModNumber& l, const ModNumber& r)
 {
-	if (&l == &r)				// Just optimization
-		return l = ModNumber();
-	ModNumber mzero;
-	if (r == mzero)
-		throw std::domain_error("Division by Zero");
-	ModNumber mone(1ull);
-	if (r == mone)		// Just optimization
-		return l = ModNumber();
-	ModNumber mtwo(2ull);
-	if (r == mtwo)		// Just optimization
-	{
-		if (l.num[0] & 0x1ull)
-			return l = mone;
-		else
-			return l = ModNumber();
-	}
-	if (l < r)
-	{
-		return l;
-	}
-	if (l == r)
-		return l = ModNumber();
-	int li = 0;
-	int ri = 0;
-	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i])
-		{
-			li = i;
-			break;
-		}
-	for (int i = li; i >= 0; i--)
-		if (r.num[i])
-		{
-			ri = i;
-			break;
-		}
-	int diff = li - ri;
 
-	for (int i = 0; i <= diff; i++)
-	{
-		llint tmp[COUNTLL] = {};
-		for (int j = 0; j <= ri; j++)
-		{
-			tmp[j + diff - i] = r.num[j];
-		}
-		ModNumber mtmp(tmp);
-		unsigned int bl = (LLSIZE * 8 - l.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
-		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
-		int bdiff = bl - br;
-		for (int j = 0; j <= bdiff; j++)
-		{
-			ModNumber mtmp2(mtmp);
-			mtmp2 <<= bdiff - j;
-			while (l >= mtmp2)
-			{
-				l -= mtmp2;
-			}
-		}
-	}
+	DivideAndModulo(l, l, r, true);
 	return l;
-
 }
 
 ModNumber operator << (const ModNumber& n, unsigned int i)
@@ -1274,17 +1106,19 @@ ModNumber MultGroupMod::Inverse(const ModNumber& x) const
 	ModNumber r = x % n;
 	ModNumber l = n;
 	std::list<ModNumber> divisors;
-	std::tuple<ModNumber,ModNumber> res = DivideAndModulo(l,r);
-	while (!(std::get<1>(res) == mone))
+	ModNumber modRes = l;
+	ModNumber divRes = DivideAndModulo(modRes,l,r);
+	while (!(modRes == mone))
 	{
-		if (std::get<1>(res) == mzero)
+		if (modRes == mzero)
 			throw std::domain_error("Numbers are not relative prime, so there is no inverse.");
-		divisors.push_back(std::get<0>(res));
+		divisors.push_back(divRes);
 		l = r;
-		r = std::get<1>(res);
-		res = DivideAndModulo(l, r);
+		r = modRes;
+		modRes = l;
+		divRes = DivideAndModulo(modRes,l, r);
 	}
-	divisors.push_back(std::get<0>(res));
+	divisors.push_back(divRes);
 	ModNumber tmp1 = mzero;
 	ModNumber tmp2 = mone;
 	for (auto it = divisors.rbegin(); it != divisors.rend(); it++)

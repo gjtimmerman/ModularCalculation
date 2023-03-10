@@ -122,6 +122,7 @@ private:
 
 	friend ModNumber& operator-=(ModNumber& l, const lint &r);
 	friend ModNumber operator-(const ModNumber& l, const ModNumber& r);
+	friend void PerformSubtraction(ModNumber& res, const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator-=(ModNumber& l, const ModNumber& r);
 	friend bool operator==(const ModNumber& l, const ModNumber& r);
 	friend ModNumber& operator *=(ModNumber& n, lint scalar);
@@ -147,7 +148,7 @@ private:
 	friend std::istream& operator>>(std::istream& in, ModNumber& n);
 	friend ModNumber operator* (const ModNumber& l, const ModNumber& r);
 	friend ModNumber operator/ (const ModNumber& l, const ModNumber& r);
-	friend std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
+	friend ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber& r, bool onlyModulo);
 	friend unsigned int GetByteCount(const ModNumber& mn);
 	friend void SetRSAKey(const wchar_t* KeyName, RSAParameters rsaParameters);
 	friend unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
@@ -386,6 +387,7 @@ public:
 
 ModNumber operator-(const ModNumber& l, const ModNumber& r);
 ModNumber& operator-=(ModNumber& l, const ModNumber& r);
+void PerformSubtraction(ModNumber& res, const ModNumber& l, const ModNumber& r);
 bool operator==(const ModNumber& l, const ModNumber& r);
 ModNumber& operator *=(ModNumber& n, lint scalar);
 ModNumber& operator+=(ModNumber& n, lint scalar);
@@ -408,7 +410,7 @@ std::istream& operator>>(std::istream& in, ModNumber& n);
 ModNumber operator* (const ModNumber& l, const ModNumber& r);
 ModNumber& operator*=(ModNumber& l, const ModNumber& r);
 ModNumber operator/ (const ModNumber& l, const ModNumber& r);
-std::tuple<ModNumber, ModNumber> DivideAndModulo(const ModNumber& l, const ModNumber& r);
+ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber& r, bool onlyModulo = false);
 unsigned char* CopyKeyPart(const ModNumber& mn, unsigned int cbsize, unsigned char* pDest);
 bool operator ==(ScaledNumber l, ScaledNumber r);
 

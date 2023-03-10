@@ -821,78 +821,88 @@ namespace ModularUnitTests
 		{
 			ModNumber l(1ull);
 			ModNumber r;
-			Assert::ExpectException<std::domain_error>([l, r]() {std::tuple<ModNumber,ModNumber> res = DivideAndModulo(l, r); });
+			Assert::ExpectException<std::domain_error>([l, r]() {
+				ModNumber modRes = l;
+				ModNumber res = DivideAndModulo(modRes, l, r);
+			});
 		}
 		TEST_METHOD(TestDivideAndModuloByOne)
 		{
 			ModNumber l(1000ull);
 			ModNumber r(1ull);
-			std::tuple<ModNumber,ModNumber> res	= DivideAndModulo(l,r);
+			ModNumber modRes = l;
+			ModNumber divRes	= DivideAndModulo(modRes, l,r);
 			ModNumber expDiv(l);
 			ModNumber expMod;
 
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloZeroByOne)
 		{
 			ModNumber l(0ull);
 			ModNumber r(1ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv;
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(divRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloEvenByTwo)
 		{
 			ModNumber l(1000ull);
 			ModNumber r(2ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv(500ull);
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloOddByTwo)
 		{
 			ModNumber l(1001ull);
 			ModNumber r(2ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv(500ull);
 			ModNumber expMod(1ull);
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloSmallByLarge)
 		{
 			ModNumber l(1001ull);
 			ModNumber r(2001ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv;
 			ModNumber expMod(l);
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloEquals)
 		{
 			ModNumber l(1001ull);
 			ModNumber r(1001ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv(1ull);
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloPrimeByFive)
 		{
 			ModNumber l(101ull);
 			ModNumber r(5ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(l, r);
+			ModNumber modRes = l;
+			ModNumber divRes = DivideAndModulo(modRes, l, r);
 			ModNumber expDiv(20ull);
 			ModNumber expMod(1ull);
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModulo2Pow64ByEight)
 		{
@@ -900,11 +910,12 @@ namespace ModularUnitTests
 			l[1] = 1ull;
 			ModNumber ml(l);
 			ModNumber mr(8ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, mr);
+			ModNumber modRes = ml;
+			ModNumber divRes = DivideAndModulo(modRes, ml, mr);
 			ModNumber expDiv(ml >> 3);
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloAllFsBy2Pow16)
 		{
@@ -918,11 +929,12 @@ namespace ModularUnitTests
 			exp[COUNTLL-1] ^= (65535ull << (LLSIZE *8 - 16));
 			ModNumber ml(l);
 			ModNumber mr(65536ull);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, mr);
+			ModNumber modRes = ml;
+			ModNumber divRes = DivideAndModulo(modRes, ml, mr);
 			ModNumber expDiv(exp);
 			ModNumber expMod(65535ull);
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloAllFsLeftAndRightWordByAllFsRightWord)
 		{
@@ -936,11 +948,12 @@ namespace ModularUnitTests
 			exp[COUNTLL - 1] = 1ull;
 			ModNumber ml(l);
 			ModNumber mr(r);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, mr);
+			ModNumber modRes = ml;
+			ModNumber divRes = DivideAndModulo(modRes, ml, mr);
 			ModNumber expDiv(exp);
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 
 		TEST_METHOD(TestDivideAndModuloAllFsByAlllFs)
@@ -949,11 +962,12 @@ namespace ModularUnitTests
 			for (int i = 0; i < COUNTLL; i++)
 				l[i] = ~0ull;
 			ModNumber ml(l);
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, ml);
+			ModNumber modRes = ml;
+			ModNumber divRes = DivideAndModulo(modRes, ml, ml);
 			ModNumber expDiv(1ull);
 			ModNumber expMod;
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloAllFsByAlllFsAndZeroLowWord)
 		{
@@ -969,11 +983,12 @@ namespace ModularUnitTests
 			ModNumber mr(r);
 			llint exp[COUNTLL] = {};
 			exp[0] = ~0ull;
-			std::tuple<ModNumber, ModNumber> res = DivideAndModulo(ml, mr);
+			ModNumber modRes = ml;
+			ModNumber divRes = DivideAndModulo(modRes, ml, mr);
 			ModNumber expDiv(1ull);
 			ModNumber expMod(exp);
-			Assert::IsTrue(std::get<0>(res) == expDiv);
-			Assert::IsTrue(std::get<1>(res) == expMod);
+			Assert::IsTrue(divRes == expDiv);
+			Assert::IsTrue(modRes == expMod);
 		}
 		TEST_METHOD(TestDivideAndModuloProductOfPrimesByBothPrimesAndByBothPrimesMinusOne)
 		{
@@ -981,15 +996,17 @@ namespace ModularUnitTests
 			lint prime2(39916799ul);
 			ModNumber mnprime2(prime2);
 			ModNumber product = mnprime1 * prime2;
-			std::tuple<ModNumber, ModNumber> res1 = DivideAndModulo(product, mnprime1);
-			std::tuple<ModNumber, ModNumber> res2 = DivideAndModulo(product, mnprime2);
+			ModNumber modRes1 = product;
+			ModNumber modRes2 = product;
+			ModNumber divRes1 = DivideAndModulo(modRes1, product, mnprime1);
+			ModNumber divRes2 = DivideAndModulo(modRes2, product, mnprime2);
 			ModNumber mexpDiv1(mnprime2);
 			ModNumber mexpMod1;
 			ModNumber mexpDiv2(mnprime1);
-			Assert::IsTrue(std::get<0>(res1) == mexpDiv1);
-			Assert::IsTrue(std::get<1>(res1) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res2) == mexpDiv2);
-			Assert::IsTrue(std::get<1>(res2) == mexpMod1);
+			Assert::IsTrue(divRes1 == mexpDiv1);
+			Assert::IsTrue(modRes1 == mexpMod1);
+			Assert::IsTrue(divRes2 == mexpDiv2);
+			Assert::IsTrue(modRes2 == mexpMod1);
 			ModNumber mone(1ull);
 			ModNumber mnprime1MinusOne = mnprime1 - mone;
 			ModNumber mnprime2MinusOne = mnprime2 - mone;
@@ -999,18 +1016,22 @@ namespace ModularUnitTests
 			ModNumber mexpDiv4(mnprime2);
 			ModNumber mexpDiv5(mnprime2MinusOne);
 			ModNumber mexpDiv6(mnprime1MinusOne);
-			std::tuple<ModNumber, ModNumber> res3 = DivideAndModulo(productMinusPrime1, mnprime2MinusOne);
-			std::tuple<ModNumber, ModNumber> res4 = DivideAndModulo(productMinusPrime2, mnprime1MinusOne);
-			std::tuple<ModNumber, ModNumber> res5 = DivideAndModulo(productMinusPrime1, mnprime1);
-			std::tuple<ModNumber, ModNumber> res6 = DivideAndModulo(productMinusPrime2, mnprime2);
-			Assert::IsTrue(std::get<0>(res3) == mexpDiv3);
-			Assert::IsTrue(std::get<1>(res3) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res4) == mexpDiv4);
-			Assert::IsTrue(std::get<1>(res4) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res5) == mexpDiv5);
-			Assert::IsTrue(std::get<1>(res5) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res6) == mexpDiv6);
-			Assert::IsTrue(std::get<1>(res6) == mexpMod1);
+			ModNumber modRes3 = productMinusPrime1;
+			ModNumber modRes4 = productMinusPrime2;
+			ModNumber modRes5 = productMinusPrime1;
+			ModNumber modRes6 = productMinusPrime2;
+			ModNumber divRes3 = DivideAndModulo(modRes3, productMinusPrime1, mnprime2MinusOne);
+			ModNumber divRes4 = DivideAndModulo(modRes4, productMinusPrime2, mnprime1MinusOne);
+			ModNumber divRes5 = DivideAndModulo(modRes5, productMinusPrime1, mnprime1);
+			ModNumber divRes6 = DivideAndModulo(modRes6, productMinusPrime2, mnprime2);
+			Assert::IsTrue(divRes3 == mexpDiv3);
+			Assert::IsTrue(modRes3 == mexpMod1);
+			Assert::IsTrue(divRes4 == mexpDiv4);
+			Assert::IsTrue(modRes4 == mexpMod1);
+			Assert::IsTrue(divRes5 == mexpDiv5);
+			Assert::IsTrue(modRes5 == mexpMod1);
+			Assert::IsTrue(divRes6 == mexpDiv6);
+			Assert::IsTrue(modRes6 == mexpMod1);
 		}
 
 		TEST_METHOD(TestDivideAndModuloProductOfLargesPrimesByBothPrimesAndByBothPrimesMinusOne)
@@ -1018,15 +1039,17 @@ namespace ModularUnitTests
 			ModNumber mPrime1 = ModNumber::stomn("C882E9B30B9F87F47AD7653886EF5CD53D9CAA96D2B83C24C643F024B86CDFE61DE6627F0C63B3CBB885DD3212C77CBE47A3469E5EA2FAD245984A75D866AAF3", 16);
 			ModNumber mPrime2 = ModNumber::stomn("E1668918F4DD83B3066B32577933BD27B1FFA8F49907637863750304EFCBDB1DCC86362EEBC81ACD68B7E0C0BCE35B1BC0F353F16B59C5E7636AF1464805CAB3", 16);
 			ModNumber product = mPrime1 * mPrime2;
-			std::tuple<ModNumber, ModNumber> res1 = DivideAndModulo(product, mPrime1);
-			std::tuple<ModNumber, ModNumber> res2 = DivideAndModulo(product, mPrime2);
+			ModNumber modRes1 = product;
+			ModNumber modRes2 = product;
+			ModNumber divRes1 = DivideAndModulo(modRes1, product, mPrime1);
+			ModNumber divRes2 = DivideAndModulo(modRes2, product, mPrime2);
 			ModNumber mexpDiv1(mPrime2);
 			ModNumber mexpMod1;
 			ModNumber mexpDiv2(mPrime1);
-			Assert::IsTrue(std::get<0>(res1) == mexpDiv1);
-			Assert::IsTrue(std::get<1>(res1) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res2) == mexpDiv2);
-			Assert::IsTrue(std::get<1>(res2) == mexpMod1);
+			Assert::IsTrue(divRes1 == mexpDiv1);
+			Assert::IsTrue(modRes1 == mexpMod1);
+			Assert::IsTrue(divRes2 == mexpDiv2);
+			Assert::IsTrue(modRes2 == mexpMod1);
 			ModNumber mone(1ull);
 			ModNumber mnprime1MinusOne = mPrime1 - mone;
 			ModNumber mnprime2MinusOne = mPrime2 - mone;
@@ -1036,18 +1059,22 @@ namespace ModularUnitTests
 			ModNumber mexpDiv4(mPrime2);
 			ModNumber mexpDiv5(mnprime2MinusOne);
 			ModNumber mexpDiv6(mnprime1MinusOne);
-			std::tuple<ModNumber, ModNumber> res3 = DivideAndModulo(productMinusPrime1, mnprime2MinusOne);
-			std::tuple<ModNumber, ModNumber> res4 = DivideAndModulo(productMinusPrime2, mnprime1MinusOne);
-			std::tuple<ModNumber, ModNumber> res5 = DivideAndModulo(productMinusPrime1, mPrime1);
-			std::tuple<ModNumber, ModNumber> res6 = DivideAndModulo(productMinusPrime2, mPrime2);
-			Assert::IsTrue(std::get<0>(res3) == mexpDiv3);
-			Assert::IsTrue(std::get<1>(res3) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res4) == mexpDiv4);
-			Assert::IsTrue(std::get<1>(res4) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res5) == mexpDiv5);
-			Assert::IsTrue(std::get<1>(res5) == mexpMod1);
-			Assert::IsTrue(std::get<0>(res6) == mexpDiv6);
-			Assert::IsTrue(std::get<1>(res6) == mexpMod1);
+			ModNumber modRes3 = productMinusPrime1;
+			ModNumber modRes4 = productMinusPrime2;
+			ModNumber modRes5 = productMinusPrime1;
+			ModNumber modRes6 = productMinusPrime2;
+			ModNumber divRes3 = DivideAndModulo(modRes3, productMinusPrime1, mnprime2MinusOne);
+			ModNumber divRes4 = DivideAndModulo(modRes4, productMinusPrime2, mnprime1MinusOne);
+			ModNumber divRes5 = DivideAndModulo(modRes5, productMinusPrime1, mPrime1);
+			ModNumber divRes6 = DivideAndModulo(modRes6, productMinusPrime2, mPrime2);
+			Assert::IsTrue(divRes3 == mexpDiv3);
+			Assert::IsTrue(modRes3 == mexpMod1);
+			Assert::IsTrue(divRes4 == mexpDiv4);
+			Assert::IsTrue(modRes4 == mexpMod1);
+			Assert::IsTrue(divRes5 == mexpDiv5);
+			Assert::IsTrue(modRes5 == mexpMod1);
+			Assert::IsTrue(divRes6 == mexpDiv6);
+			Assert::IsTrue(modRes6 == mexpMod1);
 		}
 
 

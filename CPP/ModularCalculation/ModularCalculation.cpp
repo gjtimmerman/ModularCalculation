@@ -19,7 +19,7 @@ ModNumber& operator-=(ModNumber& l, const lint &r)
 	}
 	ll[0] = ltmp - r;
 	int i = 1;
-	while (carry > 0 && i < COUNTL)
+	for (int i = 1;carry > 0 && i < COUNTL; i++)
 	{
 		if (carry <= ll[i])
 		{
@@ -28,7 +28,6 @@ ModNumber& operator-=(ModNumber& l, const lint &r)
 		}
 		else
 			ll[i] -= carry;
-		i++;
 	}
 	return l;
 }

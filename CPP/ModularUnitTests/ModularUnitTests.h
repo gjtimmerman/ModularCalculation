@@ -205,10 +205,8 @@ namespace ModularUnitTests
 		TEST_METHOD(TestSubtractAssignScalarWithCarryAcrossMultipleSections)
 		{
 			llint l[COUNTLL] = {};
-			lint r;
-			l[0] = 0ul;
+			lint r = 1u;
 			l[COUNTLL - 1] = 1ul;
-			r = 1u;
 			llint exp[COUNTLL];
 			exp[COUNTLL - 1] = 0ull;
 			for (int i = 0; i < COUNTLL - 1; i++)

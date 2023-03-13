@@ -341,16 +341,16 @@ namespace ModularCalculation
                 divisor[nonZeroDifference - i] = 1ul;
                 ModNumber mRShiftedLeft = new ModNumber(rShiftedLeft);
                 ModNumber mDivisor = new ModNumber(divisor);
-                int bitsToShiftl = (int)((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
-                int bitsToShiftr = (int)((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * nonZeroDifference + firstNonzeroWordr - i));
-                int bitsToShiftDifference = bitsToShiftl - bitsToShiftr;
-                for (int j = 0; j <= bitsToShiftDifference; j++)
+                int firstBitl = (int)((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
+                int firstBitr = (int)((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
+                int firstBitDifference = firstBitl - firstBitr;
+                for (int j = 0; j <= firstBitDifference; j++)
                 {
                     ModNumber rShiftedLeftBits = new ModNumber(mRShiftedLeft);
                     ModNumber mDivisorShiftedLeftBits = new ModNumber(mDivisor);
-                    rShiftedLeftBits <<= bitsToShiftDifference - j;
+                    rShiftedLeftBits <<= firstBitDifference - j;
                     if (!onlyModulo)
-                        mDivisorShiftedLeftBits <<= bitsToShiftDifference - j;
+                        mDivisorShiftedLeftBits <<= firstBitDifference - j;
                     while (modRes >= rShiftedLeftBits )
                     {
                         modRes -= rShiftedLeftBits;

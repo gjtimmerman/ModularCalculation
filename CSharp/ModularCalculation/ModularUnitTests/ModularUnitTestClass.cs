@@ -449,12 +449,26 @@ namespace ModularUnitTests
         [DataRow(0ul, 1ul, 0ul)]
         [DataRow(1000ul, 2ul, 0ul)]
         [DataRow(1001ul, 2ul, 1ul)]
+        [DataRow(1001ul, 2001ul, 1001ul)]
+        [DataRow(1001ul, 1001ul, 0ul)]
+        [DataRow(101ul, 5ul, 1ul)]
         public void TestModulo(ulong l, ulong r, ulong exp)
         {
             ModNumber ml = new ModNumber(l);
             ModNumber mr = new ModNumber(r);
             ModNumber mexp = new ModNumber(exp);
             Assert.IsTrue(mexp == ml % mr);
+        }
+        [TestMethod]
+        public void TestModuloDivide2Pow64ByEight()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[1] = 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(8ul);
+            ModNumber mexp = new ModNumber(0ul);
+            Assert.IsTrue(mexp == ml % mr);
+
         }
 
 

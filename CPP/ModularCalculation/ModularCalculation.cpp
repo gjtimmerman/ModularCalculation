@@ -8,47 +8,47 @@
 
 
 
-ModNumber& operator-=(ModNumber& l, const lint &r)
+ModNumber& operator-=(ModNumber& ml, const lint &r)
 {
-	lint* ll = (lint*)l.num;
+	lint* pl = (lint*)ml.num;
 	lint carry = 0;
-	lint ltmp = ll[0];
+	lint ltmp = pl[0];
 	if (ltmp < r)
 	{
 		carry = 1;
 	}
-	ll[0] = ltmp - r;
+	pl[0] = ltmp - r;
 	int i = 1;
 	for (int i = 1;carry > 0 && i < COUNTL; i++)
 	{
-		if (carry <= ll[i])
+		if (carry <= pl[i])
 		{
-			ll[i] -= carry;
+			pl[i] -= carry;
 			carry = 0;
 		}
 		else
-			ll[i] -= carry;
+			pl[i] -= carry;
 	}
-	return l;
+	return ml;
 }
 
-void PerformSubtraction(ModNumber& res, const ModNumber& l, const ModNumber& r)
+void PerformSubtraction(ModNumber& mres, const ModNumber& ml, const ModNumber& mr)
 {
 	// res might be equal to l
-	if (l == r)					// Optimization
+	if (ml == mr)					// Optimization
 	{
-		res = ModNumber();
+		mres = ModNumber();
 		return;
 	}
 
-	const lint* ll = (const lint*)l.num;
-	const lint* rl = (const lint*)r.num;
-	lint* resl = (lint*)res.num;
+	const lint* pl = (const lint*)ml.num;
+	const lint* pr = (const lint*)mr.num;
+	lint* pres = (lint*)mres.num;
 	lint carry = 0;
 	for (int i = 0; i < COUNTL; i++)
 	{
-		lint ltmp = ll[i];
-		lint rtmp = rl[i];
+		lint ltmp = pl[i];
+		lint rtmp = pr[i];
 		if (ltmp >= carry)
 		{
 			ltmp -= carry;
@@ -62,23 +62,23 @@ void PerformSubtraction(ModNumber& res, const ModNumber& l, const ModNumber& r)
 		{
 			carry = 1;
 		}
-		resl[i] = ltmp - rtmp;
+		pres[i] = ltmp - rtmp;
 	}
 
 
 }
 
-ModNumber operator-(const ModNumber& l, const ModNumber& r)
+ModNumber operator-(const ModNumber& ml, const ModNumber& mr)
 {
-	ModNumber res;
-	PerformSubtraction(res, l, r);
-	return res;
+	ModNumber mres;
+	PerformSubtraction(mres, ml, mr);
+	return mres;
 }
 
-ModNumber &operator-=(ModNumber& l, const ModNumber& r)
+ModNumber &operator-=(ModNumber& ml, const ModNumber& mr)
 {
-	PerformSubtraction(l, l, r);
-	return l;
+	PerformSubtraction(ml, ml, mr);
+	return ml;
 }
 
 unsigned int ModNumber::FindFirstNonZeroBitInWord(unsigned int word) const
@@ -93,87 +93,85 @@ unsigned int ModNumber::FindFirstNonZeroBitInWord(unsigned int word) const
 	return LLSIZE*8;
 }
 
-ModNumber operator/ (const ModNumber& l, const ModNumber& r)
+ModNumber operator/ (const ModNumber& ml, const ModNumber& mr)
 {
-	ModNumber modRes = l;
-	ModNumber res = DivideAndModulo(modRes, l, r);
-	return res;
+	ModNumber modRes = ml;
+	ModNumber mres = DivideAndModulo(modRes, ml, mr);
+	return mres;
 }
 
 
-ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber& r, bool onlyModulo)
+ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& ml, const ModNumber& mr, bool onlyModulo)
 {
 	ModNumber divRes;
 	ModNumber mzero;
-	if (r == mzero)
+	if (mr == mzero)
 		throw std::domain_error("Division by Zero");
 	ModNumber mone(1ull);
-	if (r == mone)		// Just optimization
+	if (mr == mone)		// Just optimization
 	{
 		modRes = mzero;
-		return l;
+		return ml;
 	}
 	ModNumber mtwo(2ull);
-	if (r == mtwo)		// Just optimization
+	if (mr == mtwo)		// Just optimization
 	{
-		divRes = l >> 1;
-		if (l.num[0] & 0x1ull)
+		divRes = ml >> 1;
+		if (ml.num[0] & 0x1ull)
 			modRes = mone;
 		else
 			modRes = mzero;
 		return divRes;
 	}
-	//if (modRes == mzero)
-	//	modRes = l;
-	if (l < r)
+	if (ml < mr)
 	{
 		return mzero;
 	}
-	if (l == r)
+	if (ml == mr)
 	{
 		modRes = mzero;
 		return mone;
 	}
-	int li = 0;
-	int ri = 0;
+	int indexOfFirstNonzeroWordLeft = 0;
+	int indexOfFirstNonzeroWordRight = 0;
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i])
+		if (ml.num[i])
 		{
-			li = i;
+			indexOfFirstNonzeroWordLeft = i;
 			break;
 		}
-	for (int i = li; i >= 0; i--)
-		if (r.num[i])
+	for (int i = indexOfFirstNonzeroWordLeft; i >= 0; i--)
+		if (mr.num[i])
 		{
-			ri = i;
+			indexOfFirstNonzeroWordRight = i;
 			break;
 		}
-	int diff = li - ri;
+	int differenceLeftAndRight = indexOfFirstNonzeroWordLeft - indexOfFirstNonzeroWordRight;
 	divRes = ModNumber();
-	for (int i = 0; i <= diff; i++)
+	for (int i = 0; i <= differenceLeftAndRight; i++)
 	{
 		llint divisor[COUNTLL] = {};
-		llint tmp[COUNTLL] = {};
-		for (int j = 0; j <= ri; j++)
+		llint wordShiftedRightArgument[COUNTLL] = {};
+		for (int j = 0; j <= indexOfFirstNonzeroWordRight; j++)
 		{
-			tmp[j + diff - i] = r.num[j];
+			wordShiftedRightArgument[j + differenceLeftAndRight - i] = mr.num[j];
 		}
-		divisor[diff - i] = 1ull;
-		ModNumber mtmp(tmp);
+		divisor[differenceLeftAndRight - i] = 1ull;
+		ModNumber mWordShiftedRightArgument(wordShiftedRightArgument);
 		ModNumber mdivisor(divisor);
-		unsigned int bl = (LLSIZE * 8 - modRes.FindFirstNonZeroBitInWord(li)) + (li)*LLSIZE * 8;
-		unsigned int br = (LLSIZE * 8 - mtmp.FindFirstNonZeroBitInWord(diff + ri - i)) + (diff + ri - i) * LLSIZE * 8;
-		int bdiff = bl - br;
-		for (int j = 0; j <= bdiff; j++)
+		unsigned int firstNonzeroBitLeft = (LLSIZE * 8 - modRes.FindFirstNonZeroBitInWord(indexOfFirstNonzeroWordLeft)) + (indexOfFirstNonzeroWordLeft)*LLSIZE * 8;
+		unsigned int firstNonzeroBitRight = (LLSIZE * 8 - mWordShiftedRightArgument.FindFirstNonZeroBitInWord(differenceLeftAndRight + indexOfFirstNonzeroWordRight - i)) + (differenceLeftAndRight + indexOfFirstNonzeroWordRight - i) * LLSIZE * 8;
+		int bitDifference = firstNonzeroBitLeft - firstNonzeroBitRight;
+		for (int j = 0; j <= bitDifference; j++)
 		{
-			ModNumber mtmp2(mtmp);
+			ModNumber mBitShiftedRightArgument(mWordShiftedRightArgument);
 			ModNumber mdivisor2(mdivisor);
-			mtmp2 <<= bdiff - j;
+			mBitShiftedRightArgument <<= bitDifference - j;
 			if (!onlyModulo)
-				mdivisor2 <<= bdiff - j;
-			while (modRes >= mtmp2)
+				mdivisor2 <<= bitDifference - j;
+			while (modRes >= mBitShiftedRightArgument)
 			{
-				modRes -= mtmp2;
+				modRes -= mBitShiftedRightArgument;
 				if (!onlyModulo)
 					divRes += mdivisor2;
 			}
@@ -183,35 +181,35 @@ ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& l, const ModNumber
 }
 
 
-ModNumber operator%(const ModNumber& l, const ModNumber& r)
+ModNumber operator%(const ModNumber& ml, const ModNumber& mr)
 {
-	ModNumber modRes = l;
-	DivideAndModulo(modRes,l, r, true);
+	ModNumber modRes = ml;
+	DivideAndModulo(modRes,ml, mr, true);
 	return modRes;
 }
 
-ModNumber& operator%=(ModNumber& l, const ModNumber& r)
+ModNumber& operator%=(ModNumber& ml, const ModNumber& mr)
 {
 
-	DivideAndModulo(l, l, r, true);
-	return l;
+	DivideAndModulo(ml, ml, mr, true);
+	return ml;
 }
 
-void ShiftLeft(ModNumber& res, const ModNumber& n, unsigned int i)
+void ShiftLeft(ModNumber& mres, const ModNumber& mn, unsigned int i)
 {
 	int words = 0;
 	if (i >= LSIZE * 8)
 	{
 		if (i >= NSIZE)
 		{
-			res = ModNumber();
+			mres = ModNumber();
 			return;
 		}
 		words = i / (LSIZE * 8);
 		i %= (LSIZE * 8);
 	}
-	const lint* pn = (const lint*)n.num;
-	lint *pres = (lint *)res.num;
+	const lint* pn = (const lint*)mn.num;
+	lint *pres = (lint *)mres.num;
 	pres[COUNTL - 1] = pn[COUNTL - words - 1] << i;
 	for (int j = COUNTL - 2; j >= words; j--)
 	{
@@ -219,27 +217,27 @@ void ShiftLeft(ModNumber& res, const ModNumber& n, unsigned int i)
 		pres[j + 1] |= ((lint*)(&tmp))[1];
 		pres[j] = ((lint*)(&tmp))[0];
 	}
-	if (&res == &n)
+	if (&mres == &mn)
 		for (int j = 0; j < words; j++)
 			pres[j] = 0ul;
 
 }
 
-void ShiftRight(ModNumber& res, const ModNumber& n, unsigned int i)
+void ShiftRight(ModNumber& mres, const ModNumber& mn, unsigned int i)
 {
 	int words = 0;
 	if (i >= LSIZE * 8)
 	{
 		if (i >= NSIZE)
 		{
-			res = ModNumber();
+			mres = ModNumber();
 			return;
 		}
 		words = i / (LSIZE * 8);
 		i %= (LSIZE * 8);
 	}
-	const lint* pn = (const lint*)n.num;
-	lint *pres = (lint *)res.num;
+	const lint* pn = (const lint*)mn.num;
+	lint *pres = (lint *)mres.num;
 	pres[0] = pn[words] >> i;
 	for (int j = 0; j < COUNTL - words - 1; j++)
 	{
@@ -247,86 +245,86 @@ void ShiftRight(ModNumber& res, const ModNumber& n, unsigned int i)
 		pres[j] |= ((lint*)(&tmp))[0];
 		pres[j + 1] = ((lint*)(&tmp))[1];
 	}
-	if (&res == &n)
+	if (&mres == &mn)
 		for (int j = COUNTL - words; j < COUNTL; j++)
 			pres[j] = 0ul;
 
 }
 
-ModNumber operator << (const ModNumber& n, unsigned int i)
+ModNumber operator << (const ModNumber& mn, unsigned int i)
 {
-	ModNumber res;
-	ShiftLeft(res, n, i);
-	return res;
+	ModNumber mres;
+	ShiftLeft(mres, mn, i);
+	return mres;
 }
 
-ModNumber operator >> (const ModNumber& n, unsigned int i)
+ModNumber operator >> (const ModNumber& mn, unsigned int i)
 {
-	ModNumber res;
-	ShiftRight(res, n, i);
-	return res;
+	ModNumber mres;
+	ShiftRight(mres, mn, i);
+	return mres;
 }
 
-ModNumber& operator <<= (ModNumber& n, unsigned int i)
+ModNumber& operator <<= (ModNumber& mn, unsigned int i)
 {
 
-	ShiftLeft(n, n, i);
-	return n;
+	ShiftLeft(mn, mn, i);
+	return mn;
 }
-ModNumber& operator >>= (ModNumber& n, unsigned int i)
+ModNumber& operator >>= (ModNumber& mn, unsigned int i)
 {
 
-	ShiftRight(n, n, i);
-	return n;
+	ShiftRight(mn, mn, i);
+	return mn;
 }
 
-bool operator==(const ModNumber& l, const ModNumber& r)
+bool operator==(const ModNumber& ml, const ModNumber& mr)
 {
 	for (int i = 0; i < COUNTLL; i++)
-		if (l.num[i] != r.num[i])
+		if (ml.num[i] != mr.num[i])
 			return false;
 		else
 			;
 	return true;
 }
 
-bool operator < (const ModNumber& l, const ModNumber& r)
+bool operator < (const ModNumber& ml, const ModNumber& mr)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i] == r.num[i])
+		if (ml.num[i] == mr.num[i])
 			continue;
 		else
-			return l.num[i] < r.num[i];
+			return ml.num[i] < mr.num[i];
 	return false;
 }
 
-bool operator <= (const ModNumber& l, const ModNumber& r)
+bool operator <= (const ModNumber& ml, const ModNumber& mr)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i] == r.num[i])
+		if (ml.num[i] == mr.num[i])
 			continue;
 		else
-			return l.num[i] < r.num[i];
+			return ml.num[i] < mr.num[i];
 	return true;
 }
 
-bool operator >= (const ModNumber& l, const ModNumber& r)
+bool operator >= (const ModNumber& ml, const ModNumber& mr)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i] == r.num[i])
+		if (ml.num[i] == mr.num[i])
 			continue;
 		else
-			return l.num[i] > r.num[i];
+			return ml.num[i] > mr.num[i];
 	return true;
 }
 
-bool operator > (const ModNumber& l, const ModNumber& r)
+bool operator > (const ModNumber& ml, const ModNumber& mr)
 {
 	for (int i = COUNTLL - 1; i >= 0; i--)
-		if (l.num[i] == r.num[i])
+		if (ml.num[i] == mr.num[i])
 			continue;
 		else
-			return l.num[i] > r.num[i];
+			return ml.num[i] > mr.num[i];
 	return false;
 }
 

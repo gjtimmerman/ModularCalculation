@@ -854,7 +854,821 @@ namespace ModularUnitTests
             Assert.IsTrue(modRes6 == mexpMod);
 
         }
+        [TestMethod]
+        public void TestDivideByZero()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(0ul);
+            Assert.ThrowsException<DivideByZeroException>(() => { ModNumber res = ml / mr; });
+        }
+        [TestMethod]
+        public void TestDivideByOne()
+        {
+            ModNumber ml = new ModNumber(1000ul);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(1000ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideZeroByOne()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(0ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideEvenByTwo()
+        {
+            ModNumber ml = new ModNumber(1000ul);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(500ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideOddByTwo()
+        {
+            ModNumber ml = new ModNumber(1001ul);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(500ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideSmallByLarge()
+        {
+            ModNumber ml = new ModNumber(1001ul);
+            ModNumber mr = new ModNumber(2001ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(0ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideEquals()
+        {
+            ModNumber ml = new ModNumber(1001ul);
+            ModNumber mr = new ModNumber(1001ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(1ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDividePrimeByFive()
+        {
+            ModNumber ml = new ModNumber(101ul);
+            ModNumber mr = new ModNumber(5ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(20ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivide2Pow64ByEight()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[1] = 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(8ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = ml >> 3;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideAllFsBy2Pow16()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                exp[i] = ~0ul; 
+            }
+            exp[ModNumber.LCOUNT - 1] ^= (65535ul << (ModNumber.LSIZE * 8 - 16));
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(65536ul);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(exp);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideAllFsLeftAndRightWordByAllFsRightWord()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            r[0] = ~0ul;
+            exp[0] = 1ul;
+            exp[ModNumber.LCOUNT - 1] = 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(exp);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideAllFsByAllFs()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(1ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideAllFsByAllFsAndZeroLowWord()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+            }
+            r[0] = 0;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mres = ml / mr;
+            ModNumber mexp = new ModNumber(1ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne()
+        {
+            ModNumber mnprime1 = new ModNumber(355687428095999ul);
+            uint prime2 = 39916799u;
+            ModNumber mnprime2 = new ModNumber(prime2);
+            ModNumber product = mnprime1 * prime2;
+            ModNumber divRes1 = product / mnprime1;
+            ModNumber divRes2 = product / mnprime2;
+            ModNumber mexpDiv1 = new ModNumber(mnprime2);
+            ModNumber mexpDiv2 = new ModNumber(mnprime1);
+            Assert.IsTrue(divRes1 == mexpDiv1);
+            Assert.IsTrue(divRes2 == mexpDiv2);
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mnprime1MinusOne = mnprime1 - mone;
+            ModNumber mnprime2MinusOne = mnprime2 - mone;
+            ModNumber productMinusPrime1 = product - mnprime1;
+            ModNumber productMinusPrime2 = product - mnprime2;
+            ModNumber mexpDiv3 = new ModNumber(mnprime1);
+            ModNumber mexpDiv4 = new ModNumber(mnprime2);
+            ModNumber mexpDiv5 = new ModNumber(mnprime2MinusOne);
+            ModNumber mexpDiv6 = new ModNumber(mnprime1MinusOne);
+            ModNumber divRes3 = productMinusPrime1 / mnprime2MinusOne;
+            ModNumber divRes4 = productMinusPrime2 / mnprime1MinusOne;
+            ModNumber divRes5 = productMinusPrime1 / mnprime1;
+            ModNumber divRes6 = productMinusPrime2 / mnprime2;
 
+            Assert.IsTrue(divRes3 == mexpDiv3);
+            Assert.IsTrue(divRes4 == mexpDiv4);
+            Assert.IsTrue(divRes5 == mexpDiv5);
+            Assert.IsTrue(divRes6 == mexpDiv6);
+        }
+        [TestMethod]
+        public void TestEqualTrue()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsTrue(ml == mr);
+        }
+        [TestMethod]
+        public void TestSubtractEqualNumbers()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(ml);
+            ModNumber mres = ml - mr;
+            ModNumber mexp = new ModNumber(0ul);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestEqualNotTrueFirstSection()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+                r[i] = i;
+            }
+            r[0] -= 1;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            Assert.IsFalse(ml == mr);
+           
+        }
+        [TestMethod]
+        public void TestEqualNotTrueLastSection()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+                r[i] = i;
+            }
+            r[ModNumber.LCOUNT-1] -= 1;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            Assert.IsFalse(ml == mr);
 
+        }
+        [TestMethod]
+        public void TestLessThanTrue()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(2ul);
+            Assert.IsTrue(ml < mr);
+        }
+        [TestMethod]
+        public void TestLessThanFalse()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(2ul);
+            Assert.IsFalse(mr < ml);
+        }
+        [TestMethod]
+        public void TestGreaterThanTrueForLargeDifference()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT-1] = 1ul;
+            r[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            Assert.IsTrue(ml > mr);
+
+        }
+        [TestMethod]
+        public void TestLessThanFalseForLargeDifference()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = 1ul;
+            r[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            Assert.IsFalse(ml < mr);
+
+        }
+        [TestMethod]
+        public void TestLessThanFalseForEquality()
+        {
+            ModNumber ml = new ModNumber(1234ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsFalse(ml < mr);
+
+        }
+        [TestMethod]
+        public void TestLessThanFalseForEqualityOfZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsFalse(ml < mr);
+
+        }
+        [TestMethod]
+        public void TestLessOrEqualTrueForLessThan()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(2ul);
+            Assert.IsTrue(ml <= mr);
+
+        }
+        [TestMethod]
+        public void TestLessOrEqualFalseForGreaterThan()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(2ul);
+            Assert.IsFalse(mr <= ml);
+
+        }
+        [TestMethod]
+        public void TestLessOrEqualTrueForEquality()
+        {
+            ModNumber ml = new ModNumber(1234ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsTrue(ml <= mr);
+
+        }
+        [TestMethod]
+        public void TestLessOrEqualTrueForEqualityOfZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsTrue(ml <= mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterThanTrue()
+        {
+            ModNumber ml = new ModNumber(2ul);
+            ModNumber mr = new ModNumber(1ul);
+            Assert.IsTrue(ml > mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterThanFalse()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            ModNumber mr = new ModNumber(2ul);
+            Assert.IsFalse(ml > mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterThanFalseForEquality()
+        {
+            ModNumber ml = new ModNumber(1234ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsFalse(ml > mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterThanFalseForEqualityOfZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsFalse(ml > mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterOrEqualTrueForGreaterThan()
+        {
+            ModNumber ml = new ModNumber(2ul);
+            ModNumber mr = new ModNumber(1ul);
+            Assert.IsTrue(ml >= mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterOrEqualFalseForLessThan()
+        {
+            ModNumber ml = new ModNumber(2ul);
+            ModNumber mr = new ModNumber(1ul);
+            Assert.IsFalse(mr >= ml);
+
+        }
+        [TestMethod]
+        public void TestGreaterOrEqualTrueForEquality()
+        {
+            ModNumber ml = new ModNumber(1234ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsTrue(ml >= mr);
+
+        }
+        [TestMethod]
+        public void TestGreaterOrEqualTrueForEqualityOfZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(ml);
+            Assert.IsTrue(ml >= mr);
+
+        }
+        [TestMethod]
+        public void TestAddAssignScalarOneToZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ml += 1u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddScalarOneToZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ml + 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignScalarOneToFirstSectionMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            ml += 1u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddScalarOneToFirstSectionMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml + 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignScalarOneToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0ul);
+            ml += 1u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddScalarOneToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = ml + 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignScalarMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0xFEul);
+            ml += 0xFFu;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddScalarMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0xFEul);
+            ModNumber mres = ml + 0xFFu;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignOneToZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ml += mr;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddOneToZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ml + mr;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignOneToFirstSectionMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(1ul);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            ml += mr;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddOneToFirstSectionMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(1ul);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml + mr;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignOneToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ml += mr;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddSelfAssignMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[0] -= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ml += ml;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignFirstWordMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(~0ul);
+            ModNumber mexp = new ModNumber(~0ul - 1ul);
+            ml += mr;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddFirstWordMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(~0ul);
+            ModNumber mexp = new ModNumber(~0ul - 1ul);
+            ModNumber mres = ml + mr;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestAddAssignMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[0] -= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ml += mr;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestAddMaxToMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[0] -= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml + mr;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignByZero() 
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0ul);
+            ml *= 0u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyByZeroScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber morig = new ModNumber(l);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = ml * 0u;
+            Assert.IsTrue(mres == mexp);
+            Assert.IsTrue(morig == ml);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignByOneScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(l);
+            ml *= 1u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyByOneScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(l);
+            ModNumber mres = ml * 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+                exp[i] = i * 2;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ml *= 2u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = i;
+                exp[i] = i * 2;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * 2u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignAllFFFFByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[0] ^= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ml *= 2u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAllFFFFByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[0] ^= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * 2u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignFsBy2Pow16Scalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            exp[1] = ~0ul >> (ModNumber.LSIZE * 8 - 16);
+            exp[0] = ~0ul << 16;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ml *= 65536u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyFsBy2Pow16Scalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            exp[1] = ~0ul >> (ModNumber.LSIZE * 8 - 16);
+            exp[0] = ~0ul << 16;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * 65536u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssignAllAsByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = 0xaaaaaaaaaaaaaaaaul;
+                exp[i] = (l[i] << 1) + 1;
+            }
+            exp[0] = l[0] << 1;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ml *= 2u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAllAsByTwoScalar()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = 0xaaaaaaaaaaaaaaaaul;
+                exp[i] = (l[i] << 1) + 1;
+            }
+            exp[0] = l[0] << 1;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * 2u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestMultiplyAssign9sDecBy9sDecScalar()
+        {
+            ModNumber ml = new ModNumber(99999999ul);
+            ModNumber mexp = ModNumber.Stomn("9999999800000001");
+            ml *= 99999999u;
+            Assert.IsTrue(ml == mexp);
+        }
+        [TestMethod]
+        public void TestMultiply9sDecBy9sDecScalar()
+        {
+            ModNumber ml = new ModNumber(99999999ul);
+            ModNumber mexp = ModNumber.Stomn("9999999800000001");
+            ModNumber mres = ml * 99999999u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionByZeroScalar()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            Assert.ThrowsException<DivideByZeroException>(() => { ModNumber mres = ml / 0u; });
+        }
     }
 }

@@ -138,7 +138,7 @@ namespace ModularCalculation
                     pNumi[lpos++] = pResi[0];
                     while (pResi[1] > 0u && lpos < ICOUNT)
                     {
-                        res = pNumi[lpos] + pResi[1];
+                        res = (ulong)pNumi[lpos] + (ulong)pResi[1];
                         pNumi[lpos++] = pResi[0];
                     }
                 }
@@ -178,7 +178,7 @@ namespace ModularCalculation
                     uint *pNumi = (uint*)pNum;
                     uint *pResi = (uint*)pRes;
                     int firstNonzeroWord;
-                    for (firstNonzeroWord = LCOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
+                    for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
                     {
                         if (pNumi[firstNonzeroWord] != 0)
                             break;
@@ -188,7 +188,7 @@ namespace ModularCalculation
                         ulong tmpres = ((ulong)pNumi[i]) * scalar;
                         uint *pTmpres = (uint*)&tmpres;
                         mres.AddAssignScalar(i, pTmpres[0]);
-                        if (i <  LCOUNT - 1)
+                        if (i <  ICOUNT - 1)
                             mres.AddAssignScalar(i + 1, pTmpres[1]);
                     }
 
@@ -338,6 +338,43 @@ namespace ModularCalculation
             }
             return mres;
         }
+        public (ModNumber, uint) DivideAndModulo(uint scalar, bool onlyModulo)
+        {
+            if (scalar == 0)
+                throw new DivideByZeroException("Division by zero not allowed!");
+            ModNumber mres = new ModNumber();
+            uint modRes;
+            unsafe
+            {
+                fixed(ulong *pN = &num[0])
+                    fixed(ulong *pRes = &mres.num[0])
+                {
+                    uint *piN = (uint*)pN;
+                    uint *piRes = (uint*)pRes;
+                    ulong tmp = 0ul;
+                    for(int i = ModNumber.ICOUNT - 1; i >= 0;i--)
+                    {
+                        *((uint*)&tmp) = piN[i];
+                        if (scalar <= tmp)
+                        {
+                            if (!onlyModulo)
+                                piRes[i] = (uint)(tmp / scalar);
+                            tmp %= scalar;
+
+                        }
+                        tmp <<= ModNumber.ISIZE * 8;
+                    }
+                    modRes = ((uint*)&tmp)[1];
+                }
+            }
+            return (mres, modRes) ;
+        }
+
+        public static ModNumber operator / (ModNumber n, uint scalar)
+        {
+            (ModNumber mres, uint divRes) = n.DivideAndModulo(scalar, false);
+            return mres;
+        }
 
         public static (ModNumber, ModNumber) DivideAndModulo(ModNumber l, ModNumber r, bool onlyModulo)
         {
@@ -421,6 +458,11 @@ namespace ModularCalculation
             (ModNumber div, ModNumber mod) = DivideAndModulo(ml, mr, true);
             return mod;
         }
+        public static ModNumber operator /(ModNumber ml, ModNumber mr)
+        {
+            (ModNumber div, ModNumber mod) = DivideAndModulo(ml, mr, false);
+            return div;
+        }
         public static string AdjustStringLength(string s, int desiredLength)
         {
             if (desiredLength < s.Length)
@@ -455,11 +497,20 @@ namespace ModularCalculation
         public static ModNumber StomnDecimalBase(string s)
         {
             ModNumber mres = new ModNumber();
+            s = AdjustStringLength(s, DecimalStringLength);
+            for(int i = 0; i < DecimalStringLength;i++)
+            {
+                if (!Char.IsDigit(s[i]))
+                    throw new ArgumentException("Only digits allowed");
+                uint digit = (uint)s[i] - '0';
+                mres *= 10u;
+                mres += digit;
+            }
             return mres;
 
         }
 
-        public static ModNumber Stomn(string s, int digitBase)
+        public static ModNumber Stomn(string s, int digitBase = 10)
         {
             int i;
             for (i = 0; i < s.Length; i++)

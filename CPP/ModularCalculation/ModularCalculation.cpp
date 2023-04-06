@@ -165,15 +165,15 @@ ModNumber DivideAndModulo(ModNumber& modRes, const ModNumber& ml, const ModNumbe
 		for (int j = 0; j <= bitDifference; j++)
 		{
 			ModNumber mBitShiftedRightArgument(mWordShiftedRightArgument);
-			ModNumber mdivisor2(mdivisor);
+			ModNumber mDivisorShiftedRight(mdivisor);
 			mBitShiftedRightArgument <<= bitDifference - j;
 			if (!onlyModulo)
-				mdivisor2 <<= bitDifference - j;
+				mDivisorShiftedRight <<= bitDifference - j;
 			while (modRes >= mBitShiftedRightArgument)
 			{
 				modRes -= mBitShiftedRightArgument;
 				if (!onlyModulo)
-					divRes += mdivisor2;
+					divRes += mDivisorShiftedRight;
 			}
 		}
 	}

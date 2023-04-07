@@ -2,6 +2,7 @@
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
 using System.Reflection;
+using System.Text;
 
 namespace ModularCalculation
 {
@@ -532,6 +533,178 @@ namespace ModularCalculation
                     return StomnHexBase(s);
             }
             throw new ArgumentException("Only base 8, 10 and 16 are valid");
+        }
+        public string ToString_HexBase()
+        {
+            return "";
+        }
+        public string ToString_DecBase()            
+        {
+            return "";
+        }
+        public string ToString_OctBase()
+        {
+            StringBuilder res = new StringBuilder(new string('0', ModNumber.OctalStringLength));
+            uint mask = 7u;
+            unsafe
+            {
+                fixed (ulong* pN = &num[0])
+                {
+                    uint *pIN = (uint *)pN;
+                    uint [] buffer = new uint[2];
+                    fixed(uint *piBuffer = &buffer[0])
+                    {
+                        ulong *pBuffer = (ulong *)piBuffer;
+                        buffer[0] = pIN[0];
+                        int tripleCount = 0;
+                        int wordCount = 0;
+                        for(int i = 0; i < ModNumber.NSIZE; i++)
+                        {
+                            if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                            {
+                                if((wordCount/(8 * ModNumber.ISIZE) + 1) < ModNumber.ICOUNT)
+                                {
+                                    buffer[1] = pIN[wordCount/(8 * ModNumber.ISIZE)+1];
+                                }
+                            }
+                            if(tripleCount++ % 3 == 0)
+                            {
+                                uint numToPrint = buffer[0] & mask;
+                                char charToPrint = (char)('0' + numToPrint);
+                                res[ModNumber.OctalStringLength - (tripleCount/3) - 1] = charToPrint;
+                            }
+                            (*pBuffer) >>= 1;
+                        }
+                    }
+                }
+            }
+            return res.ToString();
+        }
+
+        public string ToString(int nBase = 10)
+        {
+            switch(nBase)
+            {
+                case 8:
+                    return ToString_OctBase();
+                case 10:
+                    return ToString_DecBase();
+                case 16:
+                    return ToString_HexBase();
+                default:
+                    throw new ArgumentException("Base must be 8, 10 or 16");
+            }
+        }
+    }
+    public class ScaledNumber
+    {
+        public ScaledNumber(ModNumber mn, int scale, bool alreadyScaled = false)
+        {
+            if (alreadyScaled)
+                this.mn = mn;
+            else
+                this.mn = mn << (8 * scale);
+            this.scale = scale;
+        }
+        public int scale;
+        private ModNumber mn;
+        public string ToString(int nBase = 10)
+        {
+            switch (nBase)
+            {
+                case 8:
+                    return ToString_OctBase();
+                case 10:
+                    return ToString_DecBase();
+                case 16:
+                    return ToString_HexBase();
+                default:
+                    throw new ArgumentException("Base must be 8, 10 or 16");
+            }
+        }
+        public (int,int) CalculateOctalStringLength()
+        {
+            return ((ModNumber.NCOUNT - scale) * 8 % 3 == 0 ? (ModNumber.NCOUNT - scale) * 8 / 3 : (ModNumber.NCOUNT - scale) * 8 / 3 + 1, (scale * 8 % 3) == 0 ? (scale * 8 / 3) : (scale * 8 / 3 + 1));
+        }
+        private string ToString_OctBase()
+        {
+            StringBuilder res = new StringBuilder(ModNumber.OctalStringLength+3);
+            uint mask = 7u;
+            int wordsToSkip = scale / ModNumber.ISIZE;
+            int bitsToSkip = (scale % ModNumber.ISIZE) * 8;
+            unsafe
+            {
+                fixed(ulong *pN = &mn.num[0])
+                {
+                    uint* piNStart = (uint*)pN;
+                    uint* piN = piNStart + wordsToSkip; 
+                    uint[] buffer = new uint[2];
+                    fixed(uint *piBuffer = &buffer[0])
+                    {
+                        ulong *pBuffer = (ulong *)piBuffer;
+                        buffer[0] = piN[0];
+                        buffer[1] = piN[1];
+                        int tripleCount = 0;
+                        (int digitsLeft, int digitsToSkip) = CalculateOctalStringLength();
+                        res.Append(new string('0', digitsToSkip + digitsLeft + 1));
+                        res[digitsLeft] = '.';
+                        int wordCount = bitsToSkip;
+                        (*pBuffer) >>= bitsToSkip;
+                        for (int i = scale * 8; i < ModNumber.NSIZE; i++)
+                        {
+                            if((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                            {
+                                if (wordCount / (8 * ModNumber.ISIZE) + 1 < ModNumber.ICOUNT - wordsToSkip)
+                                    pBuffer[1] = piN[wordCount / (8 * ModNumber.ISIZE) + 1];
+                                else
+                                    pBuffer[1] = 0;
+                            }
+                            if (tripleCount++ % 3 == 0)
+                            {
+                                uint numToPrint = buffer[0] & mask;
+                                char charToPrint = (char)('0'+numToPrint);
+                                res[digitsLeft - (tripleCount / 3) - 1] = charToPrint;
+                            }
+                            (*pBuffer) >>= 1;
+                        }
+                        buffer[1] = piN[0];
+                        if (wordsToSkip > 0)
+                        {
+                            buffer[0] = piN[-1];
+                        }
+                        else
+                            buffer[0] = 0u;
+                        (*pBuffer) <<= (ModNumber.ISIZE * 8) - bitsToSkip;
+                        wordCount = ModNumber.ISIZE * 8 - bitsToSkip;
+                        tripleCount = 0;
+                        for (int i = 0; i < scale * 8; i++)
+                        {
+                            if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                                if (wordCount < (wordsToSkip * ModNumber.ISIZE * 8))
+                                    buffer[0] = piN[-1 - (wordCount / (8 * ModNumber.ISIZE))];
+                                else
+                                    buffer[0] = 0;
+                            if (tripleCount++ % 3 == 0)
+                            {
+                                uint numToPrint = (buffer[1] >> (32 - 3)) & mask;
+                                char charToPrint = (char) ('0'+ numToPrint);
+                                res[digitsLeft + (tripleCount / 3) + 1] = charToPrint;
+                            }
+                            (*pBuffer) <<= 1;
+                        }
+                    }
+                }
+            }
+
+            return res.ToString();
+        }
+        private string ToString_DecBase()
+        {
+            return "";
+        }
+        private string ToString_HexBase()
+        {
+            return "";
         }
     }
 }

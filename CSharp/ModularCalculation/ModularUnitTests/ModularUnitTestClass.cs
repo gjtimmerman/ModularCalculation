@@ -1670,5 +1670,144 @@ namespace ModularUnitTests
             ModNumber ml = new ModNumber(0ul);
             Assert.ThrowsException<DivideByZeroException>(() => { ModNumber mres = ml / 0u; });
         }
+        [TestMethod]
+        public void TestDivisionZeroByOneScalar()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = ml / 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionNonZeroByOneScalar()
+        {
+            ModNumber ml = new ModNumber(123456ul);
+            ModNumber mexp = new ModNumber(123456ul);
+            ModNumber mres = ml / 1u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionNonZeroByTwoScalar()
+        {
+            ModNumber ml = new ModNumber(24690ul);
+            ModNumber mexp = new ModNumber(12345ul);
+            ModNumber mres = ml / 2u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionAll9sBy3s()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i=0; i<ModNumber.LCOUNT; i++)
+            {
+                l[i] = 9999999999999999999ul;
+                exp[i] = 3333333333333333333ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml / 3u;
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionAllNinesByTwoAndMultipliedByTwo()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = 9999999999999999999ul;
+                exp[i] = 9999999999999999999ul;
+            }
+            exp[0] = 9999999999999999998ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres1 = ml / 2u;
+            ModNumber mres2 = mres1 * 2u;
+            Assert.IsTrue(mres2 == mexp);
+        }
+        [TestMethod]
+        public void TestDivisionMaxULongTimesTwoByTwo()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            l[1] = 1;
+            exp[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml / 2u;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestDivisionAllAsByTwo()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = 0xaaaaaaaaaaaaaaaaul;
+                exp[i] = 0x5555555555555555ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml / 2u;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestToStringIllegalBase()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            Assert.ThrowsException<ArgumentException>(() => { string s = ml.ToString(11); });
+        }
+        [TestMethod]
+        public void TestToStringOctalForZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            string exp = new string('0', ModNumber.OctalStringLength);
+            string res = ml.ToString(8);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringOctalForOne()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            string exp = new string('0', ModNumber.OctalStringLength-1);
+            exp += "1";
+            string res = ml.ToString(8);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringOctalForEight()
+        {
+            ModNumber ml = new ModNumber(8ul);
+            string exp = new string('0', ModNumber.OctalStringLength - 2);
+            exp += "10";
+            string res = ml.ToString(8);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringOctalForEightScale6()
+        {
+            ModNumber ml = new ModNumber(8ul);
+            ScaledNumber sn = new ScaledNumber(ml, 6);
+            (int digitsLeft, int digitsRight) = sn.CalculateOctalStringLength();
+            string exp = new string('0', digitsLeft - 2);
+            exp += "10.0000000000000000";
+            string res = sn.ToString(8);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringOctalFor0x012345678910Scaled6()
+        {
+            ModNumber ml = new ModNumber(0x012345678910ul);
+            ScaledNumber sn = new ScaledNumber(ml, 6, true);
+            (int digitsLeft, int digitsRight) = sn.CalculateOctalStringLength();
+            string exp = new string('0', digitsLeft);
+            exp += ".0022150531704420";
+            string res = sn.ToString(8);
+            Assert.IsTrue(res == exp);
+        }
+
     }
 }

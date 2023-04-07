@@ -1,5 +1,6 @@
 using ModularCalculation;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 
 namespace ModularUnitTests
 {
@@ -1808,6 +1809,60 @@ namespace ModularUnitTests
             string res = sn.ToString(8);
             Assert.IsTrue(res == exp);
         }
-
+        [TestMethod]
+        public void TestToStringOctalForMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            string exp = new string('7', ModNumber.OctalStringLength-1);
+            uint left = ModNumber.NCOUNT * 8 % 3;
+            switch (left)
+            {
+                case 0:
+                    exp = "7" + exp;
+                    break;
+                case 1:
+                    exp = "1" + exp;
+                    break;
+                case 2:
+                    exp = "3" + exp;
+                    break;
+            }
+            string res = ml.ToString(8);
+            Assert.IsTrue(exp == res);
+        }
+        [TestMethod]
+        public void TestToStringOctalForMaxScaled6()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            ScaledNumber sn = new ScaledNumber(ml, 6, true);
+            (int digitsLeft, int digitsRight) = sn.CalculateOctalStringLength();
+            string exp = new string('7', digitsLeft - 1);
+            uint left = (ModNumber.NCOUNT-6) * 8 % 3;
+            switch (left)
+            {
+                case 0:
+                    exp = "7" + exp;
+                    break;
+                case 1:
+                    exp = "1" + exp;
+                    break;
+                case 2:
+                    exp = "3" + exp;
+                    break;
+            }
+            exp += ".7777777777777777";
+            string res = sn.ToString(8);
+            Assert.IsTrue(exp == res);
+        }
     }
 }

@@ -655,9 +655,9 @@ namespace ModularCalculation
                             if((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
                             {
                                 if (wordCount / (8 * ModNumber.ISIZE) + 1 < ModNumber.ICOUNT - wordsToSkip)
-                                    pBuffer[1] = piN[wordCount / (8 * ModNumber.ISIZE) + 1];
+                                    buffer[1] = piN[wordCount / (8 * ModNumber.ISIZE) + 1];
                                 else
-                                    pBuffer[1] = 0;
+                                    buffer[1] = 0;
                             }
                             if (tripleCount++ % 3 == 0)
                             {

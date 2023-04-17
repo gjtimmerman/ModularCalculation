@@ -713,6 +713,10 @@ ModNumber ModNumber::stomn(std::string s, int base)
 	if (!(base == 8 || base == 10 || base == 16))
 		throw std::invalid_argument("Only base 8, 10 and 16 are valid");
 	size_t len = s.length();
+	if (len == 0)
+	{
+		return ModNumber(0ull);
+	}
 	int i;
 	for (i = 0; i < len; i++)
 		if (!std::isspace(s[i]))

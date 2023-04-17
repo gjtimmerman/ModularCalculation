@@ -2010,5 +2010,78 @@ namespace ModularUnitTests
             ModNumber mres = ModNumber.Stomn(s, 16);
             Assert.IsTrue(mres == mexp);
         }
+        [TestMethod]
+        public void TestToModularNumberHexForOne()
+        {
+            string s = "1";
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ModNumber.Stomn(s, 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForSixteen()
+        {
+            string s = "10";
+            ModNumber mexp = new ModNumber(16ul);
+            ModNumber mres = ModNumber.Stomn(s, 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForSixteenWithLeadingZeros()
+        {
+            string s = "000000000000000000000000010";
+            ModNumber mexp = new ModNumber(16ul);
+            ModNumber mres = ModNumber.Stomn(s, 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForSixteenWithLeadingMinusSign()
+        {
+            string s = "-10";            
+            Assert.ThrowsException<ArgumentException>(() => { ModNumber mres = ModNumber.Stomn(s, 16); });
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForSixteenWithLeadingPlusSign()
+        {
+            string s = "+10";
+            ModNumber mexp = new ModNumber(16ul);
+            ModNumber mres = ModNumber.Stomn(s, 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForMax()
+        {
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                exp[i] = ~0ul;
+            }
+            ModNumber mexp = new ModNumber(exp);
+            string str = new string('F', ModNumber.HexStringLength);
+            ModNumber mres = ModNumber.Stomn(str, 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexIncreasingSequenceByteInput()
+        {
+            byte[] exp = new byte[ModNumber.LCOUNT * ModNumber.NCOUNT];
+            for (int i = 0; i < ModNumber.NCOUNT; i++)
+            {
+                exp[i] = (byte)(i % 16);
+            }
+            ModNumber mexp = new ModNumber(exp);
+            StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+            for (int i = 0; i * 2 < ModNumber.HexStringLength % 32; i++)
+            {
+                string s = string.Format("{0,2:X2}", (ModNumber.HexStringLength % 32) / 2 - i - 1);
+                stringBuilder.Append(s);
+            }
+            for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+            {
+                stringBuilder.Append("0F0E0D0C0B0A09080706050403020100");
+            }
+            ModNumber mres = ModNumber.Stomn(stringBuilder.ToString(), 16);
+            Assert.IsTrue(mres == mexp);
+        }
     }
 }

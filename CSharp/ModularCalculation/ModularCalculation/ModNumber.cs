@@ -32,6 +32,20 @@ namespace ModularCalculation
         {
             m.num.CopyTo(num, 0);
         }
+        public ModNumber(byte[] n)
+        {
+            unsafe
+            {
+                fixed(ulong *pN = &num[0])
+                {
+                    byte* pByte = (byte*)pN;
+                    for (int i = 0; i < ModNumber.NCOUNT; i++)
+                    {
+                        pByte[i] = n[i];
+                    }
+                }
+            }
+        }
         public override bool Equals(object ?other)
         {
             if (other is ModNumber om)
@@ -537,6 +551,8 @@ namespace ModularCalculation
                 s = s.Substring(i);
             if (s[0] == '-')
                 throw new ArgumentException("Only positive numbers allowed");
+            if (s[0] == '+')
+                s = s.Substring(1);
             switch(digitBase)
             {
                 case 8:

@@ -2271,7 +2271,7 @@ namespace ModularUnitTests
 			unsigned char cexp[NCOUNT];
 			for (int i = 0; i < NCOUNT; i++)
 			{
-				cexp[i] = (unsigned char)i % 16;
+				cexp[i] = (unsigned char)i % 16; 
 			}
 			llint* exp = (llint*)cexp;
 			ModNumber mexp(exp);

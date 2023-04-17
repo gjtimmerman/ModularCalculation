@@ -1,6 +1,7 @@
 using ModularCalculation;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
+using System.Text;
 
 namespace ModularUnitTests
 {
@@ -1863,6 +1864,151 @@ namespace ModularUnitTests
             exp += ".7777777777777777";
             string res = sn.ToString(8);
             Assert.IsTrue(exp == res);
+        }
+        [TestMethod]
+        public void TestToStringOctalForMaxesAndZeros() 
+        {
+            ulong []l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT - 6;i+=6)
+            {
+                for (int j = 0; j < 3; j++)
+                    l[i + j] = ~0ul;
+                for (int j = 3; j < 6; j++)
+                    l[i + j] = 0ul;
+            }
+            for (int i = ModNumber.LCOUNT - (ModNumber.LCOUNT % 6); i < ModNumber.LCOUNT; i++)
+                l[i] = 0;
+            ModNumber ml = new ModNumber(l);
+            StringBuilder exp = new StringBuilder(ModNumber.OctalStringLength);
+            exp.Append(new string('0', ModNumber.OctalStringLength % 128));
+            for (int i = ModNumber.OctalStringLength % 128; i < ModNumber.OctalStringLength; i+=128)
+            {
+                exp.Append(new string('0', 64));
+                exp.Append(new string ('7', 64));
+            }
+            string res = ml.ToString(8);
+            Assert.IsTrue(exp.ToString() == res);
+
+        }
+        [TestMethod]
+        public void TestToStringHexForZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            string exp = new string('0', ModNumber.HexStringLength);
+            string res = ml.ToString(16);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringHexForOne()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            string exp = new string('0', ModNumber.HexStringLength-1);
+            exp += '1';
+            string res = ml.ToString(16);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringHexForSixteen()
+        {
+            ModNumber ml = new ModNumber(16ul);
+            string exp = new string('0', ModNumber.HexStringLength - 2);
+            exp += "10";
+            string res = ml.ToString(16);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringHexForMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            string exp = new string('F', ModNumber.HexStringLength);
+            string res = ml.ToString(16);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForZero()
+        {
+            ModNumber ml = new ModNumber(0ul);
+            string exp = new string('0', ModNumber.DecimalStringLength);
+            string res = ml.ToString(10);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForOne()
+        {
+            ModNumber ml = new ModNumber(1ul);
+            string exp = new string('0', ModNumber.DecimalStringLength-1);
+            exp += "1";
+            string res = ml.ToString(10);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForTen()
+        {
+            ModNumber ml = new ModNumber(10ul);
+            string exp = new string('0', ModNumber.DecimalStringLength - 2);
+            exp += "10";
+            string res = ml.ToString(10);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForMaxIntPlusOne()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = 1ul << ModNumber.ISIZE * 8;
+            ModNumber ml = new ModNumber(l);
+            string exp = new string('0', ModNumber.DecimalStringLength-10);
+            exp += "4294967296";
+            string res = ml.ToString(10);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForMaxInt()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = (uint)~0u;
+            ModNumber ml = new ModNumber(l);
+            string exp = new string('0', ModNumber.DecimalStringLength - 10);
+            exp += "4294967295";
+            string res = ml.ToString(10);
+            Assert.IsTrue(res == exp);
+        }
+        [TestMethod]
+        public void TestToStringDecimalForMax()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+            }
+            ModNumber ml = new ModNumber(l);
+            string res = ml.ToString(10);
+            ModNumber exp = ModNumber.Stomn(res, 10);
+            Assert.IsTrue(ml == exp);
+        }
+        [TestMethod]
+        public void TestToModularNumberIllegalBase()
+        {
+            string s = "";
+            Assert.ThrowsException<ArgumentException>(() => { ModNumber n = ModNumber.Stomn(s, 11); });
+        }
+        [TestMethod]
+        public void TestToModularNumberIllegalChar()
+        {
+            string s = "123456789ABCDEFG";
+            Assert.ThrowsException<ArgumentException>(() => { ModNumber n = ModNumber.Stomn(s, 16); });
+        }
+        [TestMethod]
+        public void TestToModularNumberHexForEmptyString()
+        {
+            string s = "";
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = ModNumber.Stomn(s, 16);
+            Assert.IsTrue(mres == mexp);
         }
     }
 }

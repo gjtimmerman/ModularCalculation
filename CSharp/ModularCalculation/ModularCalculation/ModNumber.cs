@@ -3,6 +3,7 @@ using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
 using System.Reflection;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ModularCalculation
 {
@@ -377,6 +378,13 @@ namespace ModularCalculation
             return mres;
         }
 
+        public static uint operator % (ModNumber n, uint scalar)
+        {
+            (ModNumber div, uint modulo) = n.DivideAndModulo(scalar, true);
+            return modulo;
+
+        }
+
         public static (ModNumber, ModNumber) DivideAndModulo(ModNumber l, ModNumber r, bool onlyModulo)
         {
             ModNumber divRes = new ModNumber();
@@ -484,7 +492,9 @@ namespace ModularCalculation
             for (int i = 0; i < HexStringLength; i += LSIZE*2)
             {
                 string tmp = s.Substring(i, LSIZE * 2);
-                ulong.TryParse(tmp, System.Globalization.NumberStyles.HexNumber, null, out n[LCOUNT - (i / (LSIZE * 2)) - 1]);
+                bool result = ulong.TryParse(tmp, System.Globalization.NumberStyles.HexNumber, null, out n[LCOUNT - (i / (LSIZE * 2)) - 1]);
+                if (!result)
+                    throw new ArgumentException("Illegal Hex character");
             }
             ModNumber mres = new ModNumber(n);
             return mres;
@@ -513,6 +523,10 @@ namespace ModularCalculation
 
         public static ModNumber Stomn(string s, int digitBase = 10)
         {
+            if (!(digitBase == 8 || digitBase == 10 || digitBase == 16))
+                throw new ArgumentException("Only base 8, 10 and 16 are valid");
+            if (s.Length == 0)
+                return new ModNumber(0);
             int i;
             for (i = 0; i < s.Length; i++)
             {
@@ -536,11 +550,28 @@ namespace ModularCalculation
         }
         public string ToString_HexBase()
         {
-            return "";
+            StringBuilder res = new StringBuilder(ModNumber.HexStringLength + 1);
+            int buflen = ModNumber.LSIZE * 2;
+            string formatStr = "{" + $"0,{buflen}:X{buflen}" + "}";
+            for (int i = ModNumber.LCOUNT - 1; i >= 0; i--)
+            {
+                string digits = string.Format(formatStr, num[i]);
+                res.Append(digits);
+            }
+            return res.ToString();
         }
         public string ToString_DecBase()            
         {
-            return "";
+            StringBuilder res = new StringBuilder(ModNumber.DecimalStringLength);
+            res.Append('0', ModNumber.DecimalStringLength);
+            ModNumber tmp = new ModNumber(this);
+            for (int i = 0; i < ModNumber.DecimalStringLength; i++)
+            {
+                uint digit = tmp % 10u;
+                tmp /= 10u;
+                res[ModNumber.DecimalStringLength - i - 1] = (char)('0' + (char)digit); 
+            }
+            return res.ToString();
         }
         public string ToString_OctBase()
         {

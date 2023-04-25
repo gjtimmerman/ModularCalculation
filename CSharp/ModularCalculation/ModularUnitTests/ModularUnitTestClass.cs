@@ -2183,5 +2183,99 @@ namespace ModularUnitTests
             string s = "+10";
             Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
         }
+        [TestMethod]
+        public void TestToModularNumberDecimalForTenNines()
+        {
+            ModNumber mexp = new ModNumber(0x2540BE3FFul);
+            StringBuilder s = new StringBuilder(ModNumber.DecimalStringLength);
+            s.Append('0', ModNumber.DecimalStringLength - 10);
+            s.Append('9', 10);
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForEighteenNines()
+        {
+            ModNumber mexp = new ModNumber(0xDE0B6B3A763FFFFul);
+            StringBuilder s = new StringBuilder(ModNumber.DecimalStringLength);
+            s.Append('0', ModNumber.DecimalStringLength - 18);
+            s.Append('9', 18);
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForEmptyString()
+        {
+            ModNumber mexp = new ModNumber(0ul);
+            string s = "";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalIllegalChar()
+        {
+            string s = "123456789A";
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.Stomn(s, 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForOne()
+        {
+            ModNumber mexp = new ModNumber(1ul);
+            string s = "1";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForSixteen()
+        {
+            ModNumber mexp = new ModNumber(16ul);
+            string s = "20";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForEightWithLeadingZeros()
+        {
+            ModNumber mexp = new ModNumber(8ul);
+            string s = "000000000000000000010";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForMax()
+        {
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+                exp[i] = ~0ul;
+            ModNumber mexp = new ModNumber(exp);
+            StringBuilder s = new StringBuilder(ModNumber.OctalStringLength);
+            s.Append('7', ModNumber.OctalStringLength);
+            switch(ModNumber.NSIZE % 3)
+            {
+                case 0:
+                    break;
+                case 1:
+                    s[0] = '1';
+                    break;
+                case 2:
+                    s[0] = '3';
+                    break;
+            }
+            Assert.IsTrue(mexp == ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalForStringTooLarge()
+        {
+            StringBuilder s = new StringBuilder(ModNumber.OctalStringLength+16);
+            for (int i = 0; i < ModNumber.OctalStringLength + 1; i += 16)
+                s.Append("0706050403020100");
+            Assert.ThrowsException<ArgumentException>( () =>  ModNumber.Stomn(s.ToString(), 8));
+        }
+        [TestMethod]
+        public void TestToModularNumberOctalIncreasingSequenceByteInput()
+        {
+            StringBuilder s = new StringBuilder(ModNumber.OctalStringLength);
+            s.Append('0', ModNumber.OctalStringLength % 16);
+            for (int i = ModNumber.OctalStringLength % 16; i < ModNumber.OctalStringLength; i += 16)
+                s.Append("0001020304050607");
+            ModNumber mres = ModNumber.Stomn(s.ToString(), 8);
+            string resStr = mres.ToString(8);
+            Assert.IsTrue(resStr == s.ToString());
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -515,8 +516,38 @@ namespace ModularCalculation
         }
         public static ModNumber StomnOctalBase(string s)
         {
-            ModNumber mres = new ModNumber();
-            return mres;
+            ulong[] n = new ulong[LCOUNT];
+            ulong buffer = 0ul;
+            int bitCount = 0;
+            int firstBits = (ModNumber.NSIZE % 3 == 0) ? 0 : 3 - ModNumber.NSIZE % 3;
+            ulong mask = 4ul;
+            string expandedStr = AdjustStringLength(s, ModNumber.OctalStringLength);
+            for (int i = 0; i < ModNumber.OctalStringLength; i++)
+            {
+                if (!char.IsDigit(expandedStr[i]) || expandedStr[i] == '8' || expandedStr[i] == '9')
+                    throw new ArgumentException("Only octal digits allowed!");
+                ulong digit = (ulong)expandedStr[i] - '0';
+                for (int j = 0; j < 3; j++)
+                {
+                    buffer <<= 1;
+                    ulong res = digit & mask;
+                    res >>= 2;
+                    buffer |= res;
+                    digit <<= 1;
+                    if (firstBits != 0)
+                    {
+                        firstBits--;
+                        continue;
+                    }
+                    bitCount++;
+                    if (bitCount % (8 * ModNumber.LSIZE) == 0)
+                    {
+                        n[ModNumber.LCOUNT - (bitCount / (8 * ModNumber.LSIZE))] = buffer;
+                        buffer = 0ul;
+                    }
+                }
+            }
+            return new ModNumber(n);
 
         }
         public static ModNumber StomnDecimalBase(string s)

@@ -2106,5 +2106,82 @@ namespace ModularUnitTests
             ModNumber mres = ModNumber.Stomn(stringBuilder.ToString(), 16);
             Assert.IsTrue(mres == mexp);
         }
+        [TestMethod]
+        public void TestToModularNumberHexIncreasingSequenceSwitched()
+        {
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i + 1 < ModNumber.LCOUNT; i += 2)
+            {
+                exp[i] = 0x08090A0B0C0D0E0Ful;
+                exp[i + 1] = 0x0001020304050607ul;
+
+            }
+            ModNumber mexp = new ModNumber(exp);
+            StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+            for (int i = 0; i < ModNumber.HexStringLength % 32; i++)
+            {
+                stringBuilder.Append('0');
+            }
+            for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+            {
+                stringBuilder.Append("000102030405060708090A0B0C0D0E0F");
+            }
+            ModNumber mres = ModNumber.Stomn(stringBuilder.ToString(), 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForEmptyString()
+        {
+            ModNumber mexp = new ModNumber(0ul);
+            string s = "";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalIllegalChar()
+        {
+           string s = "123456789A";
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalWithLeadingSpaces()
+        {
+            ModNumber mexp = new ModNumber(9ul);
+            string s = "        9";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForOne()
+        {
+            ModNumber mexp = new ModNumber(1ul);
+            string s = "1";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForTen()
+        {
+            ModNumber mexp = new ModNumber(10ul);
+            string s = "10";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForTenWithLeadingZeros()
+        {
+            ModNumber mexp = new ModNumber(10ul);
+            string s = "             10";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForTenWithLeadingMinusSign()
+        {
+            string s = "-10";
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.Stomn(s, 10));
+        }
+        [TestMethod]
+        public void TestToModularNumberDecimalForTenWithLeadingPlusSign()
+        {
+            ModNumber mexp = new ModNumber(10ul);
+            string s = "+10";
+            Assert.IsTrue(mexp == ModNumber.Stomn(s, 10));
+        }
     }
 }

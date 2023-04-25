@@ -2064,7 +2064,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestToModularNumberHexIncreasingSequenceByteInput()
         {
-            byte[] exp = new byte[ModNumber.LCOUNT * ModNumber.NCOUNT];
+            byte[] exp = new byte[ModNumber.NCOUNT];
             for (int i = 0; i < ModNumber.NCOUNT; i++)
             {
                 exp[i] = (byte)(i % 16);
@@ -2075,6 +2075,29 @@ namespace ModularUnitTests
             {
                 string s = string.Format("{0,2:X2}", (ModNumber.HexStringLength % 32) / 2 - i - 1);
                 stringBuilder.Append(s);
+            }
+            for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+            {
+                stringBuilder.Append("0F0E0D0C0B0A09080706050403020100");
+            }
+            ModNumber mres = ModNumber.Stomn(stringBuilder.ToString(), 16);
+            Assert.IsTrue(mres == mexp);
+        }
+        [TestMethod]
+        public void TestToModularNumberHexIncreasingSequence()
+        {
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i + 1 < ModNumber.LCOUNT; i += 2)
+            {
+                exp[i] = 0x0706050403020100ul;
+                exp[i + 1] = 0x0F0E0D0C0B0A0908ul;
+
+            }
+            ModNumber mexp = new ModNumber(exp);
+            StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+            for (int i = 0; i < ModNumber.HexStringLength % 32; i++)
+            {
+                stringBuilder.Append('0');
             }
             for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
             {

@@ -12,6 +12,7 @@ namespace ModularCalculation
     {
         public const int MaxMod = 4096 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
+        public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong) ;
         public const int ISIZE = sizeof(uint);
         public const int LCOUNT = NCOUNT / LSIZE;
@@ -71,6 +72,12 @@ namespace ModularCalculation
         public static bool operator !=(ModNumber om1, ModNumber om2)
         {
             return !(om1.Equals(om2));
+        }
+        internal void CheckMax(int size)
+        {
+            for (int i = size; i < ModNumber.LCOUNT; i++)
+                if (num[i] != 0ul)
+                    throw new ArgumentException("Modulus is too large!");
         }
         public static ModNumber operator- (ModNumber l, uint r)
         {
@@ -791,6 +798,53 @@ namespace ModularCalculation
         private string ToString_HexBase()
         {
             return "";
+        }
+    }
+    public class MultGroupMod
+    {
+        public MultGroupMod(ModNumber n)
+        {
+            ModNumber modzero = new ModNumber(0ul);
+            if (n == modzero)
+                throw new ArgumentException("Modulus cannot be zero!");
+            ModNumber modone = new ModNumber(1ul);
+            if (n == modone)
+                throw new ArgumentException("Modulus cannot be one!");
+            n.CheckMax(ModNumber.COUNTMOD);
+            this.n = new ModNumber(n);
+        }
+        private ModNumber n;
+        public ModNumber Mult(ModNumber l, ModNumber r)
+        {
+            ModNumber res = new ModNumber(0ul);
+            ModNumber lMod = l % n;
+            ModNumber rMod = r % n;
+            unsafe
+            {
+                fixed(ulong *pN = &n.num[0])
+                {
+                    uint* pNint = (uint*)pN;
+                    int limit;
+                    for (limit = ModNumber.ICOUNT; limit >= 0; limit--)
+                    {
+                        if (pNint[limit] != 0)
+                            break;
+                    }
+                    for (int i = 0; i <= limit; i++)
+                    {
+                        ModNumber tmp = lMod * pNint[i];
+                        for(int j = 0; j < i; j++)
+                        {
+                            tmp %= n;
+                            tmp <<= ModNumber.ISIZE * 8;
+                        }
+                        tmp %= n;
+                        res += tmp;
+                    }
+                }    
+            }
+            res %= n;
+            return res;
         }
     }
 }

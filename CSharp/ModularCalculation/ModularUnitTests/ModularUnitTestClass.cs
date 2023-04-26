@@ -2775,8 +2775,31 @@ namespace ModularUnitTests
                 Assert.IsTrue(mexp == mres);
             }
         }
-
-
+        [TestMethod]
+        public void TestMultGroupModAboveMax()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[ModNumber.COUNTMOD] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            Assert.ThrowsException<ArgumentException>(() => new MultGroupMod(mn));
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModByZero()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD; i++)
+            {
+                l[i] = (ulong)i;
+                n[i] = (ulong)i;
+            }
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = mgm.Mult(ml, mr);
+        }
 
     }
 }

@@ -2558,6 +2558,225 @@ namespace ModularUnitTests
                 Assert.IsTrue(mexp == mres);
             }
         }
+        [TestMethod]
+        public void TestMultiplyByZero()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+                l[i] = (ulong)i;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyByOne()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = (ulong)i;
+                exp[i] = (ulong)i;
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyByTwo()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = (ulong)i;
+                exp[i] = (ulong)(i * 2);
+            }
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyAllFFFFByTwo()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT-1; i++)
+            {
+                l[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            exp[ModNumber.LCOUNT - 1] = 1ul;
+            exp[0] -= 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyFsByTwoPower16()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = ~0ul >> (ModNumber.LSIZE * 8 - 16);
+            exp[0] = ~0ul << 16;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(65536ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyAllFFFFByAllFFFF()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+            }
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyEightsBy2()
+        {
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x1111111111111110ul;
+            exp[1] = 0x1ul;
+            ModNumber ml = new ModNumber(0x8888888888888888ul);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiply9sDecBy9sDec()
+        {
+            ModNumber ml = new ModNumber(9999999999999999ul);
+            ModNumber mr = new ModNumber(9999999999999999ul);
+            string exp = "99999999999999980000000000000001";
+            ModNumber mexp = ModNumber.Stomn(exp,10);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyTwoBlocks9sDecByTwoBlocks9sDec()
+        {
+            string tmp = "9999999999999999";
+            string l = tmp + tmp;
+            string r = l;
+            string exp = "9999999999999999999999999999999800000000000000000000000000000001";
+            ModNumber ml = ModNumber.Stomn(l, 10);
+            ModNumber mr = ModNumber.Stomn(r, 10);
+            ModNumber mexp = ModNumber.Stomn(exp, 10);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyFourBlocks9sDecByFourBlocks9sDec()
+        {
+            string tmp1 = "9999999999999999";
+            string tmp2 = tmp1 + tmp1;
+            string l = tmp2 + tmp2;
+            string r = l;
+            string exp = "99999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000001";
+            ModNumber ml = ModNumber.Stomn(l, 10);
+            ModNumber mr = ModNumber.Stomn(r, 10);
+            ModNumber mexp = ModNumber.Stomn(exp, 10);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyEightBlocks9sDecByEightBlocks9sDec()
+        {
+            string tmp1 = "9999999999999999";
+            string tmp2 = tmp1 + tmp1;
+            string tmp3 = tmp2 + tmp2;
+            string l = tmp3 + tmp3;
+            string r = l;
+            string exp = "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+            ModNumber ml = ModNumber.Stomn(l, 10);
+            ModNumber mr = ModNumber.Stomn(r, 10);
+            ModNumber mexp = ModNumber.Stomn(exp, 10);
+            ModNumber mres = ml * mr;
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplySixteenBlocks9sDecBySixteenBlocks9sDec()
+        {
+            if (ModNumber.MaxMod > 1024 / 8)
+            {
+                string tmp1 = "9999999999999999";
+                string tmp2 = tmp1 + tmp1;
+                string tmp3 = tmp2 + tmp2;
+                string tmp4 = tmp3 + tmp3;
+                string l = tmp4 + tmp4;
+                string r = l;
+                string exp = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+                ModNumber ml = ModNumber.Stomn(l, 10);
+                ModNumber mr = ModNumber.Stomn(r, 10);
+                ModNumber mexp = ModNumber.Stomn(exp, 10);
+                ModNumber mres = ml * mr;
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestMultiplyThirtyOneBlocks9sDecByThirtyOneBlocks9sDec()
+        {
+            if (ModNumber.MaxMod == 4096/8)
+            {
+                string tmp1 = "9999999999999999";
+                string tmp2 = tmp1 + tmp1;
+                string tmp3 = tmp2 + tmp2;
+                string tmp4 = tmp3 + tmp3;
+                string tmp5 = tmp4 + tmp4;
+                string l = tmp5 + tmp4 + tmp3 + tmp2 + tmp1;
+                string r = l;
+                string exp = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+                ModNumber ml = ModNumber.Stomn(l, 10);
+                ModNumber mr = ModNumber.Stomn(r, 10);
+                ModNumber mexp = ModNumber.Stomn(exp, 10);
+                ModNumber mres = ml * mr;
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestMultiplyThirtyTwoBlocks9sDecByThirtyTwoBlocks9sDec()
+        {
+            if (ModNumber.MaxMod == 4096 / 8)
+            {
+                string tmp1 = "9999999999999999";
+                string tmp2 = tmp1 + tmp1;
+                string tmp3 = tmp2 + tmp2;
+                string tmp4 = tmp3 + tmp3;
+                string tmp5 = tmp4 + tmp4;
+                string l = tmp5 + tmp5;
+                string r = l;
+                string exp = "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+                ModNumber ml = ModNumber.Stomn(l, 10);
+                ModNumber mr = ModNumber.Stomn(r, 10);
+                ModNumber mexp = ModNumber.Stomn(exp, 10);
+                ModNumber mres = ml * mr;
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+
+
 
     }
 }

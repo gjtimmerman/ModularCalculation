@@ -673,6 +673,14 @@ namespace ModularCalculation
                     throw new ArgumentException("Base must be 8, 10 or 16");
             }
         }
+        public void Write(StreamWriter sw, int numBase = 10)
+        {
+            sw.WriteLine(ToString(numBase));
+        }
+        public static ModNumber Read(StreamReader sr, int numBase = 10)
+        {
+            return Stomn(sr.ReadLine() ?? "", numBase);
+        }
     }
     public class ScaledNumber
     {

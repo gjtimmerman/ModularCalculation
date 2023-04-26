@@ -2276,6 +2276,288 @@ namespace ModularUnitTests
             string resStr = mres.ToString(8);
             Assert.IsTrue(resStr == s.ToString());
         }
+        [TestMethod]
+        public void TestSerializationHexForZero()
+        {
+            ModNumber mzero = new ModNumber();
+            ModNumber mexp = new ModNumber();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mzero.Write(sw, 16);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 16);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationHexForOne()
+        {
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mone.Write(sw, 16);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 16);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationHexForSixteen()
+        {
+            ModNumber mn = new ModNumber(16ul);
+            ModNumber mexp = new ModNumber(16ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 16);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 16);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationHexForAllFFFF()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                n[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 16);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 16);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationHexForIncreasingSequence()
+        {
+            byte[] n = new byte[ModNumber.NCOUNT];
+            byte[] exp = new byte[ModNumber.NCOUNT];
+            for (int i = 0; i < ModNumber.NCOUNT; i++)
+            {
+                n[i] = (byte)i;
+                exp[i] = (byte)i;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 16);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 16);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationOctForZero()
+        {
+            ModNumber mzero = new ModNumber();
+            ModNumber mexp = new ModNumber();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mzero.Write(sw, 8);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 8);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationOctForOne()
+        {
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mone.Write(sw, 8);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 8);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationOctForSixteen()
+        {
+            ModNumber mn = new ModNumber(16ul);
+            ModNumber mexp = new ModNumber(16ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 8);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 8);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationOctForAllFFFF()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                n[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 8);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 8);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationOctForIncreasingSequence()
+        {
+            byte[] n = new byte[ModNumber.NCOUNT];
+            byte[] exp = new byte[ModNumber.NCOUNT];
+            for (int i = 0; i < ModNumber.NCOUNT; i++)
+            {
+                n[i] = (byte)i;
+                exp[i] = (byte)i;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 8);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 8);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationDecForZero()
+        {
+            ModNumber mzero = new ModNumber();
+            ModNumber mexp = new ModNumber();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mzero.Write(sw, 10);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 10);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationDecForOne()
+        {
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mone.Write(sw, 10);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 10);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationDecForSixteen()
+        {
+            ModNumber mn = new ModNumber(16ul);
+            ModNumber mexp = new ModNumber(16ul);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 10);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 10);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationDecForAllFFFF()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                n[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 10);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 10);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
+        [TestMethod]
+        public void TestSerializationDecForIncreasingSequence()
+        {
+            byte[] n = new byte[ModNumber.NCOUNT];
+            byte[] exp = new byte[ModNumber.NCOUNT];
+            for (int i = 0; i < ModNumber.NCOUNT; i++)
+            {
+                n[i] = (byte)i;
+                exp[i] = (byte)i;
+            }
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using StreamWriter sw = new StreamWriter(ms);
+                mn.Write(sw, 10);
+                sw.Flush();
+                ms.Position = 0;
+                using StreamReader sr = new StreamReader(ms);
+                ModNumber mres = ModNumber.Read(sr, 10);
+                Assert.IsTrue(mexp == mres);
+            }
+        }
 
     }
 }

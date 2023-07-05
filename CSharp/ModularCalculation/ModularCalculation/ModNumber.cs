@@ -6,6 +6,7 @@ using System.Runtime.Serialization.Formatters;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
 
+
 namespace ModularCalculation
 {
     public class ModNumber
@@ -494,6 +495,45 @@ namespace ModularCalculation
             (ModNumber div, ModNumber mod) = DivideAndModulo(ml, mr, false);
             return div;
         }
+        private static void Swap(ModNumber ml, ModNumber mr)
+        {
+            ModNumber tmp = ml;
+            ml = mr;
+            mr = tmp;
+        }
+        public static ModNumber Gcd(ModNumber ml, ModNumber mr)
+        {
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber mone = new ModNumber(1ul);
+            if (ml == mzero || mr == mzero)
+                throw new ArgumentException("Division by Zero not allowed!");
+            if (ml == mone)
+                return mone;
+            if (mr == mone)
+                return mone;
+            if (ml == mr)
+                return new ModNumber(ml);
+            ModNumber lcopy = new ModNumber(ml);
+            ModNumber rcopy = new ModNumber(mr);
+            if (lcopy < rcopy)
+                Swap(lcopy, rcopy);
+            ModNumber tmp = lcopy % rcopy;
+            while (!(tmp == mone))
+            {
+                if (tmp == mzero)
+                    return new ModNumber(rcopy);
+                lcopy = rcopy;
+                rcopy = tmp;
+                tmp = lcopy % rcopy;
+            }
+            return new ModNumber(tmp);
+        }
+        public static ModNumber Lcm(ModNumber ml, ModNumber mr)
+        {
+            ModNumber GcdRes = Gcd(ml, mr);
+            ModNumber lDivGcd = ml / GcdRes;
+            return lDivGcd * mr;
+        }
         public static string AdjustStringLength(string s, int desiredLength)
         {
             if (desiredLength < s.Length)
@@ -821,18 +861,18 @@ namespace ModularCalculation
             ModNumber rMod = r % n;
             unsafe
             {
-                fixed(ulong *pN = &n.num[0])
+                fixed(ulong *pR = &rMod.num[0])
                 {
-                    uint* pNint = (uint*)pN;
+                    uint* pRint = (uint*)pR;
                     int limit;
                     for (limit = ModNumber.ICOUNT; limit >= 0; limit--)
                     {
-                        if (pNint[limit] != 0)
+                        if (pRint[limit] != 0)
                             break;
                     }
                     for (int i = 0; i <= limit; i++)
                     {
-                        ModNumber tmp = lMod * pNint[i];
+                        ModNumber tmp = lMod * pRint[i];
                         for(int j = 0; j < i; j++)
                         {
                             tmp %= n;

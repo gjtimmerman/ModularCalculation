@@ -1,3 +1,6 @@
+#define LARGEMOD
+
+
 using ModularCalculation;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
@@ -945,7 +948,7 @@ namespace ModularUnitTests
             for (int i = 0; i < ModNumber.LCOUNT; i++)
             {
                 l[i] = ~0ul;
-                exp[i] = ~0ul; 
+                exp[i] = ~0ul;
             }
             exp[ModNumber.LCOUNT - 1] ^= (65535ul << (ModNumber.LSIZE * 8 - 16));
             ModNumber ml = new ModNumber(l);
@@ -1076,7 +1079,7 @@ namespace ModularUnitTests
             ModNumber ml = new ModNumber(l);
             ModNumber mr = new ModNumber(r);
             Assert.IsFalse(ml == mr);
-           
+
         }
         [TestMethod]
         public void TestEqualNotTrueLastSection()
@@ -1088,7 +1091,7 @@ namespace ModularUnitTests
                 l[i] = i;
                 r[i] = i;
             }
-            r[ModNumber.LCOUNT-1] -= 1;
+            r[ModNumber.LCOUNT - 1] -= 1;
             ModNumber ml = new ModNumber(l);
             ModNumber mr = new ModNumber(r);
             Assert.IsFalse(ml == mr);
@@ -1113,7 +1116,7 @@ namespace ModularUnitTests
         {
             ulong[] l = new ulong[ModNumber.LCOUNT];
             ulong[] r = new ulong[ModNumber.LCOUNT];
-            l[ModNumber.LCOUNT-1] = 1ul;
+            l[ModNumber.LCOUNT - 1] = 1ul;
             r[0] = ~0ul;
             ModNumber ml = new ModNumber(l);
             ModNumber mr = new ModNumber(r);
@@ -1477,7 +1480,7 @@ namespace ModularUnitTests
             Assert.IsTrue(mres == mexp);
         }
         [TestMethod]
-        public void TestMultiplyAssignByZero() 
+        public void TestMultiplyAssignByZero()
         {
             ulong[] l = new ulong[ModNumber.LCOUNT];
             for (ulong i = 0ul; i < ModNumber.LCOUNT; i++)
@@ -1701,7 +1704,7 @@ namespace ModularUnitTests
         {
             ulong[] l = new ulong[ModNumber.LCOUNT];
             ulong[] exp = new ulong[ModNumber.LCOUNT];
-            for (int i=0; i<ModNumber.LCOUNT; i++)
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
             {
                 l[i] = 9999999999999999999ul;
                 exp[i] = 3333333333333333333ul;
@@ -1774,7 +1777,7 @@ namespace ModularUnitTests
         public void TestToStringOctalForOne()
         {
             ModNumber ml = new ModNumber(1ul);
-            string exp = new string('0', ModNumber.OctalStringLength-1);
+            string exp = new string('0', ModNumber.OctalStringLength - 1);
             exp += "1";
             string res = ml.ToString(8);
             Assert.IsTrue(res == exp);
@@ -1819,7 +1822,7 @@ namespace ModularUnitTests
                 l[i] = ~0ul;
             }
             ModNumber ml = new ModNumber(l);
-            string exp = new string('7', ModNumber.OctalStringLength-1);
+            string exp = new string('7', ModNumber.OctalStringLength - 1);
             uint left = ModNumber.NCOUNT * 8 % 3;
             switch (left)
             {
@@ -1848,7 +1851,7 @@ namespace ModularUnitTests
             ScaledNumber sn = new ScaledNumber(ml, 6, true);
             (int digitsLeft, int digitsRight) = sn.CalculateOctalStringLength();
             string exp = new string('7', digitsLeft - 1);
-            uint left = (ModNumber.NCOUNT-6) * 8 % 3;
+            uint left = (ModNumber.NCOUNT - 6) * 8 % 3;
             switch (left)
             {
                 case 0:
@@ -1866,10 +1869,10 @@ namespace ModularUnitTests
             Assert.IsTrue(exp == res);
         }
         [TestMethod]
-        public void TestToStringOctalForMaxesAndZeros() 
+        public void TestToStringOctalForMaxesAndZeros()
         {
-            ulong []l = new ulong[ModNumber.LCOUNT];
-            for (int i = 0; i < ModNumber.LCOUNT - 6;i+=6)
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT - 6; i += 6)
             {
                 for (int j = 0; j < 3; j++)
                     l[i + j] = ~0ul;
@@ -1881,10 +1884,10 @@ namespace ModularUnitTests
             ModNumber ml = new ModNumber(l);
             StringBuilder exp = new StringBuilder(ModNumber.OctalStringLength);
             exp.Append(new string('0', ModNumber.OctalStringLength % 128));
-            for (int i = ModNumber.OctalStringLength % 128; i < ModNumber.OctalStringLength; i+=128)
+            for (int i = ModNumber.OctalStringLength % 128; i < ModNumber.OctalStringLength; i += 128)
             {
                 exp.Append(new string('0', 64));
-                exp.Append(new string ('7', 64));
+                exp.Append(new string('7', 64));
             }
             string res = ml.ToString(8);
             Assert.IsTrue(exp.ToString() == res);
@@ -1902,7 +1905,7 @@ namespace ModularUnitTests
         public void TestToStringHexForOne()
         {
             ModNumber ml = new ModNumber(1ul);
-            string exp = new string('0', ModNumber.HexStringLength-1);
+            string exp = new string('0', ModNumber.HexStringLength - 1);
             exp += '1';
             string res = ml.ToString(16);
             Assert.IsTrue(res == exp);
@@ -1941,7 +1944,7 @@ namespace ModularUnitTests
         public void TestToStringDecimalForOne()
         {
             ModNumber ml = new ModNumber(1ul);
-            string exp = new string('0', ModNumber.DecimalStringLength-1);
+            string exp = new string('0', ModNumber.DecimalStringLength - 1);
             exp += "1";
             string res = ml.ToString(10);
             Assert.IsTrue(res == exp);
@@ -1961,7 +1964,7 @@ namespace ModularUnitTests
             ulong[] l = new ulong[ModNumber.LCOUNT];
             l[0] = 1ul << ModNumber.ISIZE * 8;
             ModNumber ml = new ModNumber(l);
-            string exp = new string('0', ModNumber.DecimalStringLength-10);
+            string exp = new string('0', ModNumber.DecimalStringLength - 10);
             exp += "4294967296";
             string res = ml.ToString(10);
             Assert.IsTrue(res == exp);
@@ -2037,7 +2040,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestToModularNumberHexForSixteenWithLeadingMinusSign()
         {
-            string s = "-10";            
+            string s = "-10";
             Assert.ThrowsException<ArgumentException>(() => { ModNumber mres = ModNumber.Stomn(s, 16); });
         }
         [TestMethod]
@@ -2139,7 +2142,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestToModularNumberDecimalIllegalChar()
         {
-           string s = "123456789A";
+            string s = "123456789A";
             Assert.ThrowsException<ArgumentException>(() => ModNumber.Stomn(s, 10));
         }
         [TestMethod]
@@ -2244,7 +2247,7 @@ namespace ModularUnitTests
             ModNumber mexp = new ModNumber(exp);
             StringBuilder s = new StringBuilder(ModNumber.OctalStringLength);
             s.Append('7', ModNumber.OctalStringLength);
-            switch(ModNumber.NSIZE % 3)
+            switch (ModNumber.NSIZE % 3)
             {
                 case 0:
                     break;
@@ -2260,10 +2263,10 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestToModularNumberOctalForStringTooLarge()
         {
-            StringBuilder s = new StringBuilder(ModNumber.OctalStringLength+16);
+            StringBuilder s = new StringBuilder(ModNumber.OctalStringLength + 16);
             for (int i = 0; i < ModNumber.OctalStringLength + 1; i += 16)
                 s.Append("0706050403020100");
-            Assert.ThrowsException<ArgumentException>( () =>  ModNumber.Stomn(s.ToString(), 8));
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.Stomn(s.ToString(), 8));
         }
         [TestMethod]
         public void TestToModularNumberOctalIncreasingSequenceByteInput()
@@ -2607,7 +2610,7 @@ namespace ModularUnitTests
         {
             ulong[] l = new ulong[ModNumber.LCOUNT];
             ulong[] exp = new ulong[ModNumber.LCOUNT];
-            for (int i = 0; i < ModNumber.LCOUNT-1; i++)
+            for (int i = 0; i < ModNumber.LCOUNT - 1; i++)
             {
                 l[i] = ~0ul;
                 exp[i] = ~0ul;
@@ -2670,7 +2673,7 @@ namespace ModularUnitTests
             ModNumber ml = new ModNumber(9999999999999999ul);
             ModNumber mr = new ModNumber(9999999999999999ul);
             string exp = "99999999999999980000000000000001";
-            ModNumber mexp = ModNumber.Stomn(exp,10);
+            ModNumber mexp = ModNumber.Stomn(exp, 10);
             ModNumber mres = ml * mr;
             Assert.IsTrue(mexp == mres);
         }
@@ -2738,7 +2741,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestMultiplyThirtyOneBlocks9sDecByThirtyOneBlocks9sDec()
         {
-            if (ModNumber.MaxMod == 4096/8)
+            if (ModNumber.MaxMod == 4096 / 8)
             {
                 string tmp1 = "9999999999999999";
                 string tmp2 = tmp1 + tmp1;
@@ -2799,7 +2802,804 @@ namespace ModularUnitTests
             ModNumber mr = new ModNumber(0ul);
             ModNumber mexp = new ModNumber(0ul);
             ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModByOne()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD; i++)
+            {
+                l[i] = (ulong)i;
+                n[i] = (ulong)i;
+            }
+            n[0] += 1;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(ml);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModByTwoResultEqMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD; i++)
+            {
+                l[i] = (ulong)i;
+                n[i] = (ulong)i * 2;
+            }
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModByTwoResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD; i++)
+            {
+                l[i] = (ulong)i;
+                n[i] = (ulong)i * 2;
+                exp[i] = (ulong)i * 2;
+            }
+            n[0] += 1;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModAllFFFFByTwoResultEqMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD; i++)
+            {
+                l[i] = ~0ul;
+                n[i] = ~0ul;
+            }
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModAllFFFFByTwoResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.COUNTMOD - 1; i++)
+            {
+                l[i] = ~0ul;
+                n[i] = ~0ul;
+                exp[i] = ~0ul;
+            }
+            n[ModNumber.COUNTMOD - 1] = 1ul;
+            exp[ModNumber.COUNTMOD - 1] = 1ul;
+            exp[0] -= 1ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(2ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFsByPow16ResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[2] = 1ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = ~0ul >> (ModNumber.LSIZE * 8 - 16);
+            exp[0] = ~0ul << 16;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(65536ul);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFsByFsResultModOne3rdBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = ~0ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[2] = 1ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = ~0ul - 1ul;
+            exp[0] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFsByFsResultModOne2ndBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = ~0ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[1] = 1ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFsByFsResultModEs1thBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = ~0ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[0] = 0xEEEEEEEEEEEEEEEEul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x1111111111111111ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModAllFsByAllFsResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+            }
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[ModNumber.LCOUNT - 3] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModAllFsByAllFsResultGreaterMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                l[i] = ~0ul;
+                r[i] = ~0ul;
+            }
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[1] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupMod8sBy2ResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = 0x8888888888888888ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = 2ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[2] = 1ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x1111111111111110ul;
+            exp[1] = 0x1ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupMod8sBy2ResultGreaterMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = 0x8888888888888888ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = 2ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[1] = 1ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x1111111111111110ul;
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupMod9sDecBy9sDecResultLessMod()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[0] = 9999999999999999ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = 9999999999999999ul;
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[4] = 1ul;
+            string exp = "99999999999999980000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = ModNumber.Stomn(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModTwoBlock9sDecByTwoBlock9sDecResultLessMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[4] = 1ul;
+            string exp = "9999999999999999";
+            exp += "9999999999999998";
+            exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = ModNumber.Stomn(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModTwoBlock9sDecByTwoBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFourBlock9sDecByFourBlock9sDecResultLessMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[8] = 1ul;
+            string exp = "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999998";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = ModNumber.Stomn(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModFourBlock9sDecByFourBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+
+#if LARGEMOD || MEDMOD
+        [TestMethod]
+        public void TestMultiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultLessMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[16] = 1ul;
+            string exp = "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999998";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = ModNumber.Stomn(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+
+#endif
+        [TestMethod]
+        public void TestMultiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+
+#if LARGEMOD
+    [TestMethod]
+    public void TestMultiplyMultGroupModSixteenBlock9sDecBySixteenBlock9sDecResultLessMod()
+    {
+        string lstr = "9999999999999999";
+        lstr += lstr;
+        lstr += lstr;
+        lstr += lstr;
+        lstr += lstr;
+        string rstr = lstr;
+        ModNumber ml = ModNumber.Stomn(lstr);
+        ModNumber mr = ModNumber.Stomn(rstr);
+        ulong[] n = new ulong[ModNumber.LCOUNT];
+        n[32] = 1ul;
+        string exp = "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999998";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000001";
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber mexp = ModNumber.Stomn(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        Assert.IsTrue(mexp == mres);
+    }
+
+#endif
+        [TestMethod]
+        public void TestMultiplyMultGroupModSixteenBlock9sDecBySixteenBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            ModNumber mexp = new ModNumber(exp);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+#if LARGEMOD
+        [TestMethod]
+        public void TestMultiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultLessMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr = lstr.Substring(0, ModNumber.NCOUNT - 24);
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[ModNumber.LCOUNT - 2] = 1ul;
+            string exp = "";
+            for (int i = 0; i < 30; i++)
+                exp += "9999999999999999";
+            exp += "9999999999999998";
+            for (int i = 0; i < 30; i++)
+                exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = ModNumber.Stomn(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+
+#endif
+#if LARGEMOD || MEDMOD
+        [TestMethod]
+        public void TestMultiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr = lstr.Substring(0, ModNumber.NCOUNT - 24);
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[ModNumber.LCOUNT - 2] = 1ul;
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestMultiplyMultGroupModThirtyTwoBlock9sDecByThirtyTwoBlock9sDecResultGreaterMod()
+        {
+            string lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            string rstr = lstr;
+            ModNumber ml = ModNumber.Stomn(lstr);
+            ModNumber mr = ModNumber.Stomn(rstr);
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[ModNumber.LCOUNT - 2] = 1ul;
+            string nstr = "10000000000000000";
+            ModNumber mn = ModNumber.Stomn(nstr);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 1ul;
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+
+#endif
+        [TestMethod]
+        public void TestGcdOfOneAndZero()
+        {
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mres;
+            Assert.ThrowsException<ArgumentException>(() => mres = ModNumber.Gcd(mone, mzero));
+        }
+        [TestMethod]
+        public void TestGcdOfZeroAndOne()
+        {
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mres;
+            Assert.ThrowsException<ArgumentException>(() => mres = ModNumber.Gcd(mzero, mone));
+        }
+        [TestMethod]
+        public void TestGcdOf100AndOne()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ModNumber.Gcd(monehundred, mone);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOfOneAnd100()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber mone = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ModNumber.Gcd(mone, monehundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOf101And100()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredone = new ModNumber(101ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = ModNumber.Gcd(monehundredone, monehundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOf102And100()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredtwo = new ModNumber(102ul);
+            ModNumber mexp = new ModNumber(2ul);
+            ModNumber mres = ModNumber.Gcd(monehundredtwo, monehundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOf100And102()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredtwo = new ModNumber(102ul);
+            ModNumber mexp = new ModNumber(2ul);
+            ModNumber mres = ModNumber.Gcd(monehundred, monehundredtwo);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOf400And600()
+        {
+            ModNumber mfourhundred = new ModNumber(400ul);
+            ModNumber msixhundred = new ModNumber(600ul);
+            ModNumber mexp = new ModNumber(200ul);
+            ModNumber mres = ModNumber.Gcd(mfourhundred, msixhundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOfAllFin2ndBlockAndAllFin1thBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = ~0ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Gcd(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOfAllFinLastBlockAndAllFin2ndBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT-1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[1] = ~0ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Gcd(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOfAllFinLastBlockAndAllAin3rdBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[2] = 0xaaaaaaaaaaaaaaaaul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[2] = 0xaaaaaaaaaaaaaaaaul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Gcd(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestGcdOfAllFinLastBlockAndAllBin3rdBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[2] = 0xbbbbbbbbbbbbbbbbul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[2] = 0x1111111111111111ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Gcd(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOf101And100()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredone = new ModNumber(101ul);
+            ModNumber mexp = new ModNumber(10100ul);
+            ModNumber mres = ModNumber.Lcm(monehundredone, monehundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOf102And100()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredtwo = new ModNumber(102ul);
+            ModNumber mexp = new ModNumber(5100ul);
+            ModNumber mres = ModNumber.Lcm(monehundredtwo, monehundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOf100And102()
+        {
+            ModNumber monehundred = new ModNumber(100ul);
+            ModNumber monehundredtwo = new ModNumber(102ul);
+            ModNumber mexp = new ModNumber(5100ul);
+            ModNumber mres = ModNumber.Lcm(monehundred, monehundredtwo);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOf400And600()
+        {
+            ModNumber mfourhundred = new ModNumber(400ul);
+            ModNumber msixhundred = new ModNumber(600ul);
+            ModNumber mexp = new ModNumber(1200ul);
+            ModNumber mres = ModNumber.Lcm(mfourhundred, msixhundred);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOfAllFin2ndBlockAndAllFin1thBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[0] = ~0ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[1] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Lcm(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOfAllFinLastBlockAndAllFin2ndBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[1] = ~0ul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[ModNumber.LCOUNT - 1] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Lcm(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOfAllFinLastBlockAndAllAin3rdBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[2] = 0xaaaaaaaaaaaaaaaaul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[ModNumber.LCOUNT - 1] = ~0ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Lcm(ml, mr);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestLcmOfAllFinLastBlockAndAllBin3rdBlock()
+        {
+            ulong[] l = new ulong[ModNumber.LCOUNT];
+            l[ModNumber.LCOUNT - 1] = ~0ul;
+            ulong[] r = new ulong[ModNumber.LCOUNT];
+            r[2] = 0xbbbbbbbbbbbbbbbbul;
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[ModNumber.LCOUNT - 1] = 0xfffffffffffffff5ul;
+            ModNumber ml = new ModNumber(l);
+            ModNumber mr = new ModNumber(r);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.Lcm(ml, mr);
+            Assert.IsTrue(mexp == mres);
         }
 
     }
+
 }

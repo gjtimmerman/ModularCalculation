@@ -3599,6 +3599,204 @@ namespace ModularUnitTests
             ModNumber mres = ModNumber.Lcm(ml, mr);
             Assert.IsTrue(mexp == mres);
         }
+        [TestMethod]
+        public void TestSqrtOfZero()
+        {
+            ModNumber mn = new ModNumber(0ul);
+            ModNumber mexp = new ModNumber(0ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOfOne()
+        {
+            ModNumber mn = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOfFour()
+        {
+            ModNumber mn = new ModNumber(4ul);
+            ModNumber mexp = new ModNumber(2ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOfTwentyFive()
+        {
+            ModNumber mn = new ModNumber(25ul);
+            ModNumber mexp = new ModNumber(5ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOfOneHundredSixtyNine()
+        {
+            ModNumber mn = new ModNumber(169ul);
+            ModNumber mexp = new ModNumber(13ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOf152399025()
+        {
+            ModNumber mn = new ModNumber(152399025ul);
+            ModNumber mexp = new ModNumber(12345ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOf1524157875019052100()
+        {
+            ModNumber mn = new ModNumber(1524157875019052100ul);
+            ModNumber mexp = new ModNumber(1234567890ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOf152415787532374345526722756()
+        {
+            ModNumber mn = ModNumber.Stomn("152415787532374345526722756");
+            ModNumber mexp = new ModNumber(12345678901234ul);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOfAllFsSquared()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            int numInts = ModNumber.LCOUNT % 2 == 0 ? ModNumber.LCOUNT : ModNumber.LCOUNT - 1;
+            for (int i = numInts / 2; i < numInts; i++)
+                n[i] = ~0ul;
+            n[numInts / 2] <<= 1;
+            n[0] = 1;
+            for (int i = 0; i < numInts / 2; i++)
+                exp[i] = ~0ul;
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtOf1InLastWord()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            int numInts = ModNumber.LCOUNT % 2 == 1 ? ModNumber.LCOUNT : ModNumber.LCOUNT - 1;
+            n[numInts-1] = 1ul;
+            exp[(numInts - 1)/2] = 1ul;
+            ModNumber mn = new ModNumber(n);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mn.Sqrt();
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestSqrtPrecision18Of2()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 18);
+            ulong [] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x09e667f3bcc908b2ul;
+            exp[1] = 0x016aul;
+            ModNumber mexp = new ModNumber(exp);
+            ScaledNumber snexp = new ScaledNumber(mexp, 18 / 2, true);
+            ScaledNumber snres = sn.Sqrt();
+            Assert.IsTrue(snexp == snres);
+
+        }
+        [TestMethod]
+        public void TestSqrtPrecision18Of2StrHex()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 18);
+            string exp = new string('0',ModNumber.HexStringLength-19);
+            exp += "1.6A09E667F3BCC908B2";
+            ScaledNumber snres = sn.Sqrt();
+            string resStr = snres.ToString(16);
+            Assert.IsTrue(exp == resStr);
+
+        }
+        [TestMethod]
+        public void TestSqrtPrecision18Of2StrDec()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 18);
+            ScaledNumber snres = sn.Sqrt();
+            int IntegerStringLength = snres.calculateDecimalStringLengthLeft();
+            string exp = new string('0', IntegerStringLength - 1);
+            exp += "1.414213562373095048";
+            Assert.IsTrue(18 / 2 == snres.scale);
+            string resStr = snres.ToString();
+            Assert.IsTrue(exp == resStr);
+        }
+        [TestMethod]
+        public void TestSqrtPrecision18Of2StrOctal()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 18);
+            ScaledNumber snres = sn.Sqrt();
+            (int digitsLeft, int digitsRight) = snres.CalculateOctalStringLength();
+            string exp = new string('0', digitsLeft - 1);
+            exp += "1.324047463177167462204262";
+            Assert.IsTrue(18 / 2 == snres.scale);
+            string resStr = snres.ToString(8);
+            Assert.IsTrue(exp == resStr);
+        }
+        [TestMethod]
+        public void TestSqrtPrecision16Of2()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 16);
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x6a09e667f3bcc908ul;
+            exp[1] = 0x01ul;
+            ModNumber mexp = new ModNumber(exp);
+            ScaledNumber snexp = new ScaledNumber(mexp, 16 / 2, true);
+            ScaledNumber snres = sn.Sqrt();
+            Assert.IsTrue(snexp == snres);
+
+        }
+        [TestMethod]
+        public void TestSqrtPrecision16Of2StrHex()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 16);
+            string exp = new string('0', ModNumber.HexStringLength - 17);
+            exp += "1.6A09E667F3BCC908";
+            ScaledNumber snres = sn.Sqrt();
+            string resStr = snres.ToString(16);
+            Assert.IsTrue(exp == resStr);
+
+        }
+        [TestMethod]
+        public void TestSqrtPrecision16Of2StrDec()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 16);
+            ScaledNumber snres = sn.Sqrt();
+            int IntegerStringLength = snres.calculateDecimalStringLengthLeft();
+            string exp = new string('0', IntegerStringLength - 1);
+            exp += "1.4142135623730950";
+            Assert.IsTrue(16 / 2 == snres.scale);
+            string resStr = snres.ToString();
+            Assert.IsTrue(exp == resStr);
+        }
+        [TestMethod]
+        public void TestSqrtPrecision16Of2StrOctal()
+        {
+            ModNumber mn = new ModNumber(2ul);
+            ScaledNumber sn = new ScaledNumber(mn, 16);
+            ScaledNumber snres = sn.Sqrt();
+            (int digitsLeft, int digitsRight) = snres.CalculateOctalStringLength();
+            string exp = new string('0', digitsLeft - 1);
+            exp += "1.3240474631771674622040";
+            Assert.IsTrue(16 / 2 == snres.scale);
+            string resStr = snres.ToString(8);
+            Assert.IsTrue(exp == resStr);
+        }
 
     }
 

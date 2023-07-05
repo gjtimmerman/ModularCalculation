@@ -2,6 +2,7 @@
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
@@ -14,12 +15,12 @@ namespace ModularCalculation
         public const int MaxMod = 4096 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
-        public const int LSIZE = sizeof(ulong) ;
+        public const int LSIZE = sizeof(ulong);
         public const int ISIZE = sizeof(uint);
         public const int LCOUNT = NCOUNT / LSIZE;
         public const int ICOUNT = NCOUNT / ISIZE;
         public const int NSIZE = NCOUNT * 8;
-        public ulong []num = new ulong[LCOUNT];
+        public ulong[] num = new ulong[LCOUNT];
         public const int HexStringLength = NCOUNT * 2;
         public const int OctalStringLength = (NSIZE % 3 == 0) ? (NSIZE / 3) : (NSIZE / 3 + 1);
         public const int DecimalStringLength = (int)(NSIZE * 0.30102999566398119521373889472449) + 1; // log(2)
@@ -39,7 +40,7 @@ namespace ModularCalculation
         {
             unsafe
             {
-                fixed(ulong *pN = &num[0])
+                fixed (ulong* pN = &num[0])
                 {
                     byte* pByte = (byte*)pN;
                     for (int i = 0; i < ModNumber.NCOUNT; i++)
@@ -49,7 +50,7 @@ namespace ModularCalculation
                 }
             }
         }
-        public override bool Equals(object ?other)
+        public override bool Equals(object? other)
         {
             if (other is ModNumber om)
             {
@@ -66,7 +67,7 @@ namespace ModularCalculation
         {
             return num.GetHashCode();
         }
-        public static bool operator== (ModNumber om1, ModNumber om2)
+        public static bool operator ==(ModNumber om1, ModNumber om2)
         {
             return om1.Equals(om2);
         }
@@ -80,15 +81,15 @@ namespace ModularCalculation
                 if (num[i] != 0ul)
                     throw new ArgumentException("Modulus is too large!");
         }
-        public static ModNumber operator- (ModNumber l, uint r)
+        public static ModNumber operator -(ModNumber l, uint r)
         {
-            ModNumber result = new ModNumber ();
+            ModNumber result = new ModNumber();
             l.num.CopyTo(result.num, 0);
             unsafe
             {
-                fixed(ulong* pNuml = &result.num[0])
+                fixed (ulong* pNuml = &result.num[0])
                 {
-                    uint *pNumi = (uint *)pNuml;
+                    uint* pNumi = (uint*)pNuml;
                     uint carry = 0;
                     uint ltmp = pNumi[0];
                     if (ltmp < r)
@@ -103,14 +104,14 @@ namespace ModularCalculation
                         }
                         else
                             pNumi[i] -= carry;
-                            
+
                     }
 
                 }
             }
             return result;
         }
-        public static ModNumber operator- (ModNumber l, ModNumber r)
+        public static ModNumber operator -(ModNumber l, ModNumber r)
         {
             ModNumber result = new ModNumber();
             if (l == r)
@@ -119,30 +120,30 @@ namespace ModularCalculation
             unsafe
             {
                 fixed (ulong* pNuml = &l.num[0])
-                    fixed (ulong *pNumr = &r.num[0])
-                        fixed(ulong *pNumresult = &result.num[0])
+                fixed (ulong* pNumr = &r.num[0])
+                fixed (ulong* pNumresult = &result.num[0])
+                {
+                    uint* pNumli = (uint*)pNuml;
+                    uint* pNumri = (uint*)pNumr;
+                    uint* pNumresulti = (uint*)pNumresult;
+                    uint carry = 0;
+                    for (int i = 0; i < ICOUNT; i++)
+                    {
+                        uint ltmp = pNumli[i];
+                        uint rtmp = pNumri[i];
+                        if (ltmp >= carry)
                         {
-                            uint *pNumli = (uint *)pNuml;
-                            uint* pNumri = (uint*)pNumr;
-                            uint* pNumresulti = (uint*)pNumresult;
-                            uint carry = 0;
-                            for (int i = 0; i < ICOUNT; i++)
-                            {
-                                uint ltmp = pNumli[i];
-                                uint rtmp = pNumri[i];
-                                if (ltmp >= carry)
-                                {
-                                    ltmp -= carry;
-                                    carry = 0;
-                                }
-                                else
-                                    ltmp -= carry;
-                                if (ltmp < rtmp)
-                                    carry = 1;
-                                pNumresulti[i] = ltmp - rtmp;
-                            }
-                    
+                            ltmp -= carry;
+                            carry = 0;
                         }
+                        else
+                            ltmp -= carry;
+                        if (ltmp < rtmp)
+                            carry = 1;
+                        pNumresulti[i] = ltmp - rtmp;
+                    }
+
+                }
 
             }
             return result;
@@ -155,7 +156,7 @@ namespace ModularCalculation
             ulong res = 0ul;
             unsafe
             {
-                fixed(ulong *pNum = &num[0])
+                fixed (ulong* pNum = &num[0])
                 {
                     uint* pNumi = (uint*)pNum;
                     res = ((ulong)pNumi[lpos]) + scalar;
@@ -170,7 +171,7 @@ namespace ModularCalculation
             }
             return this;
         }
-        public static ModNumber operator + (ModNumber l, uint scalar)
+        public static ModNumber operator +(ModNumber l, uint scalar)
         {
             ModNumber mres = new ModNumber(l);
             mres.AddAssignScalar(0, scalar);
@@ -181,9 +182,9 @@ namespace ModularCalculation
             ModNumber mres = new ModNumber(l);
             unsafe
             {
-                fixed(ulong *pRNum = &r.num[0])
+                fixed (ulong* pRNum = &r.num[0])
                 {
-                    uint *pRNumi = (uint*)pRNum;
+                    uint* pRNumi = (uint*)pRNum;
                     for (int i = 0; i < ICOUNT; i++)
                     {
                         mres.AddAssignScalar(i, pRNumi[i]);
@@ -192,16 +193,16 @@ namespace ModularCalculation
             }
             return mres;
         }
-        public static ModNumber operator*(ModNumber l, uint scalar)
+        public static ModNumber operator *(ModNumber l, uint scalar)
         {
             ModNumber mres = new ModNumber(0ul);
             unsafe
             {
-                fixed(ulong *pNum = &l.num[0])
-                    fixed(ulong *pRes = &mres.num[0])
+                fixed (ulong* pNum = &l.num[0])
+                fixed (ulong* pRes = &mres.num[0])
                 {
-                    uint *pNumi = (uint*)pNum;
-                    uint *pResi = (uint*)pRes;
+                    uint* pNumi = (uint*)pNum;
+                    uint* pResi = (uint*)pRes;
                     int firstNonzeroWord;
                     for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
                     {
@@ -211,9 +212,9 @@ namespace ModularCalculation
                     for (int i = 0; i <= firstNonzeroWord; i++)
                     {
                         ulong tmpres = ((ulong)pNumi[i]) * scalar;
-                        uint *pTmpres = (uint*)&tmpres;
+                        uint* pTmpres = (uint*)&tmpres;
                         mres.AddAssignScalar(i, pTmpres[0]);
-                        if (i <  ICOUNT - 1)
+                        if (i < ICOUNT - 1)
                             mres.AddAssignScalar(i + 1, pTmpres[1]);
                     }
 
@@ -221,7 +222,7 @@ namespace ModularCalculation
             }
             return mres;
         }
-        public static ModNumber operator*(ModNumber ml, ModNumber mr)
+        public static ModNumber operator *(ModNumber ml, ModNumber mr)
         {
             ModNumber mres = new ModNumber();
             unsafe
@@ -254,7 +255,7 @@ namespace ModularCalculation
             }
             return LSIZE * 8;
         }
-        public static bool operator < (ModNumber l, ModNumber r)
+        public static bool operator <(ModNumber l, ModNumber r)
         {
             for (int i = LCOUNT - 1; i >= 0; i--)
             {
@@ -299,7 +300,7 @@ namespace ModularCalculation
             return true;
         }
 
-        public static ModNumber operator << (ModNumber n, int i)
+        public static ModNumber operator <<(ModNumber n, int i)
         {
             ModNumber mres = new ModNumber();
             int words = 0;
@@ -312,8 +313,8 @@ namespace ModularCalculation
             }
             unsafe
             {
-                fixed (ulong *pN = &n.num[0])
-                    fixed(ulong *pRes = &mres.num[0])
+                fixed (ulong* pN = &n.num[0])
+                fixed (ulong* pRes = &mres.num[0])
                 {
                     uint* piN = (uint*)pN;
                     uint* piRes = (uint*)pRes;
@@ -321,7 +322,7 @@ namespace ModularCalculation
                     for (int j = ICOUNT - 2; j >= words; j--)
                     {
                         ulong tmp = ((ulong)(piN[j - words])) << i;
-                        uint *pTmp = (uint*)&tmp;
+                        uint* pTmp = (uint*)&tmp;
                         piRes[j + 1] |= pTmp[1];
                         piRes[j] = pTmp[0];
                     }
@@ -331,7 +332,7 @@ namespace ModularCalculation
             return mres;
         }
 
-        public static ModNumber operator >> (ModNumber n, int i)
+        public static ModNumber operator >>(ModNumber n, int i)
         {
             ModNumber mres = new ModNumber();
             int words = 0;
@@ -346,8 +347,8 @@ namespace ModularCalculation
             }
             unsafe
             {
-                fixed(ulong *pN = &n.num[0])
-                    fixed(ulong *pRes = &mres.num[0])
+                fixed (ulong* pN = &n.num[0])
+                fixed (ulong* pRes = &mres.num[0])
                 {
                     uint* pNi = (uint*)pN;
                     uint* pResi = (uint*)pRes;
@@ -355,7 +356,7 @@ namespace ModularCalculation
                     for (int j = 0; j < ICOUNT - words - 1; j++)
                     {
                         ulong tmp = ((ulong)pNi[j + words + 1]) << ((ISIZE * 8) - i);
-                        uint* pTmpi = (uint *)&tmp;
+                        uint* pTmpi = (uint*)&tmp;
                         pResi[j] |= pTmpi[0];
                         pResi[j + 1] = pTmpi[1];
                     }
@@ -371,13 +372,13 @@ namespace ModularCalculation
             uint modRes;
             unsafe
             {
-                fixed(ulong *pN = &num[0])
-                    fixed(ulong *pRes = &mres.num[0])
+                fixed (ulong* pN = &num[0])
+                fixed (ulong* pRes = &mres.num[0])
                 {
-                    uint *piN = (uint*)pN;
-                    uint *piRes = (uint*)pRes;
+                    uint* piN = (uint*)pN;
+                    uint* piRes = (uint*)pRes;
                     ulong tmp = 0ul;
-                    for(int i = ModNumber.ICOUNT - 1; i >= 0;i--)
+                    for (int i = ModNumber.ICOUNT - 1; i >= 0; i--)
                     {
                         *((uint*)&tmp) = piN[i];
                         if (scalar <= tmp)
@@ -392,16 +393,16 @@ namespace ModularCalculation
                     modRes = ((uint*)&tmp)[1];
                 }
             }
-            return (mres, modRes) ;
+            return (mres, modRes);
         }
 
-        public static ModNumber operator / (ModNumber n, uint scalar)
+        public static ModNumber operator /(ModNumber n, uint scalar)
         {
             (ModNumber mres, uint divRes) = n.DivideAndModulo(scalar, false);
             return mres;
         }
 
-        public static uint operator % (ModNumber n, uint scalar)
+        public static uint operator %(ModNumber n, uint scalar)
         {
             (ModNumber div, uint modulo) = n.DivideAndModulo(scalar, true);
             return modulo;
@@ -427,10 +428,10 @@ namespace ModularCalculation
                 divRes = l >> 1;
                 if ((l.num[0] & 0x1ul) > 0)
                     modRes = new ModNumber(1ul);
-                return (divRes,modRes);
+                return (divRes, modRes);
             }
-            l.num.CopyTo(modRes.num,0);
-            if (l < r)                        
+            l.num.CopyTo(modRes.num, 0);
+            if (l < r)
             {
 
                 return (mzero, modRes);
@@ -475,10 +476,10 @@ namespace ModularCalculation
                     rShiftedLeftBits <<= firstBitDifference - j;
                     if (!onlyModulo)
                         mDivisorShiftedLeftBits <<= firstBitDifference - j;
-                    while (modRes >= rShiftedLeftBits )
+                    while (modRes >= rShiftedLeftBits)
                     {
                         modRes -= rShiftedLeftBits;
-                        if (!onlyModulo) 
+                        if (!onlyModulo)
                             divRes += mDivisorShiftedLeftBits;
                     }
                 }
@@ -533,6 +534,86 @@ namespace ModularCalculation
             ModNumber GcdRes = Gcd(ml, mr);
             ModNumber lDivGcd = ml / GcdRes;
             return lDivGcd * mr;
+        }
+        public uint GetByteCount()
+        {
+            unsafe
+            {
+                fixed (ulong* p = &this.num[0])
+                {
+                    byte* pb = (byte*)p;
+                    for (uint i = NCOUNT - 1; i >= 0; i--)
+                    {
+                        if (pb[i] != 0)
+                            return i + 1;
+                    }
+                }
+            }
+            return 0;
+        }
+        public ushort GetDoubleByteValue(int cb)
+        {
+            unsafe
+            {
+                fixed(ulong *p = &this.num[0])
+                {
+                    ushort *ps = (ushort*)p;
+                    return ps[cb];
+                }
+            }
+        }
+        public ModNumber Sqrt()
+        {
+            ModNumber mzero = new ModNumber(0ul);
+            if (this == mzero)
+                return new ModNumber(mzero);
+            ModNumber mone = new ModNumber(1ul);
+            if (this == mone)
+                return new ModNumber(mone);
+            ModNumber mres = new ModNumber(0ul);
+            ModNumber mdivisor = new ModNumber(0ul);
+            ModNumber mremainder = new ModNumber(0ul);
+            uint doubleByteCount = (GetByteCount() - 1u) / 2u;
+            for (int i = (int)doubleByteCount; i >= 0; i--)
+            {
+                ushort tmp = GetDoubleByteValue(i);
+                mremainder <<= 16;
+                mdivisor <<= 8;
+                mres <<= 8;
+                unsafe
+                {
+                    fixed (ulong* p = &mremainder.num[0])
+                    {
+                        ushort *ps = (ushort*)p;
+                        *ps |= tmp;
+                    }
+
+                }
+                if (mremainder == mzero)
+                    continue;
+                ushort counter = 1;
+                mdivisor += 1;
+                ModNumber mDivisorTimesCounter = mdivisor * counter;
+                while (mDivisorTimesCounter < mremainder)
+                {
+                    mdivisor += 1;
+                    mDivisorTimesCounter = mdivisor * ++counter;
+                }
+                if (mDivisorTimesCounter == mremainder)
+                {
+                    mremainder = new ModNumber(0ul);
+
+                }
+                else
+                {
+                    mdivisor -= 1;
+                    mDivisorTimesCounter = mdivisor * --counter;
+                    mremainder -= mDivisorTimesCounter;
+                }
+                mdivisor += counter;
+                mres += counter;
+            }
+            return mres;
         }
         public static string AdjustStringLength(string s, int desiredLength)
         {
@@ -741,6 +822,14 @@ namespace ModularCalculation
         }
         public int scale;
         private ModNumber mn;
+        public static bool operator ==(ScaledNumber l, ScaledNumber  r)
+        {
+            return l.scale == r.scale && l.mn == r.mn;
+        }
+        public static bool operator !=(ScaledNumber l, ScaledNumber r)
+        {
+            return l.scale != r.scale || l.mn != r.mn;
+        }
         public string ToString(int nBase = 10)
         {
             switch (nBase)
@@ -831,13 +920,65 @@ namespace ModularCalculation
 
             return res.ToString();
         }
+        public int calculateDecimalStringLengthLeft()
+        {
+            return (int)Math.Ceiling((ModNumber.NSIZE - scale * 8) * 0.30102999566398119521373889472449); // log(2)
+        }
         private string ToString_DecBase()
         {
-            return "";
+            int IntegerStringLength = calculateDecimalStringLengthLeft();
+            StringBuilder sb = new StringBuilder(ModNumber.DecimalStringLength+3);
+            sb.Append('0', IntegerStringLength);
+            ModNumber tmp = mn >> scale * 8;
+            for (int i = 0; i < IntegerStringLength; i++)
+            {
+                uint digit = tmp % 10u;
+                tmp /= 10u;
+                sb[IntegerStringLength - i - 1] += (char)digit;
+
+            }
+            if (scale > 0)
+            {
+                sb.Append('.');
+                ModNumber tmpFraction = new ModNumber(mn);
+                ModNumber divisor = new ModNumber(1ul);
+                for (int i = 0; i < scale * 2; i++)
+                    divisor *= 10u;
+                tmpFraction *= divisor;
+                tmpFraction >>= scale * 8;
+                tmpFraction %= divisor;
+                for (int i = 0; i < scale * 2; i++)
+                {
+                    divisor /= 10u;
+                    ModNumber resTmp = tmpFraction / divisor;
+                    uint digit = resTmp % 10u;
+                    sb.Append((char)('0' + digit),1);
+                }
+
+            }
+            return sb.ToString();
         }
         private string ToString_HexBase()
         {
-            return "";
+            int bufLen = ModNumber.LSIZE * 2;
+            StringBuilder sb = new StringBuilder(bufLen * ModNumber.LCOUNT + 1);
+            string formatStr = "X" + bufLen.ToString();
+            for (int i = ModNumber.LCOUNT - 1; i >= 0; i--)
+            {
+                string tmp = this.mn.num[i].ToString(formatStr);
+                sb.Append(tmp);
+            }
+            if (scale > 0)
+            {
+                int pos = bufLen * ModNumber.LCOUNT - (scale * 2);
+                sb.Insert(pos, '.');
+            }
+            return sb.ToString();
+        }
+        public ScaledNumber Sqrt()
+        {
+            ModNumber rt = mn.Sqrt();
+            return new ScaledNumber(rt, scale / 2, true);
         }
     }
     public class MultGroupMod

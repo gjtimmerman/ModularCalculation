@@ -809,6 +809,32 @@ namespace ModularCalculation
         {
             return Stomn(sr.ReadLine() ?? "", numBase);
         }
+        ModNumber GetPKCS1Mask(bool stable, int modulusSize)
+        {
+            uint keyByteSize = (uint)modulusSize;
+            uint mSize = GetByteCount();
+            uint mCount = mSize / LSIZE;
+            if (keyByteSize - 11 < mSize)
+                throw new ArgumentException("Message size greater than Key Byte size minus 11");
+            ModNumber res = new ModNumber();
+            Random random = new Random();
+            uint padSize = keyByteSize - mSize - 3;
+            uint totalBytesLeft = keyByteSize % LSIZE;
+            uint totalNumWords = keyByteSize / LSIZE;
+            if (totalBytesLeft > 1)
+                totalNumWords++;
+            ulong tmp = stable ? 0x0001u : 0x0002u;
+            uint totalBytesShift = totalBytesLeft;
+            if (totalBytesLeft < 2)
+                totalBytesShift += 8;
+            for (uint i = 0; i < totalBytesShift - 2; i++)
+            {
+                tmp <<= 8;
+                byte mask = stable ? (byte)0xFF : (byte)(((byte)random.Next() % 0xFF) + 1u);
+                tmp |= mask;
+            }
+            return res;
+        }
     }
     public class ScaledNumber
     {

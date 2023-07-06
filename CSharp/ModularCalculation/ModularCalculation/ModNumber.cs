@@ -1027,5 +1027,33 @@ namespace ModularCalculation
             res %= n;
             return res;
         }
+        public ModNumber Kwad(ModNumber x)
+        {
+            ModNumber l = x;
+            ModNumber r = x;
+            return Mult(l, r);
+        }
+        public ModNumber Exp(ModNumber x, ModNumber e)
+        {
+            ModNumber res = new ModNumber(1ul);
+            ModNumber xMod = x % n;
+            int top;
+            for (top = ModNumber.LCOUNT - 1; top >= 0; top--)
+                if (e.num[top] != 0)
+                    break;
+            for (int i = 0; i <= top; i++)
+            {
+                ulong mask = 1ul;
+                ulong tmp = e.num[i];
+                for (int j = 0; j < ModNumber.LSIZE * 8 && (tmp != 0ul || i < top); j++)
+                {
+                    if ((tmp & mask) != 0)
+                        res = Mult(res, xMod);
+                    xMod = Kwad(xMod);
+                    tmp >>= 1;
+                }
+            }
+            return res;
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace ModularCalculation
 {
     public class ModNumber
     {
-        public const int MaxMod = 4096 / 8;
+        public const int MaxMod = 1024 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong);
@@ -830,6 +830,20 @@ namespace ModularCalculation
         {
             return l.scale != r.scale || l.mn != r.mn;
         }
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+                return false;
+            else
+            {
+                ScaledNumber other = (obj as ScaledNumber)!;
+                return scale == other.scale && mn == other.mn;
+            }
+        }
+        public override int GetHashCode()
+        {
+            return scale.GetHashCode() + mn.GetHashCode();
+        }
         public string ToString(int nBase = 10)
         {
             switch (nBase)
@@ -1054,6 +1068,59 @@ namespace ModularCalculation
                 }
             }
             return res;
+        }
+        public ModNumber Add (ModNumber l, ModNumber r)
+        {
+            ModNumber lMod = l % n;
+            ModNumber rMod = r % n;
+            return (lMod + rMod) % n;
+        }
+        public ModNumber Diff(ModNumber l, ModNumber r)
+        {
+            ModNumber lMod = l % n;
+            ModNumber rMod = r % n;
+            if (lMod == rMod)
+                return new ModNumber(0ul);
+            if (lMod > rMod)
+                return lMod - rMod;
+            else
+                return n - rMod + lMod;
+        }
+        public ModNumber Inverse (ModNumber mx)
+        {
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber mone = new ModNumber(1ul);
+            if (mx == mzero)
+                throw new ArgumentException("Zero does not have an inverse.");
+            if (mx == mone)
+                return mone;
+            if (mx == n)
+                throw new ArgumentException("Zero does not have an inverse.");
+            ModNumber r = mx % n;
+            ModNumber l = new ModNumber(n);
+            List<ModNumber> divisors = new List<ModNumber>();
+            (ModNumber divRes, ModNumber modRes) = ModNumber.DivideAndModulo(l, r, false);
+            while(!(modRes == mone))
+            {
+                if (modRes == mzero)
+                    throw new ArgumentException("Numbers are not relative prime, so there is no inverse");
+                divisors.Add(divRes);
+                l = r;
+                r = modRes;
+                (divRes, modRes) = ModNumber.DivideAndModulo(l, r, false);
+            }
+            divisors.Add(divRes);
+            ModNumber tmp1 = mzero;
+            ModNumber tmp2 = mone;
+            divisors.Reverse();
+            foreach(ModNumber it in divisors)
+            {
+                ModNumber tmp = tmp2;
+                ModNumber product = Mult(tmp2, it);
+                tmp2 = Diff(tmp1, product);
+                tmp1 = tmp;
+            }
+            return tmp2;
         }
     }
 }

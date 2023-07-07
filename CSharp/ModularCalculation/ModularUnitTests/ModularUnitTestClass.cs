@@ -1,6 +1,6 @@
-//#define LARGEMOD
+#define LARGEMOD
 //#define MEDMOD
-#define SMALLMOD
+//#define SMALLMOD
 
 using ModularCalculation;
 using System.Collections.Generic;
@@ -5738,6 +5738,57 @@ namespace ModularUnitTests
             Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2, 4), "0002") == 0);
             Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 20, 2), "00") == 0);
             Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 20 + 2, ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26), new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26)) == 0);
+        }
+        [TestMethod]
+        public void TestfromTextTextOneCharTooLong()
+        {
+            string s = new string('a', (ModNumber.LCOUNT * ModNumber.LSIZE)/sizeof(char) + 1);
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.fromText(s));
+        }
+        [TestMethod]
+        public void TestfromTextTextEightCharsTooLong()
+        {
+            string s = new string('a', (ModNumber.LCOUNT+1)/sizeof(char) * ModNumber.LSIZE);
+            Assert.ThrowsException<ArgumentException>(() => ModNumber.fromText(s));
+        }
+        [TestMethod]
+        public void TestfromTextTextMaxSizeAllas()
+        {
+            string s = new string('\x6161', (ModNumber.LCOUNT * ModNumber.LSIZE) / sizeof(char));
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+                exp[i] = 0x6161616161616161ul;
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.fromText(s);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestfromTextTextMaxSizeMinusOneAllas()
+        {
+            string s = new string('\x6161', (ModNumber.LCOUNT * ModNumber.LSIZE - 1) / sizeof(char));
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT - 1; i++)
+                exp[i] = 0x6161616161616161ul;
+            exp[ModNumber.LCOUNT - 1] = 0x616161616161ul;
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.fromText(s);
+            Assert.IsTrue(mexp == mres);
+        }
+        [TestMethod]
+        public void TestfromTextWholeAlphabet()
+        {
+            string s = "abcdefghijklmnopqrstuvwxyz";
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
+            exp[0] = 0x0064006300620061ul;
+            exp[1] = 0x0068006700660065ul;
+            exp[2] = 0x006c006b006a0069ul;
+            exp[3] = 0x0070006f006e006dul;
+            exp[4] = 0x0074007300720071ul;
+            exp[5] = 0x0078007700760075ul;
+            exp[6] = 0x007a0079ul;
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = ModNumber.fromText(s);
+            Assert.IsTrue(mexp == mres);
         }
 
     }

@@ -12,7 +12,7 @@ namespace ModularCalculation
 {
     public class ModNumber
     {
-        public const int MaxMod = 1024 / 8;
+        public const int MaxMod = 4096 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong);
@@ -865,6 +865,36 @@ namespace ModularCalculation
                 res.num[i] = num[i];
             }
             return res;
+        }
+        public static ModNumber fromText(string text)
+        {
+            ulong[] res = new ulong[LCOUNT];
+            int textSize = (text.Length * sizeof(char)) / LSIZE;
+            int textLeft = (text.Length * sizeof(char)) % LSIZE;
+            if (textSize > LCOUNT)
+                throw new ArgumentException("Text message too long!");
+            if (textSize == LCOUNT && textLeft > 0)
+                throw new ArgumentException("Text message too long!");
+            unsafe
+            {
+                fixed (char* p = text)
+                {
+                    ulong* pUL = (ulong*)p;
+                    for (int i = 0; i < textSize; i++)
+                        res[i] = pUL[i];
+                }
+                ulong tmp = 0ul;
+                for (int i = 0; i < textLeft / sizeof(char); i++)
+                {
+                    ulong c = text[(textSize * LSIZE) / sizeof(char) + i];
+                    c <<= sizeof(char) * 8 * i;
+                    tmp |= c;
+                }
+                if (textLeft > 0)
+                    res[textSize] = tmp;
+
+            }
+            return new ModNumber(res);
         }
     }
     public class ScaledNumber

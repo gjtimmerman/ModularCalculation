@@ -5869,11 +5869,8 @@ namespace ModularUnitTests
 			Assert::IsTrue(resstr.compare(HexStringLength - 72, 4, "0002") == 0);
 			Assert::IsTrue(resstr.compare(HexStringLength - 22, 22, "00FFFFFFFFFFFFFFFFFFFF") == 0);
 		}
-		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsModulusAllFsMinusOneBlock)
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFs)
 		{
-			RSAParameters rsaParameters;
-			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE*2,'F'),16);
-			RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 22,'F'), 16);
 			ModNumber res = GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
@@ -5882,11 +5879,8 @@ namespace ModularUnitTests
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 16,2, "00") == 0);
 			Assert::IsTrue(resstr.compare(LLSIZE*2 + 4 + 18, HexStringLength - LLSIZE * 2 - 22, std::string(HexStringLength - LLSIZE * 2 - 22,'F')) == 0);
 		}
-		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus2ModulusAllFsMinusOneBlock)
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus2)
 		{
-			RSAParameters rsaParameters;
-			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2, 'F'), 16);
-			RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 24, 'F'), 16);
 			ModNumber res = GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);
@@ -5895,11 +5889,8 @@ namespace ModularUnitTests
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 18, 2, "00") == 0);
 			Assert::IsTrue(resstr.compare(LLSIZE * 2 + 4 + 20, HexStringLength - LLSIZE * 2 - 24, std::string(HexStringLength - LLSIZE * 2 - 24, 'F')) == 0);
 		}
-		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus4ModulusAllFsMinusOneBlock)
+		TEST_METHOD(TestGetPKCS1MaskMessageMaxFsMinus4)
 		{
-			RSAParameters rsaParameters;
-			rsaParameters.Modulus = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2, 'F'), 16);
-			RSA rsa(rsaParameters);
 			ModNumber message = ModNumber::stomn(std::string(HexStringLength - LLSIZE * 2 - 26, 'F'), 16);
 			ModNumber res = GetPKCS1Mask(message);
 			std::string resstr = res.to_string(16);

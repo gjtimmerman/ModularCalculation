@@ -896,6 +896,23 @@ namespace ModularCalculation
             }
             return new ModNumber(res);
         }
+        public string getText()
+        {
+            uint byteCount = GetByteCount();
+            if (byteCount % sizeof(char) != 0)
+                byteCount += sizeof(char) - byteCount % sizeof(char);
+            StringBuilder res = new StringBuilder((int)byteCount/sizeof(char));
+            unsafe
+            {
+                fixed(ulong* p = &this.num[0])
+                {
+                    char *pC = (char*)p;
+                    for (int i = 0; i < byteCount / sizeof(char); i++)
+                        res.Append(pC[i]);
+                }
+            }
+            return res.ToString();
+        }
     }
     public class ScaledNumber
     {

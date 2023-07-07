@@ -5790,6 +5790,72 @@ namespace ModularUnitTests
             ModNumber mres = ModNumber.fromText(s);
             Assert.IsTrue(mexp == mres);
         }
+        [TestMethod]
+        public void TestgetTextTextEmpty()
+        {
+            ModNumber mzero = new ModNumber(0);
+            string res = mzero.getText();
+            string exp = "";
+            Assert.IsTrue(exp == res);
+
+        }
+        [TestMethod]
+        public void TestgetTextTextSingleChar()
+        {
+            ModNumber mn = new ModNumber(0x0061);
+            string res = mn.getText();
+            string exp = "a";
+            Assert.IsTrue(exp == res);
+
+        }
+        [TestMethod]
+        public void TestgetTextTextMaxSizeAllAs()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT; i++)
+            {
+                n[i] = 0x0061006100610061ul;
+            }
+            ModNumber mn = new ModNumber(n);
+
+            string res = mn.getText();
+            string exp = new string('a',ModNumber.LCOUNT * ModNumber.LSIZE / sizeof(char));
+            Assert.IsTrue(exp == res);
+
+        }
+        [TestMethod]
+        public void TestgetTextTextMaxSizeMinusOneAllAs()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            for (int i = 0; i < ModNumber.LCOUNT - 1; i++)
+            {
+                n[i] = 0x0061006100610061ul;
+            }
+            n[ModNumber.LCOUNT - 1] = 0x006100610061ul;
+            ModNumber mn = new ModNumber(n);
+
+            string res = mn.getText();
+            string exp = new string('a', ModNumber.LCOUNT * ModNumber.LSIZE / sizeof(char) - 1);
+            Assert.IsTrue(exp == res);
+
+        }
+        [TestMethod]
+        public void TestgetTextWholeAlphabet()
+        {
+            ulong[] n = new ulong[ModNumber.LCOUNT];
+            n[0] = 0x0064006300620061ul;
+            n[1] = 0x0068006700660065ul;
+            n[2] = 0x006c006b006a0069ul;
+            n[3] = 0x0070006f006e006dul;
+            n[4] = 0x0074007300720071ul;
+            n[5] = 0x0078007700760075ul;
+            n[6] = 0x007a0079ul;
+            ModNumber mn = new ModNumber(n);
+            string res = mn.getText();
+            string exp = "abcdefghijklmnopqrstuvwxyz";
+            Assert.IsTrue(exp == res);
+
+        }
 
     }
 

@@ -5630,6 +5630,116 @@ namespace ModularUnitTests
 
 #endif
         }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageTooLong()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFFFFFF", 16);
+            Assert.ThrowsException<ArgumentException>(() => message.GetPKCS1Mask(false, 16));
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageEmptyModulus26Fs()
+        {
+            ModNumber message = new ModNumber(0ul);
+            ModNumber mres = message.GetPKCS1Mask(false, 13);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 26), new string('0', ModNumber.HexStringLength - 26)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 26, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 2, 2), "00") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageFourFsModulus26Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 13);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 26), new string('0', ModNumber.HexStringLength - 26)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 26, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 6, 6), "00FFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageEightFsModulus30Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 15);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 30), new string('0', ModNumber.HexStringLength - 30)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 30, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 10, 10), "00FFFFFFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageEightFsModulus32Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 16);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 32), new string('0', ModNumber.HexStringLength - 32)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 32, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 10, 10), "00FFFFFFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageEightFsModulus34Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 17);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 34), new string('0', ModNumber.HexStringLength - 34)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 34, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 10, 10), "00FFFFFFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageTenFsModulus36Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 18);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 36), new string('0', ModNumber.HexStringLength - 36)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 36, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 12, 12), "00FFFFFFFFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageTwentyFsModulus72Fs()
+        {
+            ModNumber message = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFF", 16);
+            ModNumber mres = message.GetPKCS1Mask(false, 36);
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.HexStringLength - 72), new string('0', ModNumber.HexStringLength - 72)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 72, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.HexStringLength - 22, 22), "00FFFFFFFFFFFFFFFFFFFF") == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageMaxFs()
+        {
+            ModNumber message = ModNumber.Stomn(new string('F',ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22), 16);
+            ModNumber mres = message.GetPKCS1Mask();
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.LSIZE * 2), new string('0', ModNumber.LSIZE * 2)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 16, 2), "00") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 16 + 2, ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22), new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22)) == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageMaxFsMinus2()
+        {
+            ModNumber message = ModNumber.Stomn(new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 24), 16);
+            ModNumber mres = message.GetPKCS1Mask();
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.LSIZE * 2), new string('0', ModNumber.LSIZE * 2)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 18, 2), "00") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 18 + 2, ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 24), new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 24)) == 0);
+        }
+        [TestMethod]
+        public void TestGetPKCS1MaskMessageMaxFsMinus4()
+        {
+            ModNumber message = ModNumber.Stomn(new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26), 16);
+            ModNumber mres = message.GetPKCS1Mask();
+            string resStr = mres.ToString(16);
+            Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.LSIZE * 2), new string('0', ModNumber.LSIZE * 2)) == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2, 4), "0002") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 20, 2), "00") == 0);
+            Assert.IsTrue(string.Compare(resStr.Substring(ModNumber.LSIZE * 2 + 4 + 20 + 2, ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26), new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26)) == 0);
+        }
+
     }
 
 }

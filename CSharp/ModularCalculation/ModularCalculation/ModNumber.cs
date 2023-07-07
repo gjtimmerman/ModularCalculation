@@ -542,10 +542,10 @@ namespace ModularCalculation
                 fixed (ulong* p = &this.num[0])
                 {
                     byte* pb = (byte*)p;
-                    for (uint i = NCOUNT - 1; i >= 0; i--)
+                    for (int i = NCOUNT - 1; i >= 0; i--)
                     {
                         if (pb[i] != 0)
-                            return i + 1;
+                            return (uint)i + 1;
                     }
                 }
             }
@@ -809,7 +809,7 @@ namespace ModularCalculation
         {
             return Stomn(sr.ReadLine() ?? "", numBase);
         }
-        ModNumber GetPKCS1Mask(bool stable, int modulusSize)
+        public ModNumber GetPKCS1Mask(bool stable = false, int modulusSize = MaxMod)
         {
             uint keyByteSize = (uint)modulusSize;
             uint mSize = GetByteCount();
@@ -832,6 +832,37 @@ namespace ModularCalculation
                 tmp <<= 8;
                 byte mask = stable ? (byte)0xFF : (byte)(((byte)random.Next() % 0xFF) + 1u);
                 tmp |= mask;
+            }
+            res.num[totalNumWords - 1] = tmp;
+            uint padLeft = padSize - (totalBytesShift - 2);
+            uint padLeftCount = padLeft / LSIZE;
+            uint padLeftOver = padLeft % LSIZE;
+            for (uint i = 0; i < padLeftCount; i++)
+            {
+                tmp = 0;
+                for (int j = 0; j < LSIZE; j++)
+                {
+                    tmp <<= 8;
+                    byte mask = stable ? (byte)0xFF : (byte)(((byte)random.Next() % 0xFF) + 1u);
+                    tmp |= mask;
+
+                }
+                res.num[totalNumWords - i - 2] = tmp;
+            }
+            tmp = 0;
+            for (uint j = 0; j < padLeftOver; j++)
+            {
+                byte mask = stable ? (byte)0xFF : (byte)(((byte)random.Next() % 0xFF) + 1u);
+                tmp |= mask;
+                tmp <<= 8;
+
+            }
+            tmp <<= (int)((LSIZE - padLeftOver - 1) * 8);
+            tmp |= num[mCount];
+            res.num[totalNumWords - padLeftCount - 2] = tmp;
+            for (uint i = 0; i < mCount; i++)
+            {
+                res.num[i] = num[i];
             }
             return res;
         }

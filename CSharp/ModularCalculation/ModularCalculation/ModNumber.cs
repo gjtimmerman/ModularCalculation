@@ -10,9 +10,18 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace ModularCalculation
 {
+    public enum ASNElementType : byte
+    {
+        INTEGER_VALUE = 0x02,
+        OCTET_STRING = 0x04,
+        NULL_VALUE = 0x05,
+        OBJECT_IDENTIFIER = 0x06,
+        SEQUENCE = 0x10
+    }
+
     public class ModNumber
     {
-        public const int MaxMod = 4096 / 8;
+        public const int MaxMod = 1024 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong);
@@ -43,7 +52,7 @@ namespace ModularCalculation
                 fixed (ulong* pN = &num[0])
                 {
                     byte* pByte = (byte*)pN;
-                    for (int i = 0; i < ModNumber.NCOUNT; i++)
+                    for (int i = 0; i < n.Length; i++)
                     {
                         pByte[i] = n[i];
                     }
@@ -80,6 +89,27 @@ namespace ModularCalculation
             for (int i = size; i < ModNumber.LCOUNT; i++)
                 if (num[i] != 0ul)
                     throw new ArgumentException("Modulus is too large!");
+        }
+        unsafe public static byte[] convertEndianess(byte * b, int cb)
+        {
+            byte[] res = new byte[cb];
+            for (int i = 0; (i < cb); i++)
+            {
+                res[i] = b[cb - i - 1];
+            }
+            return res;
+        }
+        public byte[] convertEndianess(int cb = 0)
+        {
+            unsafe
+            {
+                fixed(ulong *p = &num[0])
+                {
+                    byte* pB = (byte*)p;
+                    int n = cb > 0 ? cb : (int)GetByteCount();
+                    return convertEndianess(pB, n);
+                }
+            }
         }
         public static ModNumber operator -(ModNumber l, uint r)
         {
@@ -913,6 +943,184 @@ namespace ModularCalculation
             }
             return res.ToString();
         }
+        unsafe (ASNElementType, uint, uint) ReadASNElement(byte *p, uint i )
+        {
+            if (i == 0)
+                throw new ArgumentException("Not a valid BER encodign");
+            switch(p[i] >> 6)
+            {
+                case 0:
+                    switch(p[i] >> 5)
+                    {
+                        case 0:
+                        case 1:
+                        
+                            {
+                                byte mask = (byte)0x1Fu;
+                                byte masked = (byte)(p[i] & mask);
+                                switch(masked)
+                                {
+                                    case (byte)ASNElementType.SEQUENCE:
+                                        switch(p[i-1] >> 7)
+                                        {
+                                            case 0:
+                                                {
+                                                    byte mask2 = (byte)0x7Fu;
+                                                    byte masked2 = (byte)(p[i-1] & mask2);
+                                                    return (ASNElementType.SEQUENCE, masked2, i - 2);
+                                                }
+                                            default:
+                                                throw new ArgumentException("Not a short length specifier!");
+
+                                        }
+                                    case (byte)ASNElementType.OBJECT_IDENTIFIER:
+                                        switch(p[i-1] >> 7)
+                                        {
+                                            case 0:
+                                                byte mask2 = (byte)0x7Fu;
+                                                byte masked2 = (byte)(p[i - 1] & mask2);
+                                                return (ASNElementType.OBJECT_IDENTIFIER, masked2, i - 2);
+                                            default:
+                                                throw new ArgumentException("Not a short length specifier!");
+                                        }
+                                    case (byte)ASNElementType.NULL_VALUE:
+                                        if (p[i - 1] != 0)
+                                            throw new ArgumentException("Not a valid NULL object");
+                                        return (ASNElementType.NULL_VALUE, p[i - 1], i - 2);
+                                    case (byte)ASNElementType.OCTET_STRING:
+                                        switch(p[i-1] >> 7)
+                                        {
+                                            case 0:
+                                                byte mask2 = (byte)0x7Fu;
+                                                byte masked2 = (byte)(p[i - 1] & mask2);
+                                                return (ASNElementType.OCTET_STRING, masked2, i - 2);
+                                            default:
+                                                throw new ArgumentException("Not a short length specifier!");
+                                        }
+                                    case (byte)ASNElementType.INTEGER_VALUE:
+                                        switch(p[i-1] >> 7)
+                                        {
+                                            case 0:
+                                                byte mask2 = (byte)0x7Fu;
+                                                byte masked2 = (byte)(p[i-1] & mask2);
+                                                return (ASNElementType.INTEGER_VALUE, masked2, i - 2);
+                                            default:
+                                                throw new ArgumentException("Not a short length specifier!");
+
+                                        }
+
+                                }
+                                
+
+                            }
+                            break;
+                        default:
+                            throw new ArgumentException("Not a constructed ASN.1 type!");
+                    }
+                    break;
+                default:
+                    throw new ArgumentException("Not a native ASN.1 type!");
+
+            }
+            throw new ArgumentException("Error");
+
+        }
+        public List<string> ParseBERASNString()
+        {
+            List<string> res = new List<string>();
+            unsafe
+            {
+                fixed(ulong *p = &this.num[0])
+                {
+                    byte *pC = (byte*)p;
+                    uint i;
+                    for (i = MaxMod - 1; i > 0; i--)
+                        if (pC[i] != 0)
+                            break;
+                    (ASNElementType type, uint len, uint index) ASNElement1 = ReadASNElement(pC, i);
+                    if (ASNElement1.type == ASNElementType.SEQUENCE)
+                    {
+                        (ASNElementType type, uint len, uint index) ASNElement2 = ReadASNElement(pC, ASNElement1.index);
+                        if (ASNElement2.type == ASNElementType.SEQUENCE)
+                        {
+                            (ASNElementType type, uint len, uint index) ASNElement3 = ReadASNElement(pC, ASNElement2.index);
+                            if (ASNElement3.type == ASNElementType.OBJECT_IDENTIFIER)
+                            {
+                                byte b = pC[ASNElement3.index];
+                                string s = string.Format("D", (int)(b / 40));
+                                s += ".";
+                                s += string.Format("D", (int)(b % 40));
+                                s += ".";
+                                ulong number = 0ul;
+                                for (int k = 0; k < ASNElement3.len; i++)
+                                {
+                                    byte mask = 0x80;
+                                    b = pC[ASNElement3.index - k];
+                                    number <<= 7;
+                                    number |= (ulong)(b & (byte)~mask);
+                                    if ((b & mask) == 0)
+                                    {
+                                        s += string.Format("D", number);
+                                        s += ".";
+                                        number = 0ul;
+                                    }
+                                }
+                                res.Add(s);
+                            }
+                            (ASNElementType type, uint len, uint index) ASNElement4 = ReadASNElement(pC, ASNElement3.index - ASNElement3.len);
+                            (ASNElementType type, uint len, uint index) ASNElement5 = ReadASNElement(pC, ASNElement4.index);
+                            if (ASNElement5.type == ASNElementType.OCTET_STRING)
+                            {
+                                string s = "";
+                                for (int k = 0; k < ASNElement5.len; k++)
+                                {
+                                    s += (char)pC[ASNElement5.index - k];
+                                }
+                                res.Add(s);
+
+                            }
+                        }
+                        else if (ASNElement2.type == ASNElementType.INTEGER_VALUE)
+                        {
+                            string s = "";
+                            for (int k = 0; k < ASNElement2.len; k++)
+                            {
+                                s += (char)pC[ASNElement2 .index - k];
+                            }
+                            res.Add(s);
+                            (ASNElementType type, uint len, uint index) ASNElement3 = ReadASNElement(pC, ASNElement2.index- ASNElement2.len);
+                            if (ASNElement3.type == ASNElementType.INTEGER_VALUE)
+                            {
+                                s = "";
+                                for (int k = 0; k < ASNElement3.len; k++)
+                                {
+                                    s += (char)pC[ASNElement3.index - k];
+
+                                }
+                                res.Add(s);
+                            }
+                        }
+                    }
+                }
+            }
+            return res;
+        }
+        public static ModNumber GetLeftMostBytes(ModNumber mn, int leftBytes)
+        {
+            byte[] leftMostBytes = new byte[leftBytes];
+            unsafe
+            {
+                fixed(ulong *p = mn.num)
+                {
+                    byte* pB = (byte*)p;
+                    uint numBytes = mn.GetByteCount();
+                    for (int i = 0; i < leftBytes; i++)
+                        leftMostBytes[i] = pB[numBytes - leftBytes + i];
+
+                }
+            }
+            return new ModNumber(leftMostBytes);
+        }
     }
     public class ScaledNumber
     {
@@ -1226,5 +1434,245 @@ namespace ModularCalculation
             }
             return tmp2;
         }
+    }
+    public struct DSAParameters
+    {
+        public ModNumber P;
+        public ModNumber Q;
+        public ModNumber g;
+        public ModNumber x;
+        public ModNumber y;
+    }
+    public abstract class DSABase
+    {
+        public abstract ModNumber CalcR(ModNumber mk);
+        public byte [] CalculateDSASignature(ModNumber Q, ModNumber x, byte[] hash, bool DEREncoded)
+        {
+            byte[] hashLittleEndian;
+            unsafe
+            {
+                fixed(byte* p = &hash[0])
+                {
+                    hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
+                }
+            }
+            ModNumber mHash = new ModNumber(hashLittleEndian);
+            int nLen = (int)Q.GetByteCount();
+            if (hash.Length > nLen)
+                mHash = ModNumber.GetLeftMostBytes(mHash, nLen);
+            ulong[] k = new ulong[ModNumber.LCOUNT];
+            Random random = new Random();
+            ModNumber r;
+            ModNumber s;
+            ModNumber mk;
+            ModNumber mzero = new ModNumber(0ul);
+            unsafe
+            {
+                fixed(ulong *p = k)
+                {
+                    byte* pB = (byte*)p;
+                    do
+                    {
+                        do
+                        {
+                            for (int i = 0; i < nLen; i++)
+                                pB[i] = (byte)(random.Next() % 0x100);
+                            mk = new ModNumber(k);
+                            if (mk == mzero)
+                                mk += (uint)random.Next() + 1;
+                            while (mk >= Q)
+                            {
+                                pB[nLen - 1] -= (byte)(random.Next() % 0x7E + 1);
+                                mk = new ModNumber(k);
+                            }
+                            r = CalcR(mk);
+                        } while (r == mzero);
+                        ModNumber ?kInverse = null;
+                        MultGroupMod mgm = new MultGroupMod(Q);
+                        Thread th1 = new Thread(() => { kInverse = mgm.Inverse(mk); });
+                        th1.Start();
+                        ModNumber ?hashPlusXr = null;
+                        Thread th2 = new Thread(() =>
+                        {
+                            ModNumber xr = mgm.Mult(x, r);
+                            hashPlusXr = mgm.Add(mHash, xr);
+                        });
+                        th2.Start();
+                        th1.Join();
+                        th2.Join();
+                        s = mgm.Mult(kInverse!, hashPlusXr!);
+                    } while (s == mzero);
+
+                }
+            }
+            if (!(s < Q && r < Q))
+                throw new ArgumentException("Wrong signature");
+            byte[] rBigEndian = r.convertEndianess();
+            byte[] sBigEndian = s.convertEndianess();
+            if (DEREncoded)
+            {
+                return CreateBERASNStringForDSASignature(rBigEndian, sBigEndian);
+            }
+            else
+            {
+                byte[] rs = new byte[rBigEndian.Length + sBigEndian.Length];
+                for (int i = 0; i < rBigEndian.Length; i++)
+                    rs[i] = rBigEndian[i];
+                for (int i = 0; i < sBigEndian.Length; i++)
+                    rs[rBigEndian.Length + i] = sBigEndian[i];
+                return rs;
+            }
+        }
+        byte [] CreateBERASNStringForDSASignature(byte[] r, byte[] s)
+        {
+            byte[] retValue = new byte[4 + r.Length + 2 + s.Length];
+            retValue[0] = (byte)ASNElementType.SEQUENCE | (byte)0x20u;
+            retValue[1] = (byte)(r.Length + 2 + s.Length + 2);
+            retValue[2] = (byte)ASNElementType.INTEGER_VALUE;
+            retValue[3] = (byte)r.Length;
+            for (int i = 0; i < r.Length; i++)
+                retValue[4 + i] = r[i];
+            retValue[4 + r.Length] = (byte)ASNElementType.INTEGER_VALUE;
+            retValue[5 + r.Length] = (byte)s.Length;
+            for (int i = 0; i < s.Length; i++)
+                retValue[6 + r.Length + i] = s[i];
+            return retValue;
+        }
+
+    }
+    public class DSA : DSABase
+    {
+        public DSA(DSAParameters parameters)
+        {
+            P = parameters.P;
+            Q = parameters.Q;
+            g = parameters.g;
+            x = parameters.x;
+            y = parameters.y;
+        }
+        public override ModNumber CalcR(ModNumber mk)
+        {
+            MultGroupMod mgm = new MultGroupMod(P);
+            return mgm.Exp(g, mk) % Q;
+        }
+        (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, string signature, bool DEREncoded)
+        {
+            ModNumber mHash;
+            unsafe
+            {
+                fixed (byte* p = hash)
+                {
+                    byte[] hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
+                    mHash = new ModNumber(hashLittleEndian);
+                    if (hash.Length > bcQ)
+                    {
+                        mHash = ModNumber.GetLeftMostBytes(mHash, bcQ);
+                    }
+                }
+            }
+            byte[] r;
+            byte[] s;
+            if (DEREncoded)
+            {
+                ModNumber mSignature = ModNumber.Stomn(signature, 16);
+                List<string> signatureStrings;
+                signatureStrings = mSignature.ParseBERASNString();
+                r = new byte[signatureStrings[0].Length];
+                for (int i = 0; i < r.Length; i++)
+                    r[i] = (byte)signatureStrings[0][i];
+                s = new byte[signatureStrings[1].Length];
+                for (int i = 0; i < s.Length; i++)
+                    s[i] = (byte)signatureStrings[1][i];
+            }
+            else
+            {
+                r = new byte[signature.Length];
+                for (int i = 0; i < signature.Length / 2; i++)
+                {
+                    r[i*2] = (byte)signature[i];
+                    r[i * 2 + 1] = (byte)(signature[i] >> 8);
+                }
+                s = new byte[signature.Length];
+                for (int i = 0; i < signature.Length / 2; i++)
+                {
+                    s[i * 2] = (byte)signature[signature.Length / 2 + i];
+                    s[i * 2 + 1] = (byte)(signature[signature.Length/2 + i] >> 8);
+                }
+            }
+            byte[] rLittleEndian;
+            byte[] sLittleEndian;
+            unsafe
+            {
+                fixed(byte* pr = r)
+                    fixed(byte *ps = s)
+                    {
+                        rLittleEndian = ModNumber.convertEndianess(pr, r.Length);
+                        sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
+                    }
+            }
+            ModNumber mr = new ModNumber(rLittleEndian);
+            ModNumber ms = new ModNumber(sLittleEndian);
+            if (!(mr < Q && ms < Q))
+                throw new ArgumentException("Invalid signature");
+            MultGroupMod mgm = new MultGroupMod(Q);
+            ModNumber sInverse = mgm.Inverse(ms);
+            ModNumber ?u1 = null;
+            Thread th1 = new Thread(() => { u1 = mgm.Mult(mHash, sInverse); });
+            th1.Start();
+            ModNumber ?u2 = null;
+            Thread th2 = new Thread(() => { u2 = mgm.Mult(mr, sInverse); });
+            th2.Start();
+            th1.Join();
+            th2.Join();
+            return (u1!, u2!, mr);
+            
+        }
+        public string Sign(byte[] hash, bool DEREncoded)
+        {
+            byte[] signature = CalculateDSASignature(Q, x, hash, DEREncoded);
+            if (DEREncoded)
+            {
+                StringBuilder sb = new StringBuilder(signature.Length * 2);
+                for (int i = 0; i < signature.Length; i++)
+                {
+                    string tmp = string.Format("{0:X2}", (int)signature[i]);
+                    sb.Append(tmp);
+                }
+                return sb.ToString();
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder(signature.Length / 2);
+                sb.Append(new string(' ', signature.Length / 2));
+                for (int i = 0; i < signature.Length; i+=2)
+                {
+                    char c = (char)signature[i];
+                    c |= (char)(signature[i + 1] << 8);
+                    sb[i/2] = c;
+                }
+                return sb.ToString();
+            }
+        }
+        public bool Verify(byte[] hash, string signature, bool DEREndoded = true)
+        {
+            MultGroupMod mgm = new MultGroupMod(P);
+            ModNumber ?mv1 = null;
+            int bcQ = (int)Q.GetByteCount();
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSACalculateU1U2Mr(Q, bcQ, hash, signature, DEREndoded);
+            Thread th3 = new Thread(() => { mv1 = mgm.Exp(g, u1!); });
+            th3.Start();
+            ModNumber ?mv2 = null;
+            Thread th4 = new Thread(() => { mv2 = mgm.Exp(y, u2!); });
+            th4.Start();
+            th3.Join();
+            th4.Join();
+            ModNumber mv = mgm.Mult(mv1!, mv2!) % Q;
+            return mv == mr;
+        }
+        private ModNumber P;
+        private ModNumber Q;
+        private ModNumber g;
+        private ModNumber x;
+        private ModNumber y;
     }
 }

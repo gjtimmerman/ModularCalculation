@@ -21,7 +21,7 @@ namespace ModularCalculation
 
     public class ModNumber
     {
-        public const int MaxMod = 1024 / 8;
+        public const int MaxMod = 3072 / 8;
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong);

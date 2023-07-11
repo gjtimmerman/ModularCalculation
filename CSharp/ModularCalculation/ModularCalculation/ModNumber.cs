@@ -21,7 +21,18 @@ namespace ModularCalculation
 
     public class ModNumber
     {
+#if LARGEMOD
+        public const int MaxMod = 4096 / 8;
+
+#elif LARGEMODSIGNATURE
         public const int MaxMod = 3072 / 8;
+
+#elif MEDMOD
+        public const int MaxMod = 2048 / 8;
+
+#elif SMALLMOD
+        public const int MaxMod = 1024 / 8;
+#endif
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
         public const int LSIZE = sizeof(ulong);
@@ -58,6 +69,17 @@ namespace ModularCalculation
                     }
                 }
             }
+        }
+        unsafe public ModNumber (byte *pNumber, int len)
+        {
+            fixed (ulong *p = num)
+            {
+                byte* pB = (byte*)p;
+                for (int i = 0; i < len; i++)
+                    pB[i] = pNumber[i];
+            }
+
+
         }
         public override bool Equals(object? other)
         {
@@ -896,6 +918,35 @@ namespace ModularCalculation
             }
             return res;
         }
+        public ModNumber RemovePKCS1Mask()
+        {
+            ModNumber res;
+            unsafe
+            {
+                fixed(ulong *p = num)
+                {
+                    byte *pB = (byte *)p;
+                    int i;
+                    for (i = MaxMod - 1; i >= 0; i--)
+                        if (pB[i] != 0)
+                            break;
+                    if (pB[i+1] != 0x00u)
+                        throw new ArgumentException("Not a valid PKCS1 Mask");
+                    if (pB[i] == 0x01u)
+                        while (pB[--i] == 0xFF && i >= 0)
+                            ;
+                    else if (pB[i] == 0x02u)
+                        while (pB[i] != 0x00u && i >= 0)
+                            i--;
+                    else
+                        throw new ArgumentException("Not a valid PKCS1 Mask");
+                    if (pB[i] != 0x00u)
+                        throw new ArgumentException("Not a valid PKCS1 Mask");
+                    res = new ModNumber(pB, i);
+                }
+            }
+            return res;
+        }
         public static ModNumber fromText(string text)
         {
             ulong[] res = new ulong[LCOUNT];
@@ -1057,7 +1108,7 @@ namespace ModularCalculation
                                     byte mask = 0x80;
                                     b = pC[ASNElement3.index - k];
                                     number <<= 7;
-                                    number |= (ulong)(b & (byte)~mask);
+                                    number |= (byte)(b & (byte)~mask);
                                     if ((b & mask) == 0)
                                     {
                                         s += string.Format("D", number);
@@ -1103,6 +1154,74 @@ namespace ModularCalculation
                     }
                 }
             }
+            return res;
+        }
+        public static ModNumber CreateBERASNString(List<string> content)
+        {
+            string plainOid = content[0];
+            string hash = content[1];
+            List<byte> hashBytes = new List<byte>(hash.Length);
+            foreach (char c in hash)
+                hashBytes.Add((byte)c);
+            List<int> oidNumbers = new List<int>();
+            int oldPos = 0;
+            int pos = plainOid.IndexOf('.');
+            while (pos != -1)
+            {
+                oidNumbers.Add(int.Parse(plainOid.Substring(oldPos, pos)));
+                oldPos = pos + 1;
+                pos = plainOid.IndexOf(".");
+            }
+            oidNumbers.Add(int.Parse(plainOid.Substring(oldPos)));
+            byte first = (byte)(oidNumbers[0] * 40);
+            first += (byte)oidNumbers[1];
+            List<byte> encodedOid = new List<byte>();
+            encodedOid.Add(first);
+            for (int i = 2; i < oidNumbers.Count; i++)
+            {
+                uint oidPart = (uint)oidNumbers[i];
+                byte divisor = (byte)0x80u;
+                byte mask = (byte)0x7F;
+                List<byte> oidByteList = new List<byte>();
+                byte oidByte = (byte)(oidPart % divisor);
+                oidByteList.Add(oidByte);
+                oidPart >>= 7;
+                while (oidPart > 0)
+                {
+                    oidByte = (byte)((oidPart & mask) | divisor);
+                    oidByteList.Add(oidByte);
+                    oidPart >>= 7;
+                }
+                for (int j = oidByteList.Count - 1; j >= 0; j--)
+                    encodedOid.Add(oidByteList[j]);
+            }
+            List<byte> innerASN = new List<byte>();
+            List<byte> outerASN = new List<byte>();
+            innerASN.Add((byte)ASNElementType.OBJECT_IDENTIFIER);
+            innerASN.Add((byte)encodedOid.Count);
+            innerASN.AddRange(encodedOid);
+            innerASN.Add((byte)ASNElementType.NULL_VALUE);
+            innerASN.Add(0);
+            outerASN.Add((byte)ASNElementType.SEQUENCE | 0x20);
+            outerASN.Add((byte)innerASN.Count);
+            outerASN.AddRange(innerASN);
+            outerASN.Add((byte)(ASNElementType.OCTET_STRING));
+            outerASN.Add((byte)hash.Length);
+            outerASN.AddRange(hashBytes);
+            List<byte> result = new List<byte>();
+            result.Add((byte)ASNElementType.SEQUENCE | 0x20);
+            result.Add((byte)outerASN.Count);
+            result.AddRange(outerASN);
+            byte[] resultArray = result.ToArray();
+            byte[] resultLittleEndian;
+            unsafe
+            {
+                fixed(byte *p = resultArray)
+                {
+                    resultLittleEndian = ModNumber.convertEndianess(p, resultArray.Length);
+                }
+            }
+            ModNumber res = new ModNumber(resultLittleEndian);
             return res;
         }
         public static ModNumber GetLeftMostBytes(ModNumber mn, int leftBytes)
@@ -1434,6 +1553,112 @@ namespace ModularCalculation
             }
             return tmp2;
         }
+    }
+    public struct RSAParameters
+    {
+        public ModNumber PubExp;
+        public ModNumber Modulus;
+        public ModNumber Prime1;
+        public ModNumber Prime2;
+        public ModNumber Exp1;          // DP
+        public ModNumber Exp2;          // DQ
+        public ModNumber Coefficient;   // InverseQ
+        public ModNumber PrivExp;
+    }
+    public class RSA
+    {
+        public RSA(RSAParameters rsaParameters)
+        {
+            PubExp = rsaParameters.PubExp;
+            Modulus = rsaParameters.Modulus;
+            Prime1 = rsaParameters.Prime1;
+            Prime2 = rsaParameters.Prime2;
+            Exp1 = rsaParameters.Exp1;
+            Exp2 = rsaParameters.Exp2;
+            Coefficient = rsaParameters.Coefficient;
+            PrivExp = rsaParameters.PrivExp;
+        }
+        public ModNumber Encrypt(ModNumber m)
+        {
+            ModNumber masked = m.GetPKCS1Mask();
+            MultGroupMod mgm = new MultGroupMod(Modulus);
+            return mgm.Exp(masked, PubExp);
+        }
+        public ModNumber Decrypt(ModNumber c)
+        {
+            MultGroupMod mgmp = new MultGroupMod(Prime1);
+            MultGroupMod mgmq = new MultGroupMod(Prime2);
+            MultGroupMod mgmn = new MultGroupMod(Modulus);
+            ModNumber ?m1 = null;
+            ModNumber? m2 = null;
+            Thread th1 = new Thread(() => { m1 = mgmp.Exp(c, Exp1); });
+            Thread th2 = new Thread(() => { m2 = mgmq.Exp(c, Exp2); });
+            th1.Start();
+            th2.Start();
+            th1.Join();
+            th2.Join();
+            ModNumber diff = mgmp.Diff(m1!, m2!);
+            ModNumber h = mgmp.Mult(Coefficient, diff);
+            ModNumber hq = mgmn.Mult(h, Prime2);
+            ModNumber res = mgmn.Add(m2!, hq);
+            return res.RemovePKCS1Mask();
+        }
+        public ModNumber EncryptSignature(string hashBigendian, string hashOid)
+        {
+            List<string> content = new List<string>();
+            content.Add(hashOid);
+            content.Add(hashBigendian);
+            ModNumber unmaskedResult = ModNumber.CreateBERASNString(content);
+            ModNumber maskedResult = unmaskedResult.GetPKCS1Mask(true);
+            MultGroupMod mgmp = new MultGroupMod(Prime1);
+            MultGroupMod mgmq = new MultGroupMod(Prime2);
+            MultGroupMod mgmn = new MultGroupMod(Modulus);
+            ModNumber? m1 = null;
+            ModNumber? m2 = null;
+            Thread th1 = new Thread(() => { m1 = mgmp.Exp(maskedResult, Exp1); });
+            Thread th2 = new Thread(() => { m2 = mgmq.Exp(maskedResult, Exp2); });
+            th1.Start();
+            th2.Start();
+            th1.Join();
+            th2.Join();
+            ModNumber diff = mgmp.Diff(m1!, m2!);
+            ModNumber h = mgmp.Mult(Coefficient, diff);
+            ModNumber hq = mgmn.Mult(h, Prime2);
+            ModNumber res = mgmn.Add(m2!, hq);
+            return res;
+        }
+        public ModNumber DecryptSignature(ModNumber signature)
+        {
+            MultGroupMod mgm = new MultGroupMod(Modulus);
+            ModNumber decryptedSignature = mgm.Exp(signature, PubExp);
+            ModNumber removedMask = decryptedSignature.RemovePKCS1Mask();
+            List<string> result = removedMask.ParseBERASNString();
+            string hashBigEndianStr = result[1];
+            byte[] hashBigEndian = new byte[hashBigEndianStr.Length];
+            for (int i = 0; i < hashBigEndian.Length; i++)
+                hashBigEndian[i] = (byte)hashBigEndianStr[i];
+            byte[] hashLittleEndian;
+            unsafe
+            {
+                fixed(byte* pb = hashBigEndian)
+                {
+                    hashLittleEndian = ModNumber.convertEndianess(pb, hashBigEndian.Length);
+
+                }
+            }
+            ModNumber retval = new ModNumber(hashBigEndian);
+            return retval;
+
+        }
+        private ModNumber PubExp;
+        private ModNumber Modulus;
+        private ModNumber Prime1;
+        private ModNumber Prime2;
+        private ModNumber Exp1;          // DP
+        private ModNumber Exp2;          // DQ
+        private ModNumber Coefficient;   // InverseQ
+        private ModNumber PrivExp;
+
     }
     public struct DSAParameters
     {

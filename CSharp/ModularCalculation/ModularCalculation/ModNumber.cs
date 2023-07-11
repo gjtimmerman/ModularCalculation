@@ -1103,7 +1103,7 @@ namespace ModularCalculation
                                 s += string.Format("D", (int)(b % 40));
                                 s += ".";
                                 ulong number = 0ul;
-                                for (int k = 0; k < ASNElement3.len; i++)
+                                for (int k = 0; k < ASNElement3.len; k++)
                                 {
                                     byte mask = 0x80;
                                     b = pC[ASNElement3.index - k];
@@ -1165,12 +1165,12 @@ namespace ModularCalculation
                 hashBytes.Add((byte)c);
             List<int> oidNumbers = new List<int>();
             int oldPos = 0;
-            int pos = plainOid.IndexOf('.');
+            int pos = plainOid.IndexOf('.', oldPos);
             while (pos != -1)
             {
-                oidNumbers.Add(int.Parse(plainOid.Substring(oldPos, pos)));
+                oidNumbers.Add(int.Parse(plainOid.Substring(oldPos, pos - oldPos)));
                 oldPos = pos + 1;
-                pos = plainOid.IndexOf(".");
+                pos = plainOid.IndexOf('.',oldPos);
             }
             oidNumbers.Add(int.Parse(plainOid.Substring(oldPos)));
             byte first = (byte)(oidNumbers[0] * 40);
@@ -1646,7 +1646,7 @@ namespace ModularCalculation
 
                 }
             }
-            ModNumber retval = new ModNumber(hashBigEndian);
+            ModNumber retval = new ModNumber(hashLittleEndian);
             return retval;
 
         }

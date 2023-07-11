@@ -1799,7 +1799,7 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 			}
 			while (mk >= q)
 			{
-				p[nLen - 1] -= rand() + 1;
+				p[nLen - 1] -= unsigned char(rand() % 0x7F + 1);
 				mk = ModNumber(k);
 			}
 			r = CalcR(mk);

@@ -1,7 +1,7 @@
-#define LARGEMOD
+//#define LARGEMOD
 //#define LARGEMODSIGNATURE
 //#define MEDMOD
-//#define SMALLMOD
+#define SMALLMOD
 
 using ModularCalculation;
 using System.Collections.Generic;
@@ -6053,7 +6053,7 @@ namespace ModularUnitTests
 #endif
 #if !LARGEMODSIGNATURE
             RSA rsa = new RSA(rsaParameters);
-            string hashBigEndian = "\x0087\x003D\x0059\x00D7\x0001\x00CA\x00C3\x0066\x00EA\x00D4\x00B1\x00C0\x000A\x00D6\x0007\x00C6\x00C7\x00FE\x005A\x0048\x0089\x00DA\x00BB\x005C\x0090\x00C7\x008B\x005C\x00AE\x00EC\x00BD\x0025";
+            byte[] hashBigEndian = { 0x87, 0x3D, 0x59, 0xD7, 0x01, 0xCA, 0xC3, 0x66, 0xEA, 0xD4, 0xB1, 0xC0, 0x0A, 0xD6, 0x07, 0xC6, 0xC7, 0xFE, 0x5A, 0x48, 0x89, 0xDA, 0xBB, 0x5C, 0x90, 0xC7, 0x8B, 0x5C, 0xAE, 0xEC, 0xBD, 0x25 };
             ModNumber signature = rsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
             ModNumber decryptedHash = rsa.DecryptSignature(signature);
             byte[] hashLittleEndian = new byte[hashBigEndian.Length];

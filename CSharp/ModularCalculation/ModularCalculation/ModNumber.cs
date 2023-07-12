@@ -1098,12 +1098,12 @@ namespace ModularCalculation
                             if (ASNElement3.type == ASNElementType.OBJECT_IDENTIFIER)
                             {
                                 byte b = pC[ASNElement3.index];
-                                string s = string.Format("D", (int)(b / 40));
+                                string s = string.Format("{0:D}", (int)(b / 40));
                                 s += ".";
-                                s += string.Format("D", (int)(b % 40));
+                                s += string.Format("{0:D}", (int)(b % 40));
                                 s += ".";
                                 ulong number = 0ul;
-                                for (int k = 0; k < ASNElement3.len; k++)
+                                for (int k = 1; k < ASNElement3.len; k++)
                                 {
                                     byte mask = 0x80;
                                     b = pC[ASNElement3.index - k];
@@ -1111,7 +1111,7 @@ namespace ModularCalculation
                                     number |= (byte)(b & (byte)~mask);
                                     if ((b & mask) == 0)
                                     {
-                                        s += string.Format("D", number);
+                                        s += string.Format("{0:D}", number);
                                         s += ".";
                                         number = 0ul;
                                     }
@@ -1156,13 +1156,8 @@ namespace ModularCalculation
             }
             return res;
         }
-        public static ModNumber CreateBERASNString(List<string> content)
+        public static ModNumber CreateBERASNString(byte[] hashBigEndian, string plainOid)
         {
-            string plainOid = content[0];
-            string hash = content[1];
-            List<byte> hashBytes = new List<byte>(hash.Length);
-            foreach (char c in hash)
-                hashBytes.Add((byte)c);
             List<int> oidNumbers = new List<int>();
             int oldPos = 0;
             int pos = plainOid.IndexOf('.', oldPos);
@@ -1206,8 +1201,8 @@ namespace ModularCalculation
             outerASN.Add((byte)innerASN.Count);
             outerASN.AddRange(innerASN);
             outerASN.Add((byte)(ASNElementType.OCTET_STRING));
-            outerASN.Add((byte)hash.Length);
-            outerASN.AddRange(hashBytes);
+            outerASN.Add((byte)hashBigEndian.Length);
+            outerASN.AddRange(hashBigEndian);
             List<byte> result = new List<byte>();
             result.Add((byte)ASNElementType.SEQUENCE | 0x20);
             result.Add((byte)outerASN.Count);
@@ -1603,12 +1598,9 @@ namespace ModularCalculation
             ModNumber res = mgmn.Add(m2!, hq);
             return res.RemovePKCS1Mask();
         }
-        public ModNumber EncryptSignature(string hashBigendian, string hashOid)
+        public ModNumber EncryptSignature(byte [] hashBigendian, string hashOid)
         {
-            List<string> content = new List<string>();
-            content.Add(hashOid);
-            content.Add(hashBigendian);
-            ModNumber unmaskedResult = ModNumber.CreateBERASNString(content);
+            ModNumber unmaskedResult = ModNumber.CreateBERASNString(hashBigendian, hashOid);
             ModNumber maskedResult = unmaskedResult.GetPKCS1Mask(true);
             MultGroupMod mgmp = new MultGroupMod(Prime1);
             MultGroupMod mgmq = new MultGroupMod(Prime2);

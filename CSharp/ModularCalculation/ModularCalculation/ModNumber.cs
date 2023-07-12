@@ -1626,9 +1626,6 @@ namespace ModularCalculation
             ModNumber removedMask = decryptedSignature.RemovePKCS1Mask();
             List<object> result = removedMask.ParseBERASNString();
             byte [] hashBigEndian = (byte [])result[1];
-            //byte[] hashBigEndian = new byte[hashBigEndianStr.Length];
-            //for (int i = 0; i < hashBigEndian.Length; i++)
-            //    hashBigEndian[i] = (byte)hashBigEndianStr[i];
             byte[] hashLittleEndian;
             unsafe
             {
@@ -1796,12 +1793,6 @@ namespace ModularCalculation
                 signatureOctets = mSignature.ParseBERASNString();
                 r = (byte[])signatureOctets[0];
                 s = (byte[])signatureOctets[1];
-                //r = new byte[signaturePart.Length];
-                //for (int i = 0; i < r.Length; i++)
-                //    r[i] = (byte)signatureStrings[0][i];
-                //s = new byte[signatureStrings[1].Length];
-                //for (int i = 0; i < s.Length; i++)
-                //    s[i] = (byte)signatureStrings[1][i];
             }
             else
             {

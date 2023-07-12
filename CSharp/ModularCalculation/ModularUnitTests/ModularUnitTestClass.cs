@@ -7,6 +7,7 @@ using ModularCalculation;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ModularUnitTests
@@ -14,6 +15,42 @@ namespace ModularUnitTests
     [TestClass]
     public class ModularUnitTestClass
     {
+        [ClassInitialize]
+        public static void InitializeKeys(TestContext context)
+        {
+            CngKey cngKey;
+            CngKeyCreationParameters parameters = new CngKeyCreationParameters();
+            parameters.KeyUsage = CngKeyUsages.Signing;
+            byte[] keyLength = new byte[4];
+            keyLength[0] = (ModNumber.MaxMod * 8) % 0x100;
+            keyLength[1] = (ModNumber.MaxMod * 8) / 0x100;
+            CngPropertyOptions options = new CngPropertyOptions();
+
+            CngProperty property = new CngProperty("Length", keyLength, options);
+            parameters.Parameters.Add(property);
+            byte[] exportp = new byte[4];
+            exportp[0] = 0x03;
+            property = new CngProperty("Export Policy", exportp, options);
+            parameters.Parameters.Add(property);
+#if LARGEMOD
+#elif MEDMOD
+#elif SMALLMOD
+            cngKey = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parameters);
+            cngKey.Dispose();
+#endif
+        }
+        [ClassCleanup]
+        public static void CleanupKeys()
+        {
+            CngKey cngKey;
+#if LARGEMOD
+#elif MEDMOD
+#elif SMALLMOD
+            cngKey = CngKey.Open("MyCoolRSASignatureKey1024");
+            cngKey.Delete();
+            cngKey.Dispose();
+#endif      
+        }
         [TestMethod]
         public void TestSubtractScalarSimple()
         {
@@ -5925,7 +5962,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestVerifyDSASignature()
         {
-            DSAParameters dsaParameters;
+            ModularCalculation.DSAParameters dsaParameters;
 #if LARGEMODSIGNATURE
             dsaParameters.P = ModNumber.Stomn("BCAE0FB273D98B3CDDDFBB1BE44470A592AAC3EA0885D06C272C5333D8C62AA7F8E5A09D56FF462BFF1032870B306F1A997CE635B920630B128C9030EE5506B7C19992EEBEDE39892D0107E0F6BBC417FE1EF3F1FE436A30E7FB1FD9043D4BAC3A240D6E287FE33090351746BC25639FAD56D3E2922D47092D0EF4AC7B0F0F85E747CF55A11E702276A6C40E285C3FBB61E50755EE3F27764B748623EC67D8E2D8B2E5A6142D244A5C4500C3A580A174FDC9D48BDC9CD93AEF8930563A28FBCBA5E52D8DDCCCE9FDB249E910594B02AB4A9283DEE01B42B405E8D71EC0B613ADCBB7095991256F6B38AE318AFEBB2432D708BCB913E6D67729E8B0F97B30CB30F5223980F792B9C8ECBDB19236FDEE155F1D8F4D0540B63EED872599DFF8B48A3A8F3F966F6CDC389781DAAFBC7DBFF8F787F0ACE60680370F6C94C0DC615A437068583E7C31FF381E1BAB1F8311EA3FD588FD74D12ACC15E6217E118E76C2C66686215D07BE8A54EA754ECECA6377E0BDFA8289F1FC3380C517E0A2CD06B8A7", 16);
             dsaParameters.Q = ModNumber.Stomn("BEF143E5D8624534038989D4AC6A76FC83A44E501C20BA8E6D3FC092F0EE36A7", 16);
@@ -5955,14 +5992,14 @@ namespace ModularUnitTests
             string hash = "25BDECAE5C8BC7905CBBDA89485AFEC7C607D60AC0B1D4EA66C3CA01D7593D87";
             ModNumber mHash = ModNumber.Stomn(hash, 16);
             byte[] hashBigEndian = mHash.convertEndianess();
-            DSA dsa = new DSA(dsaParameters);
+            ModularCalculation.DSA dsa = new ModularCalculation.DSA(dsaParameters);
             Assert.IsTrue(dsa.Verify(hashBigEndian, signature));
 #endif
         }
         [TestMethod]
         public void TestSignAndVerifyDSASignature()
         {
-            DSAParameters dsaParameters;
+            ModularCalculation.DSAParameters dsaParameters;
 #if LARGEMODSIGNATURE
             dsaParameters.P = ModNumber.Stomn("BCAE0FB273D98B3CDDDFBB1BE44470A592AAC3EA0885D06C272C5333D8C62AA7F8E5A09D56FF462BFF1032870B306F1A997CE635B920630B128C9030EE5506B7C19992EEBEDE39892D0107E0F6BBC417FE1EF3F1FE436A30E7FB1FD9043D4BAC3A240D6E287FE33090351746BC25639FAD56D3E2922D47092D0EF4AC7B0F0F85E747CF55A11E702276A6C40E285C3FBB61E50755EE3F27764B748623EC67D8E2D8B2E5A6142D244A5C4500C3A580A174FDC9D48BDC9CD93AEF8930563A28FBCBA5E52D8DDCCCE9FDB249E910594B02AB4A9283DEE01B42B405E8D71EC0B613ADCBB7095991256F6B38AE318AFEBB2432D708BCB913E6D67729E8B0F97B30CB30F5223980F792B9C8ECBDB19236FDEE155F1D8F4D0540B63EED872599DFF8B48A3A8F3F966F6CDC389781DAAFBC7DBFF8F787F0ACE60680370F6C94C0DC615A437068583E7C31FF381E1BAB1F8311EA3FD588FD74D12ACC15E6217E118E76C2C66686215D07BE8A54EA754ECECA6377E0BDFA8289F1FC3380C517E0A2CD06B8A7", 16);
             dsaParameters.Q = ModNumber.Stomn("BEF143E5D8624534038989D4AC6A76FC83A44E501C20BA8E6D3FC092F0EE36A7", 16);
@@ -5989,7 +6026,7 @@ namespace ModularUnitTests
             string hash = "25BDECAE5C8BC7905CBBDA89485AFEC7C607D60AC0B1D4EA66C3CA01D7593D87";
             ModNumber mHash = ModNumber.Stomn(hash, 16);
             byte[] hashBigEndian = mHash.convertEndianess();
-            DSA dsa = new DSA(dsaParameters);
+            ModularCalculation.DSA dsa = new ModularCalculation.DSA(dsaParameters);
             string signature = dsa.Sign(hashBigEndian, false);
             Assert.IsTrue(dsa.Verify(hashBigEndian, signature, false));
 
@@ -5998,7 +6035,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestRSAEncryptAndDecrypt()
         {
-            RSAParameters rsaParameters;
+            ModularCalculation.RSAParameters rsaParameters;
 
 #if LARGEMOD
             rsaParameters.PubExp = ModNumber.Stomn("010001", 16);
@@ -6029,7 +6066,7 @@ namespace ModularUnitTests
             rsaParameters.PrivExp = ModNumber.Stomn("9E7C2F39FBFE1FD7DC2B662009328717EFFA184E61311C15F27DEF893BF2141F0E9C9502369BBD193E446D3EFD67ACADA4A8FB81AE9C5A5BD621E4B4ECFF625469B82CE442C50E56F2C7E860FD7414AB46C9BA2C8F043FC2FAF5408E50A758BFDB2AF454020A1E77586C4F7E2D7CCF66E354715606B5223C31538AEDAAA0DB85", 16);
 #endif
 #if !LARGEMODSIGNATURE
-            RSA rsa = new RSA(rsaParameters);
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
             string message = "Dit is een test";
             ModNumber convertedMessage = ModNumber.fromText(message);
             ModNumber encryptedMessage = rsa.Encrypt(convertedMessage);
@@ -6041,7 +6078,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestRSASignAndVerify()
         {
-            RSAParameters rsaParameters;
+            ModularCalculation.RSAParameters rsaParameters;
 
 #if LARGEMOD
             rsaParameters.PubExp = ModNumber.Stomn("010001", 16);
@@ -6072,7 +6109,7 @@ namespace ModularUnitTests
             rsaParameters.PrivExp = ModNumber.Stomn("9E7C2F39FBFE1FD7DC2B662009328717EFFA184E61311C15F27DEF893BF2141F0E9C9502369BBD193E446D3EFD67ACADA4A8FB81AE9C5A5BD621E4B4ECFF625469B82CE442C50E56F2C7E860FD7414AB46C9BA2C8F043FC2FAF5408E50A758BFDB2AF454020A1E77586C4F7E2D7CCF66E354715606B5223C31538AEDAAA0DB85", 16);
 #endif
 #if !LARGEMODSIGNATURE
-            RSA rsa = new RSA(rsaParameters);
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
             byte[] hashBigEndian = { 0x87, 0x3D, 0x59, 0xD7, 0x01, 0xCA, 0xC3, 0x66, 0xEA, 0xD4, 0xB1, 0xC0, 0x0A, 0xD6, 0x07, 0xC6, 0xC7, 0xFE, 0x5A, 0x48, 0x89, 0xDA, 0xBB, 0x5C, 0x90, 0xC7, 0x8B, 0x5C, 0xAE, 0xEC, 0xBD, 0x25 };
             ModNumber signature = rsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
             ModNumber decryptedHash = rsa.DecryptSignature(signature);

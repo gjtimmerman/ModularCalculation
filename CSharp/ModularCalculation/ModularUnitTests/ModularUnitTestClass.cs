@@ -5861,12 +5861,32 @@ namespace ModularUnitTests
         public void TestReadDSASignature()
         {
             ModNumber signature = ModNumber.Stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
-            List<string> results = signature.ParseBERASNString();
-            string exp1 = "\x0027\x00FB\x00E1\x0036\x0028\x00A0\x00AA\x0070\x0053\x00E3\x00C1\x001C\x00E6\x00B4\x00E7\x00F4\x0006\x0024\x00C1\x008F";
-            string exp2 = "\x006D\x009F\x0022\x00C0\x00AA\x0016\x0084\x001B\x0026\x0096\x0091\x0066\x00C6\x0092\x00E9\x002B\x0041\x0017\x0062\x0032";
-            Assert.IsTrue(exp1 == results[0]);
-            Assert.IsTrue(exp2 == results[1]);
-             
+            List<object> results = signature.ParseBERASNString();
+            byte [] exp1 = { 0x27, 0xFB, 0xE1, 0x36, 0x28, 0xA0, 0xAA, 0x70, 0x53, 0xE3, 0xC1, 0x1C, 0xE6, 0xB4, 0xE7, 0xF4, 0x06, 0x24, 0xC1, 0x8F };
+            byte [] exp2 = { 0x6D, 0x9F, 0x22, 0xC0, 0xAA, 0x16, 0x84, 0x1B, 0x26, 0x96, 0x91, 0x66, 0xC6, 0x92, 0xE9, 0x2B, 0x41, 0x17, 0x62, 0x32 };
+            byte[] result1 = (byte [])results[0];
+            byte[] result2 = (byte [])results[1];
+            bool results1Equal = true;
+            for (int i = 0; i < result1.Length; i++)
+            {
+                if (exp1[i] != result1[i])
+                {
+                    results1Equal = false;
+                    break;
+                }
+            }
+            bool results2Equal = true;
+            for (int i = 0; i < result2.Length; i++)
+            {
+                if (exp2[i] != result2[i])
+                {
+                    results2Equal = false;
+                    break;
+                }
+            }
+            Assert.IsTrue(results1Equal);
+            Assert.IsTrue(results2Equal);
+
         }
         [TestMethod]
         public void TestDSAParameters()

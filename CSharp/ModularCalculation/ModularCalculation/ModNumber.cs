@@ -1076,9 +1076,9 @@ namespace ModularCalculation
             throw new ArgumentException("Error");
 
         }
-        public List<string> ParseBERASNString()
+        public List<object> ParseBERASNString()
         {
-            List<string> res = new List<string>();
+            List<object> res = new List<object>();
             unsafe
             {
                 fixed(ulong *p = &this.num[0])
@@ -1122,33 +1122,33 @@ namespace ModularCalculation
                             (ASNElementType type, uint len, uint index) ASNElement5 = ReadASNElement(pC, ASNElement4.index);
                             if (ASNElement5.type == ASNElementType.OCTET_STRING)
                             {
-                                string s = "";
+                                byte [] bytes = new byte [ASNElement5.len];
                                 for (int k = 0; k < ASNElement5.len; k++)
                                 {
-                                    s += (char)pC[ASNElement5.index - k];
+                                    bytes[k] = pC[ASNElement5.index - k];
                                 }
-                                res.Add(s);
+                                res.Add(bytes);
 
                             }
                         }
                         else if (ASNElement2.type == ASNElementType.INTEGER_VALUE)
                         {
-                            string s = "";
+                            byte[] bytes = new byte[ASNElement2.len];
                             for (int k = 0; k < ASNElement2.len; k++)
                             {
-                                s += (char)pC[ASNElement2 .index - k];
+                                bytes[k] = pC[ASNElement2.index - k];
                             }
-                            res.Add(s);
+                            res.Add(bytes);
                             (ASNElementType type, uint len, uint index) ASNElement3 = ReadASNElement(pC, ASNElement2.index- ASNElement2.len);
                             if (ASNElement3.type == ASNElementType.INTEGER_VALUE)
                             {
-                                s = "";
+                                byte [] bytes2 = new byte[ASNElement3.len];
                                 for (int k = 0; k < ASNElement3.len; k++)
                                 {
-                                    s += (char)pC[ASNElement3.index - k];
+                                    bytes2[k] = pC[ASNElement3.index - k];
 
                                 }
-                                res.Add(s);
+                                res.Add(bytes2);
                             }
                         }
                     }
@@ -1624,11 +1624,11 @@ namespace ModularCalculation
             MultGroupMod mgm = new MultGroupMod(Modulus);
             ModNumber decryptedSignature = mgm.Exp(signature, PubExp);
             ModNumber removedMask = decryptedSignature.RemovePKCS1Mask();
-            List<string> result = removedMask.ParseBERASNString();
-            string hashBigEndianStr = result[1];
-            byte[] hashBigEndian = new byte[hashBigEndianStr.Length];
-            for (int i = 0; i < hashBigEndian.Length; i++)
-                hashBigEndian[i] = (byte)hashBigEndianStr[i];
+            List<object> result = removedMask.ParseBERASNString();
+            byte [] hashBigEndian = (byte [])result[1];
+            //byte[] hashBigEndian = new byte[hashBigEndianStr.Length];
+            //for (int i = 0; i < hashBigEndian.Length; i++)
+            //    hashBigEndian[i] = (byte)hashBigEndianStr[i];
             byte[] hashLittleEndian;
             unsafe
             {
@@ -1792,14 +1792,16 @@ namespace ModularCalculation
             if (DEREncoded)
             {
                 ModNumber mSignature = ModNumber.Stomn(signature, 16);
-                List<string> signatureStrings;
-                signatureStrings = mSignature.ParseBERASNString();
-                r = new byte[signatureStrings[0].Length];
-                for (int i = 0; i < r.Length; i++)
-                    r[i] = (byte)signatureStrings[0][i];
-                s = new byte[signatureStrings[1].Length];
-                for (int i = 0; i < s.Length; i++)
-                    s[i] = (byte)signatureStrings[1][i];
+                List<object> signatureOctets;
+                signatureOctets = mSignature.ParseBERASNString();
+                r = (byte[])signatureOctets[0];
+                s = (byte[])signatureOctets[1];
+                //r = new byte[signaturePart.Length];
+                //for (int i = 0; i < r.Length; i++)
+                //    r[i] = (byte)signatureStrings[0][i];
+                //s = new byte[signatureStrings[1].Length];
+                //for (int i = 0; i < s.Length; i++)
+                //    s[i] = (byte)signatureStrings[1][i];
             }
             else
             {

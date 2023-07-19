@@ -4,6 +4,7 @@ using System.Formats.Asn1;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters;
+using System.Security.Cryptography;
 using System.Text;
 using static System.Formats.Asn1.AsnWriter;
 
@@ -119,6 +120,13 @@ namespace ModularCalculation
             {
                 res[i] = b[cb - i - 1];
             }
+            return res;
+        }
+        public static byte[] convertEndianess(byte[] b)
+        {
+            byte[] res = new byte[b.Length];
+            for (int i = 0; i < b.Length; i++)
+                res[i] = b[b.Length - i - 1];
             return res;
         }
         public byte[] convertEndianess(int cb = 0)
@@ -1638,6 +1646,89 @@ namespace ModularCalculation
             ModNumber retval = new ModNumber(hashLittleEndian);
             return retval;
 
+        }
+        public static RSAParameters GetRSAKey(string keyName, bool createIfNotExists, CngKeyUsages usage = CngKeyUsages.Decryption)
+        {
+            RSAParameters rsaParameters;
+            CngKey cngKey;
+            if (CngKey.Exists(keyName))
+                cngKey = CngKey.Open(keyName);
+            else
+            {
+                if (createIfNotExists)
+                {
+                    CngKeyCreationParameters parametersEncryptionRsa = new CngKeyCreationParameters();
+                    parametersEncryptionRsa.KeyUsage = CngKeyUsages.Decryption;
+                    byte[] keyLen = new byte[4];
+                    keyLen[0] = (ModNumber.MaxMod * 8) % 0x100;
+                    keyLen[1] = (ModNumber.MaxMod * 8) / 0x100;
+                    CngPropertyOptions propOptions = new CngPropertyOptions();
+
+                    CngProperty prop = new CngProperty("Length", keyLen, propOptions);
+                    parametersEncryptionRsa.Parameters.Add(prop);
+                    byte[] exportp = new byte[4];
+                    exportp[0] = 0x03;
+                    prop = new CngProperty("Export Policy", exportp, propOptions);
+                    parametersEncryptionRsa.Parameters.Add(prop);
+
+                    cngKey = CngKey.Create(CngAlgorithm.Rsa, keyName, parametersEncryptionRsa);
+                }
+                else
+                    throw new ApplicationException("Key does not exist!");
+            }
+            CngPropertyOptions options = new CngPropertyOptions();
+            CngProperty property = cngKey.GetProperty("Length", options);
+            byte [] ?length = property.GetValue();
+            int ?keyLength = (int?)(length?[1] * 0x100);
+            keyLength += length?[0];
+            if (keyLength > ModNumber.MaxMod * 8)
+                throw new ApplicationException("Keylength not less or equal to MAXMOD!");
+            byte[] keyBlob = cngKey.Export(new CngKeyBlobFormat("RSAFULLPRIVATEBLOB"));
+            if (keyBlob[0] != 0x52 && keyBlob[1] != 0x53 && keyBlob[2] != 0x41 && keyBlob[3] != 0x33)
+                throw new ApplicationException("Key structure not of type RSA Full Private!");
+            int bitLength = keyBlob[5] * 0x100;
+            bitLength += keyBlob[4];
+            if (bitLength > ModNumber.MaxMod * 8)
+                throw new ApplicationException("Keylength not less or equal to MAXMOD!");
+            int cbPubExp = keyBlob[9] * 0x100;
+            cbPubExp += keyBlob[8];
+            int cbModulus = keyBlob[13] * 0x100;
+            cbModulus += keyBlob[12];
+            int cbPrime1 = keyBlob[17] * 0x100;
+            cbPrime1 += keyBlob[16];
+            int cbPrime2 = keyBlob[21] * 0x100;
+            cbPrime2 += keyBlob[20];
+            unsafe
+            {
+                fixed(byte *pData = &keyBlob[24])
+                {
+                    byte* p = pData;
+                    byte[] pubExpLittleEndian = ModNumber.convertEndianess(p, cbPubExp);
+                    rsaParameters.PubExp = new ModNumber(pubExpLittleEndian);
+                    p += cbPubExp;
+                    byte[] modulusLittleEndian = ModNumber.convertEndianess(p, cbModulus);
+                    rsaParameters.Modulus = new ModNumber(modulusLittleEndian);
+                    p += cbModulus;
+                    byte[] prime1LittleEndian = ModNumber.convertEndianess(p, cbPrime1);
+                    rsaParameters.Prime1 = new ModNumber(prime1LittleEndian);
+                    p += cbPrime1;
+                    byte[] prime2LittleEndian = ModNumber.convertEndianess(p, cbPrime2);
+                    rsaParameters.Prime2 = new ModNumber( prime2LittleEndian);
+                    p += cbPrime2;
+                    byte[] exp1LittleEndian = ModNumber.convertEndianess(p, cbPrime1);
+                    rsaParameters.Exp1 = new ModNumber(exp1LittleEndian);
+                    p += cbPrime1;
+                    byte[] exp2LittleEndian = ModNumber.convertEndianess(p, cbPrime2);
+                    rsaParameters.Exp2 = new ModNumber( exp2LittleEndian);
+                    p += cbPrime2;
+                    byte[] coefficientLittleEndian = ModNumber.convertEndianess(p, cbPrime1);
+                    rsaParameters.Coefficient = new ModNumber(coefficientLittleEndian);
+                    p += cbPrime1;
+                    byte[] privExpLittleEndian = ModNumber.convertEndianess(p, cbModulus);
+                    rsaParameters.PrivExp = new ModNumber(privExpLittleEndian);
+                }
+            }
+            return rsaParameters;
         }
         private ModNumber PubExp;
         private ModNumber Modulus;

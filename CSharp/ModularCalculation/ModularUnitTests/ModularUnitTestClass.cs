@@ -1,7 +1,7 @@
-//#define LARGEMOD
+#define LARGEMOD
 //#define LARGEMODSIGNATURE
 //#define MEDMOD
-#define SMALLMOD
+//#define SMALLMOD
 
 using ModularCalculation;
 using System.Collections.Generic;
@@ -18,38 +18,79 @@ namespace ModularUnitTests
         [ClassInitialize]
         public static void InitializeKeys(TestContext context)
         {
-            CngKey cngKey;
-            CngKeyCreationParameters parameters = new CngKeyCreationParameters();
-            parameters.KeyUsage = CngKeyUsages.Signing;
+            CngKey ?cngKeySigningRsa = null;
+            CngKeyCreationParameters parametersSigningRsa = new CngKeyCreationParameters();
+            parametersSigningRsa.KeyUsage = CngKeyUsages.Signing;
+
+            CngKey ?cngKeyEncryptionRsa = null;
+            CngKeyCreationParameters parametersEncryptionRsa = new CngKeyCreationParameters();
+            parametersEncryptionRsa.KeyUsage = CngKeyUsages.Decryption;
+
+            CngKey ?cngKeySigningDsa = null;
+            CngKeyCreationParameters parametersSigningDsa = new CngKeyCreationParameters();
+            parametersSigningDsa.KeyUsage = CngKeyUsages.Signing;
+
+
             byte[] keyLength = new byte[4];
             keyLength[0] = (ModNumber.MaxMod * 8) % 0x100;
             keyLength[1] = (ModNumber.MaxMod * 8) / 0x100;
             CngPropertyOptions options = new CngPropertyOptions();
 
             CngProperty property = new CngProperty("Length", keyLength, options);
-            parameters.Parameters.Add(property);
+            parametersSigningRsa.Parameters.Add(property);
+            parametersEncryptionRsa.Parameters.Add(property);
             byte[] exportp = new byte[4];
             exportp[0] = 0x03;
             property = new CngProperty("Export Policy", exportp, options);
-            parameters.Parameters.Add(property);
+            parametersSigningRsa.Parameters.Add(property);
+            parametersEncryptionRsa.Parameters.Add(property);
 #if LARGEMOD
+            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey4096", parametersSigningRsa);
+            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey4096", parametersEncryptionRsa);
+#elif LARGEMODSIGNATURE
+            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey3072", parametersSigningDsa);
+
 #elif MEDMOD
+            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey2048", parametersSigningRsa);
+            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
+            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
 #elif SMALLMOD
-            cngKey = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parameters);
-            cngKey.Dispose();
+            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
+            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
+            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey1024", parametersEncryptionRsa);
 #endif
+            cngKeySigningRsa?.Dispose();
+            cngKeySigningDsa?.Dispose();
+            cngKeyEncryptionRsa?.Dispose();
+
         }
         [ClassCleanup]
         public static void CleanupKeys()
         {
-            CngKey cngKey;
+            CngKey ?cngKeySigningRsa = null;
+            CngKey? cngKeySigningDsa = null;
+            CngKey? cngKeyEncryptionRsa = null;
 #if LARGEMOD
+            cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey4096");
+            cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey4096");
+#elif LARGEMODSIGNATURE
+            cngKeySigningDsa = CngKey.Open("MyCoolDSAKey3072");
+
 #elif MEDMOD
+            cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey2048");
+            cngKeySigningDsa = CngKey.Open("MyCoolDSAKey2048");
+            cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
-            cngKey = CngKey.Open("MyCoolRSASignatureKey1024");
-            cngKey.Delete();
-            cngKey.Dispose();
-#endif      
+            cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey1024");
+            cngKeySigningDsa = CngKey.Open("MyCoolDSAKey1024");
+            cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey1024");
+#endif
+            cngKeySigningRsa?.Delete();
+            cngKeySigningRsa?.Dispose();
+            cngKeySigningDsa?.Delete();
+            cngKeySigningDsa?.Dispose();
+            cngKeyEncryptionRsa?.Delete();
+            cngKeyEncryptionRsa?.Dispose();
         }
         [TestMethod]
         public void TestSubtractScalarSimple()
@@ -6120,6 +6161,152 @@ namespace ModularUnitTests
             Assert.IsTrue(originalHash == decryptedHash);
 #endif
         }
+        [TestMethod]
+        public void TestRSADecryptSymmetricKey()
+        {
+#if LARGEMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey4096", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
+            
+#elif MEDMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
+#elif SMALLMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey1024");
+#endif
+
+#if !LARGEMODSIGNATURE
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
+            ModNumber symmetricKey = ModNumber.Stomn("DB278FB45AE1C1D78FA27EBEA3730432DA100140A40F0CCE71A7F95D027C2D15", 16);
+            RSACng rsaCng = new RSACng(cngKey);
+            byte[] dataBigEndian = symmetricKey.convertEndianess();
+            byte[] encryptedKey = rsaCng.Encrypt(dataBigEndian, RSAEncryptionPadding.Pkcs1);
+            byte[] encryptedKeyLittleEndian = ModNumber.convertEndianess(encryptedKey);
+            ModNumber encryptedKeyModNumber = new ModNumber(encryptedKeyLittleEndian);
+            ModNumber decryptedKeyModNumber = rsa.Decrypt(encryptedKeyModNumber);
+            Assert.IsTrue(symmetricKey == decryptedKeyModNumber);
+#endif
+        }
+
+        [TestMethod]
+        public void TestRSAEncrypt()
+        {
+#if LARGEMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey4096", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
+            
+#elif MEDMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
+#elif SMALLMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey1024");
+#endif
+
+#if !LARGEMODSIGNATURE
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
+            RSACng rsaCng = new RSACng(cngKey);
+            string message = "Dit is een test";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            ModNumber encryptedMessage = rsa.Encrypt(convertedMessage);
+            byte[] encryptedMessageBigEndian = encryptedMessage.convertEndianess();
+            byte[] decryptedMessageBigEndian = rsaCng.Decrypt(encryptedMessageBigEndian,RSAEncryptionPadding.Pkcs1);
+            byte[] decryptedMessage = ModNumber.convertEndianess(decryptedMessageBigEndian);
+            ModNumber decryptedMessageModNumber = new ModNumber(decryptedMessage);
+            string decryptedString = decryptedMessageModNumber.getText();
+            Assert.IsTrue(message == decryptedString);
+#endif
+        }
+        [TestMethod]
+        public void TestRSADecrypt()
+        {
+#if LARGEMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey4096", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
+            
+#elif MEDMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
+#elif SMALLMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
+            CngKey cngKey = CngKey.Open("MyCoolRSAKey1024");
+#endif
+
+#if !LARGEMODSIGNATURE
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
+            RSACng rsaCng = new RSACng(cngKey);
+            string message = "Dit is een test";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte[] convertedMessageBigEndian = convertedMessage.convertEndianess();
+            byte[] encryptedMessageBigEndian = rsaCng.Encrypt(convertedMessageBigEndian,RSAEncryptionPadding.Pkcs1);
+            byte[] encryptedMessage = ModNumber.convertEndianess(encryptedMessageBigEndian);
+            ModNumber encryptedMessageModNumber = new ModNumber(encryptedMessage);
+            ModNumber decryptedMessage = rsa.Decrypt(encryptedMessageModNumber);
+            string decryptedString = decryptedMessage.getText();
+            Assert.IsTrue(message == decryptedString);
+#endif
+        }
+        [TestMethod]
+        public void TestSignatureRSAVerifySHA256()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash =  sha256.ComputeHash(messageBytes);
+#if LARGEMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey4096", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
+            
+#elif MEDMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
+#elif SMALLMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey1024");
+#endif
+
+#if !LARGEMODSIGNATURE
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
+            RSACng rsaCng = new RSACng(cngKey);
+            byte[] signatureBigEndian = rsaCng.SignHash(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            byte[] signature = ModNumber.convertEndianess(signatureBigEndian);
+            ModNumber signatureModNumber = new ModNumber(signature);
+            ModNumber decryptedSignature = rsa.DecryptSignature(signatureModNumber);
+            byte[] hashLittleEndian = ModNumber.convertEndianess(hash);
+            ModNumber hashModNumber = new ModNumber(hashLittleEndian);
+            Assert.IsTrue(hashModNumber == decryptedSignature);
+#endif
+        }
+        [TestMethod]
+        public void TestSignatureRSACreateSHA256()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+#if LARGEMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey4096", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
+            
+#elif MEDMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
+#elif SMALLMOD
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
+            CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey1024");
+#endif
+
+#if !LARGEMODSIGNATURE
+            ModularCalculation.RSA rsa = new ModularCalculation.RSA(rsaParameters);
+            RSACng rsaCng = new RSACng(cngKey);
+            ModNumber encryptedSignature = rsa.EncryptSignature(hash, "2.16.840.1.101.3.4.2.1");
+            byte[] signature = encryptedSignature.convertEndianess();
+            bool result = rsaCng.VerifyHash(hash, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            Assert.IsTrue(result);
+#endif
+        }
+
 
     }
 

@@ -57,9 +57,9 @@ namespace ModularUnitTests
             cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
             cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
 #elif SMALLMOD
-            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
-            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
-            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey1024", parametersEncryptionRsa);
+            //cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
+            //cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
+            //cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey1024", parametersEncryptionRsa);
 #endif
             cngKeySigningRsa?.Dispose();
             cngKeySigningDsa?.Dispose();
@@ -83,9 +83,9 @@ namespace ModularUnitTests
             cngKeySigningDsa = CngKey.Open("MyCoolDSAKey2048");
             cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
-            cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey1024");
-            cngKeySigningDsa = CngKey.Open("MyCoolDSAKey1024");
-            cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey1024");
+            //cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey1024");
+            //cngKeySigningDsa = CngKey.Open("MyCoolDSAKey1024");
+            //cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey1024");
 #endif
             cngKeySigningRsa?.Delete();
             cngKeySigningRsa?.Dispose();
@@ -6163,6 +6163,240 @@ namespace ModularUnitTests
             Assert.IsTrue(originalHash == decryptedHash);
 #endif
         }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17Point00isFalse()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm,g,mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = mzero;
+            pt.y = mzero;
+            Assert.IsFalse(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17PointMinus2And3isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = p - new ModNumber(2ul);
+            pt.y = new ModNumber(3ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17PointMinus2AndMinus3isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = p - new ModNumber(2ul);
+            pt.y = p - new ModNumber(3ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17PointMinus2And4isFalse()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = p - new ModNumber(2ul);
+            pt.y = new ModNumber(4ul);
+            Assert.IsFalse(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17PointMinus1And4isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = p - new ModNumber(1ul);
+            pt.y = new ModNumber(4ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17PointMinus1AndMinus4isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = p - new ModNumber(1ul);
+            pt.y = p - new ModNumber(4ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17Point2And5isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = new ModNumber(2ul);
+            pt.y = new ModNumber(5ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveA0B17Point2AndMinus5isTrue()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = new ModNumber(2ul);
+            pt.y = p - new ModNumber(5ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveA0B17Point2is5()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModNumber x = new ModNumber(2ul);
+            ModNumber exp = new ModNumber(5ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveA0B17Point52is375()
+        {
+            ModNumber p = new ModNumber(1000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModNumber x = new ModNumber(52ul);
+            ModNumber exp = new ModNumber(375ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveA0B17Point5234is378661()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            ModNumber x = new ModNumber(5234ul);
+            ModNumber exp = new ModNumber(378661ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveAMinus2B0Point0is0()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            ModNumber x = new ModNumber(0ul);
+            ModNumber exp = new ModNumber(0ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveAMinus2B0PointMinus1is1()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            ModNumber x = p - new ModNumber(1ul);
+            ModNumber exp = new ModNumber(1ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveAMinus2B0Point2is2()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            ModNumber x = new ModNumber(2ul);
+            ModNumber exp = new ModNumber(2ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECCalculateYOnCurveAMinus2B0Point338is6214()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            ModNumber x = new ModNumber(338ul);
+            ModNumber exp = new ModNumber(6214ul);
+            Assert.IsTrue(exp == myEC.CalculateY(x));
+
+        }
+        [TestMethod]
+        public void TestECIsOnCurveAMinus2B0Point338AndMinus6214()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = new ModNumber(338ul);
+            pt.y = p - new ModNumber(6214ul);
+            Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+
         [TestMethod]
         public void TestRSADecryptSymmetricKey()
         {

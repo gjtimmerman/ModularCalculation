@@ -2076,5 +2076,45 @@ namespace ModularCalculation
         private ModNumber y;
     }
 
+    public struct ECPoint
+    {
+        public ModNumber x;
+        public ModNumber y;
+        public bool IsAtInfinity;
+    }
+    public class EC
+    {
+        public EC(MultGroupMod mgm, ECPoint g, ModNumber n, ModNumber a,  ModNumber b)
+        {
+            this.mgm = mgm;
+            this.g = g;
+            this.n = n;
+            this.a = a;
+            this.b = b;
+        }
+        public bool IsOnCurve(ECPoint p)
+        {
+            if (p.IsAtInfinity)
+                return true;
+            ModNumber yKwad = mgm.Kwad(p.y);
+            return yKwad == CalculateRhs(p.x);
+        }
+        public ModNumber CalculateRhs(ModNumber x)
+        {
+            ModNumber xPower3 = mgm.Exp(x, new ModNumber(3ul));
+            ModNumber aTimesX = mgm.Mult(x,a);
+            ModNumber rhs = mgm.Add(mgm.Add(xPower3, aTimesX), b);
+            return rhs;
+        }
+        public ModNumber CalculateY(ModNumber x)
+        {
+            return CalculateRhs(x).Sqrt();
+        }
+        public MultGroupMod mgm;
+        public ECPoint g;
+        public ModNumber n;
+        public ModNumber a;
+        public ModNumber b;
 
+    }
 }

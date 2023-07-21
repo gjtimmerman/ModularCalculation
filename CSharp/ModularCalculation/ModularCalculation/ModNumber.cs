@@ -1970,10 +1970,111 @@ namespace ModularCalculation
             ModNumber mv = mgm.Mult(mv1!, mv2!) % Q;
             return mv == mr;
         }
+        public static DSAParameters GetDSAKey(string keyName, bool createIfNotExists)
+        {
+            CngKey cngKey;
+            if (!CngKey.Exists(keyName))
+                if (createIfNotExists)
+                {
+                    CngKeyCreationParameters parametersSigningDsa = new CngKeyCreationParameters();
+                    parametersSigningDsa.KeyUsage = CngKeyUsages.Signing;
+                    byte[] keyLen = new byte[4];
+                    keyLen[0] = (ModNumber.MaxMod * 8) % 0x100;
+                    keyLen[1] = (ModNumber.MaxMod * 8) / 0x100;
+                    CngPropertyOptions keyOptions = new CngPropertyOptions();
+
+                    CngProperty prop = new CngProperty("Length", keyLen, keyOptions);
+                    parametersSigningDsa.Parameters.Add(prop);
+                    byte[] exportp = new byte[4];
+                    exportp[0] = 0x03;
+                    prop = new CngProperty("Export Policy", exportp, keyOptions);
+                    parametersSigningDsa.Parameters.Add(prop);
+
+                    cngKey = CngKey.Create(new CngAlgorithm("DSA"), keyName, parametersSigningDsa);
+                }
+                else
+                    throw new ApplicationException("Key does not exist!");
+            else
+                cngKey = CngKey.Open(keyName);
+            DSAParameters dsaParameters;
+            CngPropertyOptions options = new CngPropertyOptions();
+            CngProperty property = cngKey.GetProperty("Length", options);
+            byte[]? length = property.GetValue();
+            int? keyLength = (int?)(length?[1] * 0x100);
+            keyLength += length?[0];
+            if (keyLength > ModNumber.MaxMod * 8)
+                throw new ApplicationException("Keylength not less or equal to MAXMOD!");
+            byte[] keyBlob = cngKey.Export(new CngKeyBlobFormat("DSAPRIVATEBLOB"));
+#if SMALLMOD
+            if (keyBlob[0] != 0x44 && keyBlob[1] != 0x53 && keyBlob[2] != 0x50 && keyBlob[3] != 0x56)
+                throw new ApplicationException("Key structure not of type RSA Full Private!");
+            int byteLength = keyBlob[5] * 0x100;
+            byteLength += keyBlob[4];
+            if (byteLength != ModNumber.MaxMod)
+                throw new ApplicationException("Keylength not equal to MAXMOD!");
+            unsafe
+            {
+                fixed (byte* pData = &keyBlob[32])
+                {
+                    byte* p = pData;
+                    byte[] qLittleEndian = ModNumber.convertEndianess(p, 20);
+                    dsaParameters.Q = new ModNumber(qLittleEndian);
+                    p += 20;
+                    byte[] pLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.P = new ModNumber(pLittleEndian);
+                    p += byteLength;
+                    byte[] gLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.g = new ModNumber(gLittleEndian);
+                    p += byteLength;
+                    byte[] yLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.y = new ModNumber(yLittleEndian);
+                    p += byteLength;
+                    byte[] xLittleEndian = ModNumber.convertEndianess(p, 20);
+                    dsaParameters.x = new ModNumber(xLittleEndian);
+                }
+            }
+#elif MEDMOD || LARGEMODSIGNATURE
+            if (keyBlob[0] != 0x44 && keyBlob[1] != 0x50 && keyBlob[2] != 0x56 && keyBlob[3] != 0x32)
+                throw new ApplicationException("Key structure not of type RSA Full Private!");
+            int byteLength = keyBlob[5] * 0x100;
+            byteLength += keyBlob[4];
+            if (byteLength != ModNumber.MaxMod)
+                throw new ApplicationException("Keylength not equal to MAXMOD!");
+            int seedLength = keyBlob[17] * 0x100;
+            seedLength += keyBlob[16];
+            int groupSize = keyBlob[21] * 0x100;
+            groupSize += keyBlob[20];
+            unsafe
+            {
+                fixed (byte* pData = &keyBlob[28 + seedLength])
+                {
+                    byte* p = pData;
+                    byte[] qLittleEndian = ModNumber.convertEndianess(p, groupSize);
+                    dsaParameters.Q = new ModNumber(qLittleEndian);
+                    p += groupSize;
+                    byte[] pLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.P = new ModNumber(pLittleEndian);
+                    p += byteLength;
+                    byte[] gLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.g = new ModNumber(gLittleEndian);
+                    p += byteLength;
+                    byte[] yLittleEndian = ModNumber.convertEndianess(p, byteLength);
+                    dsaParameters.y = new ModNumber(yLittleEndian);
+                    p += byteLength;
+                    byte[] xLittleEndian = ModNumber.convertEndianess(p, groupSize);
+                    dsaParameters.x = new ModNumber(xLittleEndian);
+                }
+            }
+
+#endif
+            return dsaParameters;
+        }
         private ModNumber P;
         private ModNumber Q;
         private ModNumber g;
         private ModNumber x;
         private ModNumber y;
     }
+
+
 }

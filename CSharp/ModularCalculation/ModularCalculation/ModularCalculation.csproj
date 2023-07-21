@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);LARGEMOD</DefineConstants>
+    <DefineConstants>$(DefineConstants);SMALLMOD</DefineConstants>
   </PropertyGroup>
 
 </Project>

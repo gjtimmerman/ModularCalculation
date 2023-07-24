@@ -6171,7 +6171,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm,g,mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm,g,mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
             pt.x = mzero;
             pt.y = mzero;
@@ -6186,9 +6186,9 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = p - new ModNumber(2ul);
+            pt.x = mgm.Diff(mzero,new ModNumber(2ul));
             pt.y = new ModNumber(3ul);
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
@@ -6201,10 +6201,10 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = p - new ModNumber(2ul);
-            pt.y = p - new ModNumber(3ul);
+            pt.x = mgm.Diff(mzero,new ModNumber(2ul));
+            pt.y = mgm.Diff(mzero,new ModNumber(3ul));
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
         }
@@ -6216,9 +6216,9 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = p - new ModNumber(2ul);
+            pt.x = mgm.Diff(mzero, new ModNumber(2ul));
             pt.y = new ModNumber(4ul);
             Assert.IsFalse(myEC.IsOnCurve(pt));
 
@@ -6231,9 +6231,9 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = p - new ModNumber(1ul);
+            pt.x = mgm.Diff(mzero, new ModNumber(1ul));
             pt.y = new ModNumber(4ul);
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
@@ -6246,10 +6246,10 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = p - new ModNumber(1ul);
-            pt.y = p - new ModNumber(4ul);
+            pt.x = mgm.Diff(mzero, new ModNumber(1ul));
+            pt.y = mgm.Diff(mzero, new ModNumber(4ul));
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
         }
@@ -6261,7 +6261,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
             pt.x = new ModNumber(2ul);
             pt.y = new ModNumber(5ul);
@@ -6276,10 +6276,10 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
             pt.x = new ModNumber(2ul);
-            pt.y = p - new ModNumber(5ul);
+            pt.y = mgm.Diff(mzero, new ModNumber(5ul));
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
         }
@@ -6291,7 +6291,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModNumber x = new ModNumber(2ul);
             ModNumber exp = new ModNumber(5ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6305,7 +6305,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModNumber x = new ModNumber(52ul);
             ModNumber exp = new ModNumber(375ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6319,7 +6319,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, new ModNumber(0ul), new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModNumber x = new ModNumber(5234ul);
             ModNumber exp = new ModNumber(378661ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6333,7 +6333,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero,new ModNumber(2ul)), mzero);
             ModNumber x = new ModNumber(0ul);
             ModNumber exp = new ModNumber(0ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6347,8 +6347,8 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
-            ModNumber x = p - new ModNumber(1ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModNumber x = mgm.Diff(mzero, new ModNumber(1ul));
             ModNumber exp = new ModNumber(1ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
 
@@ -6361,7 +6361,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
             ModNumber x = new ModNumber(2ul);
             ModNumber exp = new ModNumber(2ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6375,7 +6375,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
             ModNumber x = new ModNumber(338ul);
             ModNumber exp = new ModNumber(6214ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6389,11 +6389,105 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, p - new ModNumber(2ul), mzero);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
             pt.x = new ModNumber(338ul);
-            pt.y = p - new ModNumber(6214ul);
+            pt.y = mgm.Diff(mzero, new ModNumber(6214ul));
             Assert.IsTrue(myEC.IsOnCurve(pt));
+
+        }
+        [TestMethod]
+        public void TestECAddCurveAMinus2B0Point00And00IsAtInfinity()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = mzero;
+            pt.y = mzero;
+            ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
+            exp.IsAtInfinity = true;
+            Assert.IsTrue(exp == myEC.Add(pt, pt));
+
+        }
+        [TestMethod]
+        public void TestECAddCurveAMinus2B0Point00AndAtInfinityIs00()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModularCalculation.ECPoint pt1 = new ModularCalculation.ECPoint();
+            pt1.x = mzero;
+            pt1.y = mzero;
+            ModularCalculation.ECPoint pt2 = new ModularCalculation.ECPoint();
+            pt2.IsAtInfinity = true;
+            ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
+            exp.x = mzero;
+            exp.y = mzero;
+            Assert.IsTrue(exp == myEC.Add(pt1, pt2));
+
+        }
+        [TestMethod]
+        public void TestECCurveAMinus2B0Point00Mult3IsPoint00()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
+            pt.x = mzero;
+            pt.y = mzero;
+            ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
+            exp.x = mzero;
+            exp.y = mzero;
+            Assert.IsTrue(exp == myEC.Mult(pt, new ModNumber(3ul)));
+
+        }
+        [TestMethod]
+        public void TestECAddCurveAMinus2B0PointAtInfinityAndAtInfinityIsAtInfinity()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModularCalculation.ECPoint pt1 = new ModularCalculation.ECPoint();
+            pt1.IsAtInfinity = true;
+            ModularCalculation.ECPoint pt2 = new ModularCalculation.ECPoint();
+            pt2.IsAtInfinity = true;
+            ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
+            exp.IsAtInfinity = true;
+            Assert.IsTrue(exp == myEC.Add(pt1, pt2));
+
+        }
+        [TestMethod]
+        public void TestECAddCurveAMinus2B0Point00AndMinus1And1IsPoint22()
+        {
+            ModNumber p = new ModNumber(0x10000000000ul);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.IsAtInfinity = true;
+            ModNumber mzero = new ModNumber(0ul);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
+            ModularCalculation.ECPoint pt1 = new ModularCalculation.ECPoint();
+            pt1.x = mzero;
+            pt1.y = mzero;
+            ModularCalculation.ECPoint pt2 = new ModularCalculation.ECPoint();
+            pt2.x = mgm.Diff(new ModNumber(0ul),new ModNumber(1ul));
+            pt2.y = new ModNumber(1ul);
+            ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
+            exp.x = new ModNumber(2ul);
+            exp.y = new ModNumber(2ul);
+            Assert.IsTrue(exp == myEC.Add(pt1, pt2));
 
         }
 

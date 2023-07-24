@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
 using System.Reflection;
@@ -2078,13 +2079,50 @@ namespace ModularCalculation
 
     public struct ECPoint
     {
-        public ModNumber x;
-        public ModNumber y;
+        public ModNumber ?x;
+        public ModNumber ?y;
         public bool IsAtInfinity;
+        public ECPoint(ECPoint p)
+        {
+            this.IsAtInfinity = p.IsAtInfinity;
+            if (!IsAtInfinity)
+            {
+                this.x = new ModNumber(p.x!);
+                this.y = new ModNumber(p.y!);
+            }
+            else
+            {
+                this.x = null;
+                this.y = null;
+            }
+        }
+        public static bool operator ==(ECPoint l, ECPoint r)
+        {
+            if (l.IsAtInfinity && r.IsAtInfinity)
+                return true;
+            if (l.IsAtInfinity || r.IsAtInfinity)
+                return false;
+            return l.x! == r.x! && l.y! == r.y!;
+        }
+
+        public static bool operator !=(ECPoint l, ECPoint r)
+        {
+            return !(l == r);
+        }
+        public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            ECPoint ecPointObj = (ECPoint)obj!;
+            return this == ecPointObj;    
+        }
+        public override int GetHashCode()
+        {
+            return x?.GetHashCode() ?? 0 + y?.GetHashCode() ?? 0 + IsAtInfinity.GetHashCode();
+        }
+
     }
     public class EC
     {
-        public EC(MultGroupMod mgm, ECPoint g, ModNumber n, ModNumber a,  ModNumber b)
+        public EC(MultGroupMod mgm, ECPoint g, ModNumber n, ModNumber a, ModNumber b)
         {
             this.mgm = mgm;
             this.g = g;
@@ -2096,8 +2134,8 @@ namespace ModularCalculation
         {
             if (p.IsAtInfinity)
                 return true;
-            ModNumber yKwad = mgm.Kwad(p.y);
-            return yKwad == CalculateRhs(p.x);
+            ModNumber yKwad = mgm.Kwad(p.y!);
+            return yKwad == CalculateRhs(p.x!);
         }
         public ModNumber CalculateRhs(ModNumber x)
         {
@@ -2109,6 +2147,84 @@ namespace ModularCalculation
         public ModNumber CalculateY(ModNumber x)
         {
             return CalculateRhs(x).Sqrt();
+        }
+        public ECPoint Times2(ECPoint p)
+        {
+            if (!IsOnCurve(p))
+                throw new ArgumentException("The point is not on the curve!");
+            if (p.IsAtInfinity)
+                return new ECPoint(p);
+            ECPoint result = new ECPoint();
+            ModNumber mzero = new ModNumber(0ul);
+            if (p.y! == mzero)
+            {
+                result.IsAtInfinity = true;
+                return result;
+            }
+            ModNumber xpSquared = mgm.Kwad(p.x!);
+            ModNumber xpSquaredTimes3 = mgm.Mult(xpSquared, new ModNumber(3ul));
+            ModNumber xpSquaredTimes3PlusA = mgm.Add(xpSquaredTimes3, a);
+            ModNumber ypTimes2 = mgm.Mult(p.y!, new ModNumber(2ul));
+            ModNumber ypTimes2Inverse = mgm.Inverse(ypTimes2);
+            ModNumber lambda = mgm.Mult(xpSquaredTimes3PlusA, ypTimes2Inverse);
+            ModNumber xpTimes2 = mgm.Mult(p.x!, new ModNumber(2ul));
+            ModNumber lambdaSquaredMinusXpTimes2 = mgm.Diff(mgm.Kwad(lambda), xpTimes2);
+            ModNumber xrMinusXp = mgm.Diff(lambdaSquaredMinusXpTimes2, p.x!);
+            ModNumber lambdaTimesXrMinusXp = mgm.Mult(lambda, xrMinusXp);
+            ModNumber yPPlusLambdaTimesXrMinusXp = mgm.Add(p.y!, lambdaTimesXrMinusXp);
+            result.x = lambdaSquaredMinusXpTimes2;
+            result.y = mgm.Diff(mzero, yPPlusLambdaTimesXrMinusXp);
+            return result;
+
+        }
+        public ECPoint Add(ECPoint p, ECPoint q)
+        {
+            if (!IsOnCurve(p) || !IsOnCurve(q))
+                throw new ArgumentException("One of the points is not on the curve!");
+            ECPoint result = new ECPoint();
+            if (p == q)
+                return Times2(p);
+            if (p.IsAtInfinity)
+                return new ECPoint(q);
+            if (q.IsAtInfinity)
+                return new ECPoint(p);
+            if (p.x! == q.x!)
+            {
+                result.IsAtInfinity = true;
+                return result;
+            }
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber xDelta = mgm.Diff(q.x!, p.x!);
+            ModNumber yDelta = mgm.Diff(q.y!, p.y!);
+            ModNumber xDeltaInverse = mgm.Inverse(xDelta);
+            ModNumber lambda = mgm.Mult(yDelta,xDeltaInverse);
+            result.x = mgm.Diff(mgm.Diff(mgm.Kwad(lambda), p.x!), q.x!);
+            result.y = mgm.Diff(mzero, mgm.Add(p.y!, mgm.Mult(lambda, mgm.Diff(result.x, p.x!))));
+
+            return result;
+        }
+        public ECPoint Mult(ECPoint p, ModNumber n)
+        {
+            if (!IsOnCurve(p))
+                throw new ArgumentException("The point is not on the curve!");
+            if (p.IsAtInfinity)
+                return new ECPoint(p);
+            ECPoint pCopy = new ECPoint(p);
+            ModNumber mzero = new ModNumber(0ul);
+            ECPoint result = new ECPoint();
+            result.IsAtInfinity = true;
+            ulong mask = 1ul;
+            while (n > mzero)
+            {
+                ulong first = n.num[0];
+                if ((first & mask) != 0)
+                {
+                    result = Add(result, pCopy);
+                }
+                pCopy = Times2(pCopy);
+                n >>= 1;
+            }
+            return result;
         }
         public MultGroupMod mgm;
         public ECPoint g;

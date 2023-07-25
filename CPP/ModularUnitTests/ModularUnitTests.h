@@ -6393,7 +6393,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
@@ -6406,9 +6406,9 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull) );
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull) );
 			ECPoint pt;
-			pt.x = p - ModNumber(2ull);
+			pt.x = mgm.Diff(mzero, ModNumber(2ull));
 			pt.y = ModNumber(3ull);
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
@@ -6419,10 +6419,10 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
-			pt.x = p - ModNumber(2ull);
-			pt.y = p - ModNumber(3ull);
+			pt.x = mgm.Diff(mzero, ModNumber(2ull));
+			pt.y = mgm.Diff(mzero, ModNumber(3ull));
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
 		TEST_METHOD(TestECIsOnCurveA0B17PointMinus2And4isFalse)
@@ -6432,9 +6432,9 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
-			pt.x = p - ModNumber(2ull);
+			pt.x = mgm.Diff(mzero, ModNumber(2ull));
 			pt.y = ModNumber(4ull);
 			Assert::IsFalse(myEC.IsOnCurve(pt));
 		}
@@ -6445,9 +6445,9 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
-			pt.x = p - ModNumber(1ull);
+			pt.x = mgm.Diff(mzero, ModNumber(1ull));
 			pt.y = ModNumber(4ull);
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
@@ -6458,10 +6458,10 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
-			pt.x = p - ModNumber(1ull);
-			pt.y = p - ModNumber(4ull);
+			pt.x = mgm.Diff(mzero, ModNumber(1ull));
+			pt.y = mgm.Diff(mzero, ModNumber(4ull));
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
 		TEST_METHOD(TestECIsOnCurveA0B17Point2And5isTrue)
@@ -6471,7 +6471,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(5ull);
@@ -6484,10 +6484,10 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
-			pt.y = p - ModNumber(5ull);
+			pt.y = mgm.Diff(mzero, ModNumber(5ull));
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
 		TEST_METHOD(TestECCalculateYOnCurveA0B17Point2is5)
@@ -6497,7 +6497,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ModNumber x(2ull);
 			ModNumber exp(5ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6509,7 +6509,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ModNumber x(52ull);
 			ModNumber exp(375ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6521,7 +6521,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, ModNumber(0ull), ModNumber(17ull));
+			EC myEC(mgm, g, mzero, mzero, ModNumber(17ull));
 			ModNumber x(5234ull);
 			ModNumber exp(378661ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6533,7 +6533,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero,ModNumber(2ull)), mzero);
 			ModNumber exp = mzero;
 			Assert::IsTrue(exp == myEC.CalculateY(mzero));
 		}
@@ -6544,7 +6544,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ModNumber x = p - ModNumber(1ull);
 			ModNumber exp = ModNumber(1ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6556,7 +6556,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ModNumber x = ModNumber(2ull);
 			ModNumber exp = ModNumber(2ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6568,7 +6568,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ModNumber x = ModNumber(338ull);
 			ModNumber exp = ModNumber(6214ull);
 			Assert::IsTrue(exp == myEC.CalculateY(x));
@@ -6580,10 +6580,10 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = ModNumber(338ull);
-			pt.y = p - ModNumber(6214ull);
+			pt.y = mgm.Diff(mzero, ModNumber(6214ull));
 			Assert::IsTrue(myEC.IsOnCurve(pt));
 		}
 		TEST_METHOD(TestECAddCurveAMinus2B0Point00And00isAtInfinity)
@@ -6593,7 +6593,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
@@ -6608,7 +6608,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
@@ -6626,7 +6626,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
@@ -6643,7 +6643,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.IsAtInfinity = true;
 			ECPoint pt2;
@@ -6660,12 +6660,12 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
 			ECPoint pt2;
-			pt2.x = p - ModNumber(1ull);
+			pt2.x = mgm.Diff(mzero, ModNumber(1ull));
 			pt2.y = ModNumber(1ull);
 			ECPoint exp;
 			exp.x = ModNumber(2ull);
@@ -6679,7 +6679,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(2ull), mzero);
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(2ull)), mzero);
 			ECPoint pt;
 			pt.x = mzero;
 			pt.y = mzero;
@@ -6687,7 +6687,7 @@ namespace ModularUnitTests
 			pt2.x = ModNumber(2ull);
 			pt2.y = ModNumber(2ull);
 			ECPoint exp;
-			exp.x = p - ModNumber(1ull);
+			exp.x = mgm.Diff(mzero, ModNumber(1ull));
 			exp.y = ModNumber(1ull);
 			Assert::IsTrue(exp == myEC.Add(pt, pt2));
 		}
@@ -6698,7 +6698,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(2ull);
@@ -6711,7 +6711,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6724,7 +6724,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(2ull);
@@ -6737,7 +6737,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(17ull);
@@ -6751,7 +6751,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(2ull);
@@ -6769,7 +6769,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(2ull);
@@ -6788,7 +6788,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6807,7 +6807,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6826,7 +6826,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6845,7 +6845,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6866,7 +6866,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6880,7 +6880,6 @@ namespace ModularUnitTests
 			pt2.y = ModNumber(7ull);
 			Assert::IsTrue(exp == myEC.Add(pt, pt2));
 			ECPoint pt3;
-			pt3.IsAtInfinity = false;
 			pt3.x = ModNumber(18ull);
 			pt3.y = ModNumber(4ull);
 			Assert::IsTrue(exp == myEC.Times2(pt3));
@@ -6893,7 +6892,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(17ull);
@@ -6932,7 +6931,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt1;
 			pt1.x = ModNumber(2ull);
 			pt1.y = ModNumber(2ull);
@@ -6986,7 +6985,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt1;
 			pt1.x = ModNumber(2ull);
 			pt1.y = ModNumber(17ull);
@@ -7040,7 +7039,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(2ull);
@@ -7143,7 +7142,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(2ull);
@@ -7156,7 +7155,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(2ull);
 			pt.y = ModNumber(2ull);
@@ -7169,7 +7168,7 @@ namespace ModularUnitTests
 			ECPoint g;
 			g.IsAtInfinity = true;
 			ModNumber mzero;
-			EC myEC(mgm, g, mzero, p - ModNumber(7ull), ModNumber(10));
+			EC myEC(mgm, g, mzero, mgm.Diff(mzero, ModNumber(7ull)), ModNumber(10));
 			ECPoint pt;
 			pt.x = ModNumber(1ull);
 			pt.y = ModNumber(2ull);

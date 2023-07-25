@@ -1813,8 +1813,8 @@ namespace ModularCalculation
             }
             if (!(s < Q && r < Q))
                 throw new ArgumentException("Wrong signature");
-            byte[] rBigEndian = r.convertEndianess();
-            byte[] sBigEndian = s.convertEndianess();
+            byte[] rBigEndian = r.convertEndianess(nLen);
+            byte[] sBigEndian = s.convertEndianess(nLen);
             if (DEREncoded)
             {
                 return CreateBERASNStringForDSASignature(rBigEndian, sBigEndian);
@@ -1844,6 +1844,31 @@ namespace ModularCalculation
                 retValue[6 + r.Length + i] = s[i];
             return retValue;
         }
+        public string ConvertSignatureToString(byte [] signature, bool DEREncoded)
+        {
+            if (DEREncoded)
+            {
+                StringBuilder sb = new StringBuilder(signature.Length * 2);
+                for (int i = 0; i < signature.Length; i++)
+                {
+                    string tmp = string.Format("{0:X2}", (int)signature[i]);
+                    sb.Append(tmp);
+                }
+                return sb.ToString();
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder(signature.Length / 2);
+                sb.Append(new string(' ', signature.Length / 2));
+                for (int i = 0; i < signature.Length; i += 2)
+                {
+                    char c = (char)signature[i];
+                    c |= (char)(signature[i + 1] << 8);
+                    sb[i / 2] = c;
+                }
+                return sb.ToString();
+            }
+        }
 
     }
     public class DSA : DSABase
@@ -1861,7 +1886,7 @@ namespace ModularCalculation
             MultGroupMod mgm = new MultGroupMod(P);
             return mgm.Exp(g, mk) % Q;
         }
-        (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, string signature, bool DEREncoded)
+        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, string signature, bool DEREncoded)
         {
             ModNumber mHash;
             unsafe
@@ -1891,26 +1916,26 @@ namespace ModularCalculation
                 r = new byte[signature.Length];
                 for (int i = 0; i < signature.Length / 2; i++)
                 {
-                    r[i*2] = (byte)signature[i];
+                    r[i * 2] = (byte)signature[i];
                     r[i * 2 + 1] = (byte)(signature[i] >> 8);
                 }
                 s = new byte[signature.Length];
                 for (int i = 0; i < signature.Length / 2; i++)
                 {
                     s[i * 2] = (byte)signature[signature.Length / 2 + i];
-                    s[i * 2 + 1] = (byte)(signature[signature.Length/2 + i] >> 8);
+                    s[i * 2 + 1] = (byte)(signature[signature.Length / 2 + i] >> 8);
                 }
             }
             byte[] rLittleEndian;
             byte[] sLittleEndian;
             unsafe
             {
-                fixed(byte* pr = r)
-                    fixed(byte *ps = s)
-                    {
-                        rLittleEndian = ModNumber.convertEndianess(pr, r.Length);
-                        sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
-                    }
+                fixed (byte* pr = r)
+                fixed (byte* ps = s)
+                {
+                    rLittleEndian = ModNumber.convertEndianess(pr, r.Length);
+                    sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
+                }
             }
             ModNumber mr = new ModNumber(rLittleEndian);
             ModNumber ms = new ModNumber(sLittleEndian);
@@ -1918,43 +1943,22 @@ namespace ModularCalculation
                 throw new ArgumentException("Invalid signature");
             MultGroupMod mgm = new MultGroupMod(Q);
             ModNumber sInverse = mgm.Inverse(ms);
-            ModNumber ?u1 = null;
+            ModNumber? u1 = null;
             Thread th1 = new Thread(() => { u1 = mgm.Mult(mHash, sInverse); });
             th1.Start();
-            ModNumber ?u2 = null;
+            ModNumber? u2 = null;
             Thread th2 = new Thread(() => { u2 = mgm.Mult(mr, sInverse); });
             th2.Start();
             th1.Join();
             th2.Join();
             return (u1!, u2!, mr);
-            
+
         }
         public string Sign(byte[] hash, bool DEREncoded)
         {
             byte[] signature = CalculateDSASignature(Q, x, hash, DEREncoded);
-            if (DEREncoded)
-            {
-                StringBuilder sb = new StringBuilder(signature.Length * 2);
-                for (int i = 0; i < signature.Length; i++)
-                {
-                    string tmp = string.Format("{0:X2}", (int)signature[i]);
-                    sb.Append(tmp);
-                }
-                return sb.ToString();
-            }
-            else
-            {
-                StringBuilder sb = new StringBuilder(signature.Length / 2);
-                sb.Append(new string(' ', signature.Length / 2));
-                for (int i = 0; i < signature.Length; i+=2)
-                {
-                    char c = (char)signature[i];
-                    c |= (char)(signature[i + 1] << 8);
-                    sb[i/2] = c;
-                }
-                return sb.ToString();
-            }
-        }
+            return ConvertSignatureToString(signature, DEREncoded);
+         }
         public bool Verify(byte[] hash, string signature, bool DEREndoded = true)
         {
             MultGroupMod mgm = new MultGroupMod(P);
@@ -2232,5 +2236,96 @@ namespace ModularCalculation
         public ModNumber a;
         public ModNumber b;
 
+    }
+    public class ECKeyPair
+    {
+        public ECKeyPair(EC ec, ModNumber ?mx = null, ECPoint ?y = null)
+        {
+            this.ec = ec;
+            if ((object?)mx != null)
+            {
+                this.mx = new ModNumber(mx);
+            }
+            else
+                this.mx = new ModNumber(0ul);
+            ModNumber mzero = new ModNumber(0ul);
+            if (this.mx == mzero)
+            {
+                ulong[] x = new ulong[ModNumber.LCOUNT];
+                unsafe
+                {
+                    fixed (ulong* xPtr = x)
+                    {
+                        byte *p = (byte*)xPtr;
+                        Random random = new Random();
+                        ModNumber mxTmp;
+                        uint nLen = ec.n.GetByteCount();
+                        for (uint i = 0; i < nLen; i++)
+                        {
+                            p[i] = (byte)(random.Next() % 0x100);
+                        }
+                        mxTmp = new ModNumber(x);
+                        if (mxTmp == mzero)
+                            mxTmp += (uint)random.Next() + 1;
+                        while (mxTmp >= ec.n)
+                        {
+                            p[nLen - 1] -= (byte)(random.Next() + 1);
+                            mxTmp = new ModNumber(x);
+                        }
+                        this.mx = mxTmp;
+                    }
+                }
+            }
+            if (y == null)
+                this.y = CalcPublicKey(this.mx);
+            else
+                this.y = (ECPoint)y!;
+
+        }
+        public ECPoint CalcPublicKey(ModNumber x)
+        {
+            ECPoint retval = ec.Mult(ec.g, x);
+            return retval;
+        }
+        public EC ec;
+        public ECPoint y;
+        public ModNumber mx;
+    }
+    public class ECDSA : DSABase
+    {
+        public ECDSA (ECKeyPair keyPair)
+        {
+            this.ecKeyPair = keyPair;
+        }
+        public ECKeyPair ecKeyPair;
+        public override ModNumber CalcR(ModNumber mk)
+        {
+            ECPoint ecPoint = ecKeyPair.ec.Mult(ecKeyPair.ec.g, mk);
+            if (ecPoint.IsAtInfinity)
+                throw new ArgumentException("Wrong parameters!");
+            return ecPoint.x! % ecKeyPair.ec.n;
+        }
+        public string Sign(byte[] hash, bool DEREncoded)
+        {
+            byte [] signature =  CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.mx, hash, DEREncoded);
+            return ConvertSignatureToString(signature, DEREncoded);
+        }
+        public bool Verify(byte[] hash, string signature, bool DEREncoded = true)
+        {
+            uint nLen = ecKeyPair.ec.n.GetByteCount();
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, (int)nLen, hash, signature, DEREncoded);
+            ModularCalculation.ECPoint ?pt1 = null;
+            ModularCalculation.ECPoint ?pt2 = null;
+            Thread th1 = new Thread(() => { pt1 = ecKeyPair.ec.Mult(ecKeyPair.ec.g, u1); });
+            th1.Start();
+            Thread th2 = new Thread(() => { pt2 = ecKeyPair.ec.Mult(ecKeyPair.y, u2); });
+            th2.Start();
+            th1.Join();
+            th2.Join();
+            ECPoint ptv = ecKeyPair.ec.Add((ECPoint)pt1!, (ECPoint)pt2!);
+            if (ptv.IsAtInfinity)
+                return false;
+            return ptv.x! == mr;
+        }
     }
 }

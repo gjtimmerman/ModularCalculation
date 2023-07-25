@@ -1,7 +1,7 @@
 //#define LARGEMOD
 //#define LARGEMODSIGNATURE
-//#define MEDMOD
-#define SMALLMOD
+#define MEDMOD
+//#define SMALLMOD
 
 using ModularCalculation;
 using System.Collections.Generic;
@@ -53,9 +53,9 @@ namespace ModularUnitTests
             cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey3072", parametersSigningDsa);
 
 #elif MEDMOD
-            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey2048", parametersSigningRsa);
-            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
-            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
+            //cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey2048", parametersSigningRsa);
+            //cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
+            //cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
 #elif SMALLMOD
             //cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
             //cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
@@ -7225,6 +7225,121 @@ namespace ModularUnitTests
             exp.IsAtInfinity = true;
             Assert.IsTrue(exp == myEC.Mult(pt, new ModNumber(82)));
 
+        }
+        [TestMethod]
+        public void TestECSecp256k1Parameters()
+        {
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            Assert.IsTrue(myEC.IsOnCurve(g));
+            ModularCalculation.ECPoint gTimesN = myEC.Mult(g, n);
+            Assert.IsTrue(gTimesN.IsAtInfinity);
+        }
+        [TestMethod]
+        public void TestECSecp256k1PublicPrivateKeyPair()
+        {
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey);
+            Assert.IsFalse(ecKeyPair.y.IsAtInfinity);
+            Assert.IsTrue(publicKeyX == ecKeyPair.y.x!);
+            Assert.IsTrue(publicKeyY == ecKeyPair.y.y!);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASecp256k1SignAndVerifySHA256Valid()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASecp256k1SignAndVerifySHA256InValid()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] wrongHash = new byte[hashBigEndian.Length];
+            hashBigEndian.CopyTo(wrongHash, 0);
+            wrongHash[0]++;
+            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            Assert.IsFalse(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignAndVerifySHA256Valid()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            Assert.IsTrue(valid);
         }
 
         [TestMethod]

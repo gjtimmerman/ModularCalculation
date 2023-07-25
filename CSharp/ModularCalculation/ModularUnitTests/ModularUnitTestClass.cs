@@ -7341,6 +7341,92 @@ namespace ModularUnitTests
             bool valid = ecDsa.Verify(hashBigEndian, signature, false);
             Assert.IsTrue(valid);
         }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignAndVerifySHA256InValid()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] wrongHash = new byte[hashBigEndian.Length];
+            hashBigEndian.CopyTo(wrongHash, 0);
+            wrongHash[0]++;
+            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            Assert.IsFalse(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignAndVerifyNISTP224SHA256ValidRandomPrivateKey()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("ffffffffffffffffffffffffffffffff000000000000000000000001", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21", 16);
+            g.y = ModNumber.Stomn("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignAndVerifyNISTP384SHA256ValidRandomPrivateKey()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+            g.y = ModNumber.Stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignAndVerifyNISTP384SHA256InValidRandomPrivateKey()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+            g.y = ModNumber.Stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] wrongHash = new byte[hashBigEndian.Length];
+            hashBigEndian.CopyTo(wrongHash, 0);
+            wrongHash[0]++;
+            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            Assert.IsFalse(valid);
+        }
 
         [TestMethod]
         public void TestRSADecryptSymmetricKey()
@@ -7613,6 +7699,71 @@ namespace ModularUnitTests
             Assert.IsTrue(result);
             cngKey.Dispose();
 #endif
+        }
+        [TestMethod]
+        public void TestSignatureECDSAVerifySHA256Valid()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(hash, signature, false);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSAVerifySHA256InValid()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            string messageChanged = "Dit is een test om te zien of een signature geverifieerd kan worden";
+            byte[] messageBytesChanged = Encoding.ASCII.GetBytes(messageChanged);
+            byte[] invalidHash = sha256.ComputeHash(messageBytesChanged);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(invalidHash, signature, false);
+            Assert.IsFalse(valid);
         }
 
 

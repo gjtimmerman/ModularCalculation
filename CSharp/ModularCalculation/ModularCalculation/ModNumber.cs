@@ -2287,6 +2287,20 @@ namespace ModularCalculation
             ECPoint retval = ec.Mult(ec.g, x);
             return retval;
         }
+        public ECDsaCng ImportECKeyPair(string curveName = "secP256k1")
+        {
+            ECDsaCng ecDsaCng = new ECDsaCng();
+            ECParameters ecParameters = new ECParameters();
+            ecParameters.Curve = ECCurve.CreateFromFriendlyName(curveName);
+            byte [] privateKeyBigEndian = mx.convertEndianess();
+            System.Security.Cryptography.ECPoint ecPoint = new System.Security.Cryptography.ECPoint();
+            ecPoint.X = y.x.convertEndianess();
+            ecPoint.Y = y.y.convertEndianess();
+            ecParameters.Q = ecPoint;
+            ecParameters.D = privateKeyBigEndian;
+            ecDsaCng.ImportParameters(ecParameters);
+            return ecDsaCng;
+        }
         public EC ec;
         public ECPoint y;
         public ModNumber mx;
@@ -2309,6 +2323,11 @@ namespace ModularCalculation
         {
             byte [] signature =  CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.mx, hash, DEREncoded);
             return ConvertSignatureToString(signature, DEREncoded);
+        }
+        public bool Verify(byte [] hash, byte[] signature, bool DEREncoded)
+        {
+            string encoded = ConvertSignatureToString(signature, DEREncoded);
+            return Verify(hash, encoded, DEREncoded);
         }
         public bool Verify(byte[] hash, string signature, bool DEREncoded = true)
         {

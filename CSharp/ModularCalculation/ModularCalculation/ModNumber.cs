@@ -1888,19 +1888,6 @@ namespace ModularCalculation
         }
         public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, string signature, bool DEREncoded)
         {
-            ModNumber mHash;
-            unsafe
-            {
-                fixed (byte* p = hash)
-                {
-                    byte[] hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
-                    mHash = new ModNumber(hashLittleEndian);
-                    if (hash.Length > bcQ)
-                    {
-                        mHash = ModNumber.GetLeftMostBytes(mHash, bcQ);
-                    }
-                }
-            }
             byte[] r;
             byte[] s;
             if (DEREncoded)
@@ -1926,6 +1913,11 @@ namespace ModularCalculation
                     s[i * 2 + 1] = (byte)(signature[signature.Length / 2 + i] >> 8);
                 }
             }
+            return DSACalculateU1U2Mr(Q, bcQ, hash, r, s);
+        }
+
+        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, byte[] r, byte[] s)
+        {
             byte[] rLittleEndian;
             byte[] sLittleEndian;
             unsafe
@@ -1935,6 +1927,19 @@ namespace ModularCalculation
                 {
                     rLittleEndian = ModNumber.convertEndianess(pr, r.Length);
                     sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
+                }
+            }
+            ModNumber mHash;
+            unsafe
+            {
+                fixed (byte* p = hash)
+                {
+                    byte[] hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
+                    mHash = new ModNumber(hashLittleEndian);
+                    if (hash.Length > bcQ)
+                    {
+                        mHash = ModNumber.GetLeftMostBytes(mHash, bcQ);
+                    }
                 }
             }
             ModNumber mr = new ModNumber(rLittleEndian);
@@ -2324,17 +2329,32 @@ namespace ModularCalculation
             byte [] signature =  CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.mx, hash, DEREncoded);
             return ConvertSignatureToString(signature, DEREncoded);
         }
-        public bool Verify(byte [] hash, byte[] signature, bool DEREncoded)
+        public bool Verify(byte [] hash, byte[] signature)
         {
-            string encoded = ConvertSignatureToString(signature, DEREncoded);
-            return Verify(hash, encoded, DEREncoded);
+            byte[] r = new byte[signature.Length/2];
+            byte[] s = new byte[signature.Length/2];
+            signature.CopyTo(r, 0);
+            signature.CopyTo(s, r.Length);
+            uint nLen = ecKeyPair.ec.n.GetByteCount();
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, (int)nLen, hash, r, s);
+            ModularCalculation.ECPoint ptv = CalculateV(hash, u1, u2, mr);
+            if (ptv.IsAtInfinity)
+                return false;
+            return ptv.x! == mr;
         }
         public bool Verify(byte[] hash, string signature, bool DEREncoded = true)
         {
             uint nLen = ecKeyPair.ec.n.GetByteCount();
             (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, (int)nLen, hash, signature, DEREncoded);
-            ModularCalculation.ECPoint ?pt1 = null;
-            ModularCalculation.ECPoint ?pt2 = null;
+            ModularCalculation.ECPoint ptv = CalculateV(hash, u1, u2, mr);
+            if (ptv.IsAtInfinity)
+                return false;
+            return ptv.x! == mr;
+        }
+        public  ModularCalculation.ECPoint CalculateV(byte[] hash, ModNumber u1, ModNumber u2, ModNumber mr)
+        {
+            ModularCalculation.ECPoint? pt1 = null;
+            ModularCalculation.ECPoint? pt2 = null;
             Thread th1 = new Thread(() => { pt1 = ecKeyPair.ec.Mult(ecKeyPair.ec.g, u1); });
             th1.Start();
             Thread th2 = new Thread(() => { pt2 = ecKeyPair.ec.Mult(ecKeyPair.y, u2); });
@@ -2342,9 +2362,7 @@ namespace ModularCalculation
             th1.Join();
             th2.Join();
             ECPoint ptv = ecKeyPair.ec.Add((ECPoint)pt1!, (ECPoint)pt2!);
-            if (ptv.IsAtInfinity)
-                return false;
-            return ptv.x! == mr;
+            return ptv;
         }
     }
 }

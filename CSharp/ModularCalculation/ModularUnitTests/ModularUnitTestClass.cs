@@ -7728,7 +7728,7 @@ namespace ModularUnitTests
             ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
             ECDSA ecDsa = new ECDSA(ecKeyPair);
             byte[] signature = ecDsaCng.SignHash(hash);
-            bool valid = ecDsa.Verify(hash, signature, false);
+            bool valid = ecDsa.Verify(hash, signature);
             Assert.IsTrue(valid);
         }
         [TestMethod]
@@ -7762,7 +7762,7 @@ namespace ModularUnitTests
             ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
             ECDSA ecDsa = new ECDSA(ecKeyPair);
             byte[] signature = ecDsaCng.SignHash(hash);
-            bool valid = ecDsa.Verify(invalidHash, signature, false);
+            bool valid = ecDsa.Verify(invalidHash, signature);
             Assert.IsFalse(valid);
         }
 

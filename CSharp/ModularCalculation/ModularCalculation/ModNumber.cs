@@ -1886,7 +1886,7 @@ namespace ModularCalculation
             MultGroupMod mgm = new MultGroupMod(P);
             return mgm.Exp(g, mk) % Q;
         }
-        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, string signature, bool DEREncoded)
+        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, byte[] hash, string signature, bool DEREncoded)
         {
             byte[] r;
             byte[] s;
@@ -1913,10 +1913,10 @@ namespace ModularCalculation
                     s[i * 2 + 1] = (byte)(signature[signature.Length / 2 + i] >> 8);
                 }
             }
-            return DSACalculateU1U2Mr(Q, bcQ, hash, r, s);
+            return DSACalculateU1U2Mr(Q, hash, r, s);
         }
 
-        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, int bcQ, byte[] hash, byte[] r, byte[] s)
+        public static (ModNumber, ModNumber, ModNumber) DSACalculateU1U2Mr(ModNumber Q, byte[] hash, byte[] r, byte[] s)
         {
             byte[] rLittleEndian;
             byte[] sLittleEndian;
@@ -1930,6 +1930,7 @@ namespace ModularCalculation
                 }
             }
             ModNumber mHash;
+            int bcQ = (int)Q.GetByteCount();
             unsafe
             {
                 fixed (byte* p = hash)
@@ -1968,8 +1969,7 @@ namespace ModularCalculation
         {
             MultGroupMod mgm = new MultGroupMod(P);
             ModNumber ?mv1 = null;
-            int bcQ = (int)Q.GetByteCount();
-            (ModNumber u1, ModNumber u2, ModNumber mr) = DSACalculateU1U2Mr(Q, bcQ, hash, signature, DEREndoded);
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSACalculateU1U2Mr(Q, hash, signature, DEREndoded);
             Thread th3 = new Thread(() => { mv1 = mgm.Exp(g, u1!); });
             th3.Start();
             ModNumber ?mv2 = null;
@@ -2335,8 +2335,7 @@ namespace ModularCalculation
             byte[] s = new byte[signature.Length/2];
             signature.CopyTo(r, 0);
             signature.CopyTo(s, r.Length);
-            uint nLen = ecKeyPair.ec.n.GetByteCount();
-            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, (int)nLen, hash, r, s);
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, hash, r, s);
             ModularCalculation.ECPoint ptv = CalculateV(hash, u1, u2, mr);
             if (ptv.IsAtInfinity)
                 return false;
@@ -2344,8 +2343,7 @@ namespace ModularCalculation
         }
         public bool Verify(byte[] hash, string signature, bool DEREncoded = true)
         {
-            uint nLen = ecKeyPair.ec.n.GetByteCount();
-            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, (int)nLen, hash, signature, DEREncoded);
+            (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, hash, signature, DEREncoded);
             ModularCalculation.ECPoint ptv = CalculateV(hash, u1, u2, mr);
             if (ptv.IsAtInfinity)
                 return false;

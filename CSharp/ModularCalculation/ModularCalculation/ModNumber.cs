@@ -2138,6 +2138,7 @@ namespace ModularCalculation
             this.n = n;
             this.a = a;
             this.b = b;
+            this.nLen = n.GetByteCount();
         }
         public bool IsOnCurve(ECPoint p)
         {
@@ -2240,6 +2241,7 @@ namespace ModularCalculation
         public ModNumber n;
         public ModNumber a;
         public ModNumber b;
+        public uint nLen;
 
     }
     public class ECKeyPair
@@ -2264,8 +2266,7 @@ namespace ModularCalculation
                         byte *p = (byte*)xPtr;
                         Random random = new Random();
                         ModNumber mxTmp;
-                        uint nLen = ec.n.GetByteCount();
-                        for (uint i = 0; i < nLen; i++)
+                        for (uint i = 0; i < ec.nLen; i++)
                         {
                             p[i] = (byte)(random.Next() % 0x100);
                         }
@@ -2274,7 +2275,7 @@ namespace ModularCalculation
                             mxTmp += (uint)random.Next() + 1;
                         while (mxTmp >= ec.n)
                         {
-                            p[nLen - 1] -= (byte)(random.Next() + 1);
+                            p[ec.nLen - 1] -= (byte)(random.Next() + 1);
                             mxTmp = new ModNumber(x);
                         }
                         this.mx = mxTmp;
@@ -2297,14 +2298,50 @@ namespace ModularCalculation
             ECDsaCng ecDsaCng = new ECDsaCng();
             ECParameters ecParameters = new ECParameters();
             ecParameters.Curve = ECCurve.CreateFromFriendlyName(curveName);
-            byte [] privateKeyBigEndian = mx.convertEndianess();
+            byte [] privateKeyBigEndian = mx.convertEndianess((int)ec.nLen);
             System.Security.Cryptography.ECPoint ecPoint = new System.Security.Cryptography.ECPoint();
-            ecPoint.X = y.x.convertEndianess();
-            ecPoint.Y = y.y.convertEndianess();
+            ecPoint.X = y.x!.convertEndianess((int)ec.nLen);
+            ecPoint.Y = y.y!.convertEndianess((int)ec.nLen);
             ecParameters.Q = ecPoint;
             ecParameters.D = privateKeyBigEndian;
             ecDsaCng.ImportParameters(ecParameters);
             return ecDsaCng;
+        }
+        public static ModNumber CalculateECDHSharedSecret(ECKeyPair pair1, ECKeyPair pair2)
+        {
+            ModularCalculation.ECPoint resultPt = pair1.ec.Mult(pair1.y, pair2.mx);
+            if (resultPt.IsAtInfinity)
+                throw new ArgumentException("Invalid keypair combination");
+            return resultPt.x!;
+        }
+        public static byte[] GetSecretECDHAgreement(ECKeyPair pair1, ECKeyPair pair2, string curveName, byte[] magicNr )
+        {
+            ECDiffieHellmanCng ecDiffieHellmanCng1 = new ECDiffieHellmanCng();
+            ecDiffieHellmanCng1.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
+            ECParameters ecParameters1 = new ECParameters();
+            ecParameters1.Curve = ECCurve.CreateFromFriendlyName(curveName);
+            byte[] privateKey1BigEndian = pair1.mx.convertEndianess((int)pair1.ec.nLen);
+            ecParameters1.D = privateKey1BigEndian;
+            byte[] publicKey1XBigEndian = pair1.y.x!.convertEndianess((int)pair1.ec.nLen);
+            byte[] publicKey1YBigEndian = pair1.y.y!.convertEndianess((int)pair1.ec.nLen);
+            ecParameters1.Q.X = publicKey1XBigEndian;
+            ecParameters1.Q.Y = publicKey1YBigEndian;
+            ecDiffieHellmanCng1.ImportParameters(ecParameters1);
+            ECParameters ecParameters2 = new ECParameters();
+            ecParameters2.Curve = ECCurve.CreateFromFriendlyName(curveName);
+            byte[] publicKeyBlob = new byte[pair2.ec.nLen * 2 + 8];
+            for (int i = 0; i < 4; i++)
+                publicKeyBlob[i] = magicNr[i];
+            publicKeyBlob[4] = (byte)(pair1.ec.nLen % 0x100);
+            publicKeyBlob[5] = (byte)(pair1.ec.nLen / 0x100);
+            byte[] publicKey2XBigEndian = pair2.y.x!.convertEndianess((int)pair2.ec.nLen);
+            byte[] publicKey2YBigEndian = pair2.y.y!.convertEndianess((int)pair2.ec.nLen);
+            publicKey2XBigEndian.CopyTo(publicKeyBlob, 8);
+            publicKey2YBigEndian.CopyTo(publicKeyBlob, pair2.ec.nLen + 8);
+            ECDiffieHellmanPublicKey ecDiffieHellmanPublicKey = ECDiffieHellmanCngPublicKey.FromByteArray(publicKeyBlob,CngKeyBlobFormat.EccPublicBlob);
+            byte [] sharedSecret =  ecDiffieHellmanCng1.DeriveKeyFromHash(ecDiffieHellmanPublicKey, HashAlgorithmName.SHA384, null, null);
+
+            return sharedSecret;
         }
         public EC ec;
         public ECPoint y;
@@ -2329,12 +2366,20 @@ namespace ModularCalculation
             byte [] signature =  CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.mx, hash, DEREncoded);
             return ConvertSignatureToString(signature, DEREncoded);
         }
+        public byte[] Sign(byte[] hash)
+        {
+            byte[] signature = CalculateDSASignature(ecKeyPair.ec.n, ecKeyPair.mx, hash, false);
+            return signature;
+        }
+
         public bool Verify(byte [] hash, byte[] signature)
         {
             byte[] r = new byte[signature.Length/2];
             byte[] s = new byte[signature.Length/2];
-            signature.CopyTo(r, 0);
-            signature.CopyTo(s, r.Length);
+            for (int i = 0; i < signature.Length/2; i++)
+                r[i] = signature[i];
+            for (int i = 0; i < signature.Length / 2; i++)
+                s[i] = signature[i + r.Length];
             (ModNumber u1, ModNumber u2, ModNumber mr) = DSA.DSACalculateU1U2Mr(ecKeyPair.ec.n, hash, r, s);
             ModularCalculation.ECPoint ptv = CalculateV(hash, u1, u2, mr);
             if (ptv.IsAtInfinity)

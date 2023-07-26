@@ -18,15 +18,15 @@ namespace ModularUnitTests
         [ClassInitialize]
         public static void InitializeKeys(TestContext context)
         {
-            CngKey ?cngKeySigningRsa = null;
+            CngKey? cngKeySigningRsa = null;
             CngKeyCreationParameters parametersSigningRsa = new CngKeyCreationParameters();
             parametersSigningRsa.KeyUsage = CngKeyUsages.Signing;
 
-            CngKey ?cngKeyEncryptionRsa = null;
+            CngKey? cngKeyEncryptionRsa = null;
             CngKeyCreationParameters parametersEncryptionRsa = new CngKeyCreationParameters();
             parametersEncryptionRsa.KeyUsage = CngKeyUsages.Decryption;
 
-            CngKey ?cngKeySigningDsa = null;
+            CngKey? cngKeySigningDsa = null;
             CngKeyCreationParameters parametersSigningDsa = new CngKeyCreationParameters();
             parametersSigningDsa.KeyUsage = CngKeyUsages.Signing;
 
@@ -53,13 +53,13 @@ namespace ModularUnitTests
             cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey3072", parametersSigningDsa);
 
 #elif MEDMOD
-            //cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey2048", parametersSigningRsa);
-            //cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
-            //cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
+            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey2048", parametersSigningRsa);
+            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey2048", parametersSigningDsa);
+            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey2048", parametersEncryptionRsa);
 #elif SMALLMOD
-            //cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
-            //cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
-            //cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey1024", parametersEncryptionRsa);
+            cngKeySigningRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSASignatureKey1024", parametersSigningRsa);
+            cngKeySigningDsa = CngKey.Create(new CngAlgorithm("DSA"), "MyCoolDSAKey1024", parametersSigningDsa);
+            cngKeyEncryptionRsa = CngKey.Create(CngAlgorithm.Rsa, "MyCoolRSAKey1024", parametersEncryptionRsa);
 #endif
             cngKeySigningRsa?.Dispose();
             cngKeySigningDsa?.Dispose();
@@ -69,7 +69,7 @@ namespace ModularUnitTests
         [ClassCleanup]
         public static void CleanupKeys()
         {
-            CngKey ?cngKeySigningRsa = null;
+            CngKey? cngKeySigningRsa = null;
             CngKey? cngKeySigningDsa = null;
             CngKey? cngKeyEncryptionRsa = null;
 #if LARGEMOD
@@ -83,9 +83,9 @@ namespace ModularUnitTests
             cngKeySigningDsa = CngKey.Open("MyCoolDSAKey2048");
             cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
-            //cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey1024");
-            //cngKeySigningDsa = CngKey.Open("MyCoolDSAKey1024");
-            //cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey1024");
+            cngKeySigningRsa = CngKey.Open("MyCoolRSASignatureKey1024");
+            cngKeySigningDsa = CngKey.Open("MyCoolDSAKey1024");
+            cngKeyEncryptionRsa = CngKey.Open("MyCoolRSAKey1024");
 #endif
             cngKeySigningRsa?.Delete();
             cngKeySigningRsa?.Dispose();
@@ -3545,7 +3545,7 @@ namespace ModularUnitTests
         public void TestGcdOfAllFinLastBlockAndAllFin2ndBlock()
         {
             ulong[] l = new ulong[ModNumber.LCOUNT];
-            l[ModNumber.LCOUNT-1] = ~0ul;
+            l[ModNumber.LCOUNT - 1] = ~0ul;
             ulong[] r = new ulong[ModNumber.LCOUNT];
             r[1] = ~0ul;
             ulong[] exp = new ulong[ModNumber.LCOUNT];
@@ -3769,8 +3769,8 @@ namespace ModularUnitTests
             ulong[] n = new ulong[ModNumber.LCOUNT];
             ulong[] exp = new ulong[ModNumber.LCOUNT];
             int numInts = ModNumber.LCOUNT % 2 == 1 ? ModNumber.LCOUNT : ModNumber.LCOUNT - 1;
-            n[numInts-1] = 1ul;
-            exp[(numInts - 1)/2] = 1ul;
+            n[numInts - 1] = 1ul;
+            exp[(numInts - 1) / 2] = 1ul;
             ModNumber mn = new ModNumber(n);
             ModNumber mexp = new ModNumber(exp);
             ModNumber mres = mn.Sqrt();
@@ -3781,7 +3781,7 @@ namespace ModularUnitTests
         {
             ModNumber mn = new ModNumber(2ul);
             ScaledNumber sn = new ScaledNumber(mn, 18);
-            ulong [] exp = new ulong[ModNumber.LCOUNT];
+            ulong[] exp = new ulong[ModNumber.LCOUNT];
             exp[0] = 0x09e667f3bcc908b2ul;
             exp[1] = 0x016aul;
             ModNumber mexp = new ModNumber(exp);
@@ -3795,7 +3795,7 @@ namespace ModularUnitTests
         {
             ModNumber mn = new ModNumber(2ul);
             ScaledNumber sn = new ScaledNumber(mn, 18);
-            string exp = new string('0',ModNumber.HexStringLength-19);
+            string exp = new string('0', ModNumber.HexStringLength - 19);
             exp += "1.6A09E667F3BCC908B2";
             ScaledNumber snres = sn.Sqrt();
             string resStr = snres.ToString(16);
@@ -4329,7 +4329,7 @@ namespace ModularUnitTests
             ulong[] l = new ulong[ModNumber.LCOUNT];
             ulong[] n = new ulong[ModNumber.LCOUNT];
             l[0] = 1ul;
-            n[0] = 2ul; 
+            n[0] = 2ul;
             ModNumber mn = new ModNumber(n);
             MultGroupMod mgm = new MultGroupMod(mn);
             ModNumber ml = new ModNumber(l);
@@ -4382,7 +4382,7 @@ namespace ModularUnitTests
             ModNumber mn = ModNumber.Stomn(nstr);
             MultGroupMod mgm = new MultGroupMod(mn);
             ModNumber ml = ModNumber.Stomn(lstr);
-             ModNumber mexp = new ModNumber(1ul);
+            ModNumber mexp = new ModNumber(1ul);
             ModNumber mres = mgm.Kwad(ml);
             Assert.AreEqual(mexp, mres);
 
@@ -5398,7 +5398,7 @@ namespace ModularUnitTests
             Assert.IsTrue(mexp == mres);
         }
         [TestMethod]
-        public void TestInverseTwoAndSixModEleven ()
+        public void TestInverseTwoAndSixModEleven()
         {
 
             ModNumber mx = new ModNumber(2ul);
@@ -5790,7 +5790,7 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestGetPKCS1MaskMessageMaxFs()
         {
-            ModNumber message = ModNumber.Stomn(new string('F',ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22), 16);
+            ModNumber message = ModNumber.Stomn(new string('F', ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22), 16);
             ModNumber mres = message.GetPKCS1Mask();
             string resStr = mres.ToString(16);
             Assert.IsTrue(string.Compare(resStr.Substring(0, ModNumber.LSIZE * 2), new string('0', ModNumber.LSIZE * 2)) == 0);
@@ -5823,13 +5823,13 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestfromTextTextOneCharTooLong()
         {
-            string s = new string('a', (ModNumber.LCOUNT * ModNumber.LSIZE)/sizeof(char) + 1);
+            string s = new string('a', (ModNumber.LCOUNT * ModNumber.LSIZE) / sizeof(char) + 1);
             Assert.ThrowsException<ArgumentException>(() => ModNumber.fromText(s));
         }
         [TestMethod]
         public void TestfromTextTextEightCharsTooLong()
         {
-            string s = new string('a', (ModNumber.LCOUNT+1)/sizeof(char) * ModNumber.LSIZE);
+            string s = new string('a', (ModNumber.LCOUNT + 1) / sizeof(char) * ModNumber.LSIZE);
             Assert.ThrowsException<ArgumentException>(() => ModNumber.fromText(s));
         }
         [TestMethod]
@@ -5900,7 +5900,7 @@ namespace ModularUnitTests
             ModNumber mn = new ModNumber(n);
 
             string res = mn.getText();
-            string exp = new string('a',ModNumber.LCOUNT * ModNumber.LSIZE / sizeof(char));
+            string exp = new string('a', ModNumber.LCOUNT * ModNumber.LSIZE / sizeof(char));
             Assert.IsTrue(exp == res);
 
         }
@@ -5942,10 +5942,10 @@ namespace ModularUnitTests
         {
             ModNumber signature = ModNumber.Stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
             List<object> results = signature.ParseBERASNString();
-            byte [] exp1 = { 0x27, 0xFB, 0xE1, 0x36, 0x28, 0xA0, 0xAA, 0x70, 0x53, 0xE3, 0xC1, 0x1C, 0xE6, 0xB4, 0xE7, 0xF4, 0x06, 0x24, 0xC1, 0x8F };
-            byte [] exp2 = { 0x6D, 0x9F, 0x22, 0xC0, 0xAA, 0x16, 0x84, 0x1B, 0x26, 0x96, 0x91, 0x66, 0xC6, 0x92, 0xE9, 0x2B, 0x41, 0x17, 0x62, 0x32 };
-            byte[] result1 = (byte [])results[0];
-            byte[] result2 = (byte [])results[1];
+            byte[] exp1 = { 0x27, 0xFB, 0xE1, 0x36, 0x28, 0xA0, 0xAA, 0x70, 0x53, 0xE3, 0xC1, 0x1C, 0xE6, 0xB4, 0xE7, 0xF4, 0x06, 0x24, 0xC1, 0x8F };
+            byte[] exp2 = { 0x6D, 0x9F, 0x22, 0xC0, 0xAA, 0x16, 0x84, 0x1B, 0x26, 0x96, 0x91, 0x66, 0xC6, 0x92, 0xE9, 0x2B, 0x41, 0x17, 0x62, 0x32 };
+            byte[] result1 = (byte[])results[0];
+            byte[] result2 = (byte[])results[1];
             bool results1Equal = true;
             for (int i = 0; i < result1.Length; i++)
             {
@@ -6157,7 +6157,7 @@ namespace ModularUnitTests
             ModNumber signature = rsa.EncryptSignature(hashBigEndian, "2.16.840.1.101.3.4.2.1");
             ModNumber decryptedHash = rsa.DecryptSignature(signature);
             byte[] hashLittleEndian = new byte[hashBigEndian.Length];
-            for (int i = 0; i < hashLittleEndian.Length;i++)
+            for (int i = 0; i < hashLittleEndian.Length; i++)
                 hashLittleEndian[i] = (byte)hashBigEndian[hashBigEndian.Length - 1 - i];
             ModNumber originalHash = new ModNumber(hashLittleEndian);
             Assert.IsTrue(originalHash == decryptedHash);
@@ -6171,7 +6171,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm,g,mzero, mzero, new ModNumber(17ul));
+            EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
             pt.x = mzero;
             pt.y = mzero;
@@ -6188,7 +6188,7 @@ namespace ModularUnitTests
             ModNumber mzero = new ModNumber(0ul);
             EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = mgm.Diff(mzero,new ModNumber(2ul));
+            pt.x = mgm.Diff(mzero, new ModNumber(2ul));
             pt.y = new ModNumber(3ul);
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
@@ -6203,8 +6203,8 @@ namespace ModularUnitTests
             ModNumber mzero = new ModNumber(0ul);
             EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17ul));
             ModularCalculation.ECPoint pt = new ModularCalculation.ECPoint();
-            pt.x = mgm.Diff(mzero,new ModNumber(2ul));
-            pt.y = mgm.Diff(mzero,new ModNumber(3ul));
+            pt.x = mgm.Diff(mzero, new ModNumber(2ul));
+            pt.y = mgm.Diff(mzero, new ModNumber(3ul));
             Assert.IsTrue(myEC.IsOnCurve(pt));
 
         }
@@ -6333,7 +6333,7 @@ namespace ModularUnitTests
             ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
             g.IsAtInfinity = true;
             ModNumber mzero = new ModNumber(0ul);
-            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero,new ModNumber(2ul)), mzero);
+            EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(2ul)), mzero);
             ModNumber x = new ModNumber(0ul);
             ModNumber exp = new ModNumber(0ul);
             Assert.IsTrue(exp == myEC.CalculateY(x));
@@ -6482,7 +6482,7 @@ namespace ModularUnitTests
             pt1.x = mzero;
             pt1.y = mzero;
             ModularCalculation.ECPoint pt2 = new ModularCalculation.ECPoint();
-            pt2.x = mgm.Diff(new ModNumber(0ul),new ModNumber(1ul));
+            pt2.x = mgm.Diff(new ModNumber(0ul), new ModNumber(1ul));
             pt2.y = new ModNumber(1ul);
             ModularCalculation.ECPoint exp = new ModularCalculation.ECPoint();
             exp.x = new ModNumber(2ul);
@@ -7287,8 +7287,8 @@ namespace ModularUnitTests
             publicKey.y = publicKeyY;
             ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
-            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
+            bool valid = ecDsa.Verify(hashBigEndian, signature);
             Assert.IsTrue(valid);
         }
         [TestMethod]
@@ -7314,11 +7314,11 @@ namespace ModularUnitTests
             publicKey.y = publicKeyY;
             ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
             byte[] wrongHash = new byte[hashBigEndian.Length];
             hashBigEndian.CopyTo(wrongHash, 0);
             wrongHash[0]++;
-            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            bool valid = ecDsa.Verify(wrongHash, signature);
             Assert.IsFalse(valid);
         }
         [TestMethod]
@@ -7337,8 +7337,8 @@ namespace ModularUnitTests
             EC myEC = new EC(mgm, g, n, a, b);
             ECKeyPair ecKeyPair = new ECKeyPair(myEC);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
-            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
+            bool valid = ecDsa.Verify(hashBigEndian, signature);
             Assert.IsTrue(valid);
         }
         [TestMethod]
@@ -7357,11 +7357,11 @@ namespace ModularUnitTests
             EC myEC = new EC(mgm, g, n, a, b);
             ECKeyPair ecKeyPair = new ECKeyPair(myEC);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
             byte[] wrongHash = new byte[hashBigEndian.Length];
             hashBigEndian.CopyTo(wrongHash, 0);
             wrongHash[0]++;
-            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            bool valid = ecDsa.Verify(wrongHash, signature);
             Assert.IsFalse(valid);
         }
         [TestMethod]
@@ -7380,8 +7380,8 @@ namespace ModularUnitTests
             EC myEC = new EC(mgm, g, n, a, b);
             ECKeyPair ecKeyPair = new ECKeyPair(myEC);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
-            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
+            bool valid = ecDsa.Verify(hashBigEndian, signature);
             Assert.IsTrue(valid);
         }
         [TestMethod]
@@ -7400,8 +7400,8 @@ namespace ModularUnitTests
             EC myEC = new EC(mgm, g, n, a, b);
             ECKeyPair ecKeyPair = new ECKeyPair(myEC);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
-            bool valid = ecDsa.Verify(hashBigEndian, signature, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
+            bool valid = ecDsa.Verify(hashBigEndian, signature);
             Assert.IsTrue(valid);
         }
         [TestMethod]
@@ -7420,11 +7420,11 @@ namespace ModularUnitTests
             EC myEC = new EC(mgm, g, n, a, b);
             ECKeyPair ecKeyPair = new ECKeyPair(myEC);
             ECDSA ecDsa = new ECDSA(ecKeyPair);
-            string signature = ecDsa.Sign(hashBigEndian, false);
+            byte[] signature = ecDsa.Sign(hashBigEndian);
             byte[] wrongHash = new byte[hashBigEndian.Length];
             hashBigEndian.CopyTo(wrongHash, 0);
             wrongHash[0]++;
-            bool valid = ecDsa.Verify(wrongHash, signature, false);
+            bool valid = ecDsa.Verify(wrongHash, signature);
             Assert.IsFalse(valid);
         }
 
@@ -7436,7 +7436,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
@@ -7465,7 +7465,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
@@ -7479,7 +7479,7 @@ namespace ModularUnitTests
             ModNumber convertedMessage = ModNumber.fromText(message);
             ModNumber encryptedMessage = rsa.Encrypt(convertedMessage);
             byte[] encryptedMessageBigEndian = encryptedMessage.convertEndianess();
-            byte[] decryptedMessageBigEndian = rsaCng.Decrypt(encryptedMessageBigEndian,RSAEncryptionPadding.Pkcs1);
+            byte[] decryptedMessageBigEndian = rsaCng.Decrypt(encryptedMessageBigEndian, RSAEncryptionPadding.Pkcs1);
             byte[] decryptedMessage = ModNumber.convertEndianess(decryptedMessageBigEndian);
             ModNumber decryptedMessageModNumber = new ModNumber(decryptedMessage);
             string decryptedString = decryptedMessageModNumber.getText();
@@ -7495,7 +7495,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSAKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSAKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSAKey1024", false);
@@ -7508,7 +7508,7 @@ namespace ModularUnitTests
             string message = "Dit is een test";
             ModNumber convertedMessage = ModNumber.fromText(message);
             byte[] convertedMessageBigEndian = convertedMessage.convertEndianess();
-            byte[] encryptedMessageBigEndian = rsaCng.Encrypt(convertedMessageBigEndian,RSAEncryptionPadding.Pkcs1);
+            byte[] encryptedMessageBigEndian = rsaCng.Encrypt(convertedMessageBigEndian, RSAEncryptionPadding.Pkcs1);
             byte[] encryptedMessage = ModNumber.convertEndianess(encryptedMessageBigEndian);
             ModNumber encryptedMessageModNumber = new ModNumber(encryptedMessage);
             ModNumber decryptedMessage = rsa.Decrypt(encryptedMessageModNumber);
@@ -7523,13 +7523,13 @@ namespace ModularUnitTests
             string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
             byte[] messageBytes = Encoding.ASCII.GetBytes(message);
             SHA256 sha256 = SHA256.Create();
-            byte[] hash =  sha256.ComputeHash(messageBytes);
+            byte[] hash = sha256.ComputeHash(messageBytes);
 #if LARGEMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey4096", false) ;
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
@@ -7561,7 +7561,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
@@ -7590,7 +7590,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
 
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
@@ -7622,7 +7622,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey4096");
             
 #elif MEDMOD
-            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false) ;
+            ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolRSASignatureKey2048");
 #elif SMALLMOD
             ModularCalculation.RSAParameters rsaParameters = ModularCalculation.RSA.GetRSAKey("MyCoolRSASignatureKey1024", false);
@@ -7651,7 +7651,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolDSAKey3072");
             
 #elif MEDMOD
-            ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey2048", false) ;
+            ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolDSAKey2048");
 #elif SMALLMOD
             ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey1024", false);
@@ -7661,11 +7661,11 @@ namespace ModularUnitTests
 #if !LARGEMOD
             ModularCalculation.DSA dsa = new ModularCalculation.DSA(dsaParameters);
             DSACng dsaCng = new DSACng(cngKey);
-            byte[] signatureBigEndian = dsaCng.CreateSignature(hash,DSASignatureFormat.Rfc3279DerSequence);
+            byte[] signatureBigEndian = dsaCng.CreateSignature(hash, DSASignatureFormat.Rfc3279DerSequence);
             byte[] signature = ModNumber.convertEndianess(signatureBigEndian);
             ModNumber signatureModNumber = new ModNumber(signature);
             string signatureStr = signatureModNumber.ToString(16);
-            bool valid = dsa.Verify(hash,signatureStr);
+            bool valid = dsa.Verify(hash, signatureStr);
             Assert.IsTrue(valid);
             cngKey.Dispose();
 #endif
@@ -7682,7 +7682,7 @@ namespace ModularUnitTests
             CngKey cngKey = CngKey.Open("MyCoolDSAKey3072");
             
 #elif MEDMOD
-            ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey2048", false) ;
+            ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey2048", false);
             CngKey cngKey = CngKey.Open("MyCoolDSAKey2048");
 #elif SMALLMOD
             ModularCalculation.DSAParameters dsaParameters = ModularCalculation.DSA.GetDSAKey("MyCoolDSAKey1024", true);
@@ -7765,9 +7765,404 @@ namespace ModularUnitTests
             bool valid = ecDsa.Verify(invalidHash, signature);
             Assert.IsFalse(valid);
         }
+        [TestMethod]
+        public void TestSignatureECDSASignSHA256Valid()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignSHA256InValid()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            string messageChanged = "Dit is een test om te zien of een signature geverifieerd kan worden";
+            byte[] messageBytesChanged = Encoding.ASCII.GetBytes(messageChanged);
+            byte[] invalidHash = sha256.ComputeHash(messageBytesChanged);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ModNumber publicKeyX = ModNumber.Stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+            ModNumber publicKeyY = ModNumber.Stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+            ModularCalculation.ECPoint publicKey;
+            publicKey.IsAtInfinity = false;
+            publicKey.x = publicKeyX;
+            publicKey.y = publicKeyY;
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(invalidHash, signature);
+            Assert.IsFalse(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignSHA256CalculatedPubKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignSHA256CalculatedPubAndPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+            g.y = ModNumber.Stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+            ModNumber n = ModNumber.Stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mzero;
+            ModNumber b = new ModNumber(0x07ul);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair();
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignSHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("ECDSA_P521");
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignSHA256ValidGivenPrivateKeyCalculatedPubKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber privateKey = ModNumber.Stomn("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000013C181E6027CEBCBE79BEEF7A2867F37B209E3A94568C1CA210EBC0EA717F4CAE4AD24B101E325E2B74EE256E64CF6E3A5BD39DBD30305E0F6B86888DD265537437", 16);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("ECDSA_P521");
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignSHA256InValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            string messageChanged = "Dit is een test om te zien of een signature geverifieerd kan worden";
+            byte[] messageBytesChanged = Encoding.ASCII.GetBytes(messageChanged);
+            byte[] invalidHash = sha256.ComputeHash(messageBytesChanged);
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("ECDSA_P521");
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(invalidHash, signature);
+            Assert.IsFalse(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521VerifySHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("ECDSA_P521");
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521VerifySHA256InValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            string messageChanged = "Dit is een test om te zien of een signature geverifieerd kan worden";
+            byte[] messageBytesChanged = Encoding.ASCII.GetBytes(messageChanged);
+            byte[] invalidHash = sha256.ComputeHash(messageBytesChanged);
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("ECDSA_P521");
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(invalidHash, signature);
+            Assert.IsFalse(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignNISTP224SHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("ffffffffffffffffffffffffffffffff000000000000000000000001", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21", 16);
+            g.y = ModNumber.Stomn("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("nistP224");
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSAVerifyNISTP224SHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("ffffffffffffffffffffffffffffffff000000000000000000000001", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21", 16);
+            g.y = ModNumber.Stomn("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("nistP224");
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSASignNISTP384SHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+            g.y = ModNumber.Stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("nistP384");
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestSignatureECDSAVerifyNISTP384SHA256ValidRandomPrivateKey()
+        {
+            string message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+            g.y = ModNumber.Stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("nistP384");
+            byte[] signature = ecDsaCng.SignHash(hash);
+            bool valid = ecDsa.Verify(hash, signature);
+            Assert.IsTrue(valid);
+        }
+        [TestMethod]
+        public void TestECDHSharedSecretNISTP384Ncrypt()
+        {
+            ModNumber p = ModNumber.Stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+            g.y = ModNumber.Stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+            ModNumber n = ModNumber.Stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair1 = new ECKeyPair(myEC);
+            ECKeyPair ecKeyPair2 = new ECKeyPair(myEC);
+            ModNumber sharedSecret = ECKeyPair.CalculateECDHSharedSecret(ecKeyPair1, ecKeyPair2);
+            byte[] sharedSecretBigEndian = sharedSecret.convertEndianess();
+            SHA384 sha384 = SHA384.Create();
+            byte[] sharedSecretHashed = sha384.ComputeHash(sharedSecretBigEndian);
+            byte[] expSharedSecretBigEndian = ECKeyPair.GetSecretECDHAgreement(ecKeyPair1, ecKeyPair2, "nistP384", new byte[] { 0x45, 0x43, 0x4B, 0x33 });
+            bool sameSecret = true;
+            for (int i = 0; i < expSharedSecretBigEndian.Length; i++)
+                if (expSharedSecretBigEndian[i] != sharedSecretHashed[i])
+                {
+                    sameSecret = false;
+                    break;
+                }
+            Assert.IsTrue(sameSecret);
+        }
+        [TestMethod]
+        public void TestECDHSharedSecretNISTP256r1Ncrypt()
+        {
+            ModNumber p = ModNumber.Stomn("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16);
+            g.y = ModNumber.Stomn("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16);
+            ModNumber n = ModNumber.Stomn("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = ModNumber.Stomn("ffffffff00000001000000000000000000000000fffffffffffffffffffffffc", 16);
+            ModNumber b = ModNumber.Stomn("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair1 = new ECKeyPair(myEC);
+            ECKeyPair ecKeyPair2 = new ECKeyPair(myEC);
+            ModNumber sharedSecret = ECKeyPair.CalculateECDHSharedSecret(ecKeyPair1, ecKeyPair2);
+            byte[] sharedSecretBigEndian = sharedSecret.convertEndianess();
+            SHA384 sha384 = SHA384.Create();
+            byte[] sharedSecretHashed = sha384.ComputeHash(sharedSecretBigEndian);
+            byte[] expSharedSecretBigEndian = ECKeyPair.GetSecretECDHAgreement(ecKeyPair1, ecKeyPair2, "secp256r1", new byte[] { 0x45, 0x43, 0x4B, 0x31 });
+            bool sameSecret = true;
+            for (int i = 0; i < expSharedSecretBigEndian.Length; i++)
+                if (expSharedSecretBigEndian[i] != sharedSecretHashed[i])
+                {
+                    sameSecret = false;
+                    break;
+                }
+            Assert.IsTrue(sameSecret);
+
+
+        }
 
 
     }
-
-
 }

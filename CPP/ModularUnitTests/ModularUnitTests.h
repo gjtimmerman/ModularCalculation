@@ -8295,7 +8295,7 @@ namespace ModularUnitTests
 		}
 		TEST_METHOD(TestSignatureECDSASignNISTP256SHA256ValidGivenPrivateKey)
 		{
-			char* message = "Dit is een\r\ngeheim\r\ndocument.";
+			char* message = "Dit is een\ngeheim\ndocument.";
 			std::tuple<unsigned char*, ULONG> result = hash((unsigned char*)message, strlen(message));
 			unsigned char* pHashBigEndian = std::get<0>(result);
 			ULONG len = std::get<1>(result);
@@ -8310,12 +8310,13 @@ namespace ModularUnitTests
 			ModNumber a = mgm.Diff(mzero, ModNumber(3));
 			ModNumber b = ModNumber::stomn("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16);
 			EC myEC(mgm, g, n, a, b);
-			ModNumber x = ModNumber::stomn("AE176B08B19CC8AAF0B12BB290A651B804330B6800B6C3BA3174F81D9FCF70A7");
+			ModNumber x = ModNumber::stomn("AE176B08B19CC8AAF0B12BB290A651B804330B6800B6C3BA3174F81D9FCF70A7", 16);
 			ECKeyPair ecKeyPair(myEC, x);
 			ECDSA myEcDsa(ecKeyPair);
 			
 			std::string signature = myEcDsa.Sign(pHashBigEndian, len, false);
-			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature, BCRYPT_ECC_CURVE_NISTP521);
+//			std::string signature = "ô¬Â£GòÝÛµug)ö]6ƒýq‰²àËª¢ßk‚„Ù|ª¼kÜ¨‹Iù:Úªëßé éÒÅÿEðtJßc5";
+			bool valid = verifyECDsa(myEcDsa, pHashBigEndian, len, signature, BCRYPT_ECC_CURVE_NISTP256);
 			delete[] pHashBigEndian;
 			Assert::IsTrue(valid);
 		}

@@ -1,7 +1,7 @@
 //#define LARGEMOD
 //#define LARGEMODSIGNATURE
-#define MEDMOD
-//#define SMALLMOD
+//#define MEDMOD
+#define SMALLMOD
 
 using ModularCalculation;
 using System.Collections.Generic;
@@ -7879,6 +7879,32 @@ namespace ModularUnitTests
             bool valid = ecDsaCng.VerifyHash(hash, signature);
             Assert.IsTrue(valid);
         }
+        [TestMethod]
+        public void TestSignatureECDSASignNISTP256SHA256ValidGivenPrivateKey()
+        {
+            string message = "Dit is een\ngeheim\ndocument.";
+            byte[] messageBytes = Encoding.ASCII.GetBytes(message);
+            SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(messageBytes);
+            ModNumber p = ModNumber.Stomn("ffffffff00000001000000000000000000000000ffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16);
+            g.y = ModNumber.Stomn("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16);
+            ModNumber n = ModNumber.Stomn("ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero,new ModNumber(3ul));
+            ModNumber b = ModNumber.Stomn("5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ModNumber x = ModNumber.Stomn("AE176B08B19CC8AAF0B12BB290A651B804330B6800B6C3BA3174F81D9FCF70A7", 16);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, x);
+            ECDsaCng ecDsaCng = ecKeyPair.ImportECKeyPair("nistP256");
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            byte[] signature = ecDsa.Sign(hash);
+            bool valid = ecDsaCng.VerifyHash(hash, signature);
+            Assert.IsTrue(valid);
+        }
+
         [TestMethod]
         public void TestSignatureECDSANISTP521SignSHA256ValidRandomPrivateKey()
         {

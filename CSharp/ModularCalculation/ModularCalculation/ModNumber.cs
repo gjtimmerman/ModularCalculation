@@ -24,16 +24,16 @@ namespace ModularCalculation
     public class ModNumber
     {
 #if LARGEMOD
-        public const int MaxMod = 4096 / 8;
+        public const int MaxMod = 4096 / LSIZE;
 
 #elif LARGEMODSIGNATURE
-        public const int MaxMod = 3072 / 8;
+        public const int MaxMod = 3072 / LSIZE;
 
 #elif MEDMOD
-        public const int MaxMod = 2048 / 8;
+        public const int MaxMod = 2048 / LSIZE;
 
 #elif SMALLMOD
-        public const int MaxMod = 1024 / 8;
+        public const int MaxMod = 1024 / LSIZE;
 #endif
         public const int NCOUNT = MaxMod + LSIZE;
         public const int COUNTMOD = MaxMod / LSIZE;
@@ -41,7 +41,7 @@ namespace ModularCalculation
         public const int ISIZE = sizeof(uint);
         public const int LCOUNT = NCOUNT / LSIZE;
         public const int ICOUNT = NCOUNT / ISIZE;
-        public const int NSIZE = NCOUNT * 8;
+        public const int NSIZE = NCOUNT * LSIZE;
         public ulong[] num = new ulong[LCOUNT];
         public const int HexStringLength = NCOUNT * 2;
         public const int OctalStringLength = (NSIZE % 3 == 0) ? (NSIZE / 3) : (NSIZE / 3 + 1);
@@ -60,28 +60,67 @@ namespace ModularCalculation
         }
         public ModNumber(byte[] n)
         {
-            unsafe
+            //unsafe
+            //{
+            //    fixed (ulong* pN = &num[0])
+            //    {
+            //        byte* pByte = (byte*)pN;
+            //        for (int i = 0; i < n.Length; i++)
+            //        {
+            //            pByte[i] = n[i];
+            //        }
+            //    }
+            //}
+            int lCount = n.Length / LSIZE;
+            ulong tmp;
+            for (int i = 0; i < lCount; i++)
             {
-                fixed (ulong* pN = &num[0])
+                tmp = 0ul;
+                for (int j = 0; j < LSIZE; j++)
                 {
-                    byte* pByte = (byte*)pN;
-                    for (int i = 0; i < n.Length; i++)
-                    {
-                        pByte[i] = n[i];
-                    }
+                    tmp |= ((ulong)n[i * LSIZE + j] << j * 8);
                 }
+                num[i] = tmp;
             }
-        }
-        unsafe public ModNumber (byte *pNumber, int len)
-        {
-            fixed (ulong *p = num)
+            int lSize = n.Length % LSIZE;
+            if (lSize == 0)
+                return;
+            tmp = 0ul;
+            for (int j = 0; j < lSize; j++)
             {
-                byte* pB = (byte*)p;
-                for (int i = 0; i < len; i++)
-                    pB[i] = pNumber[i];
+                tmp |= ((ulong)n[lCount * LSIZE + j] << j * 8);
             }
+            num[lCount] = tmp;
+
+        }
+        //unsafe public ModNumber (byte *pNumber, int len)
+        //{
+        //    fixed (ulong *p = num)
+        //    {
+        //        byte* pB = (byte*)p;
+        //        for (int i = 0; i < len; i++)
+        //            pB[i] = pNumber[i];
+        //    }
 
 
+        //}
+        public ModNumber (ulong [] num, int byteLen)
+        {
+            int lCount = byteLen / LSIZE;
+            for (int i = 0; i < lCount; i++)
+                this.num[i] = num[i];
+            int lSize = byteLen % LSIZE;
+            if (lSize == 0)
+                return;
+            ulong tmp = 0ul;
+            ulong mask = 0xff;
+            for (int j = 0; j < lSize; j++)
+            {
+                ulong masked = num[lCount] & mask;
+                tmp |= masked;
+                mask <<= 8;
+            }
+            this.num[lCount] = tmp;
         }
         public override bool Equals(object? other)
         {
@@ -949,7 +988,7 @@ namespace ModularCalculation
                         throw new ArgumentException("Not a valid PKCS1 Mask");
                     if (pB[i] != 0x00u)
                         throw new ArgumentException("Not a valid PKCS1 Mask");
-                    res = new ModNumber(pB, i);
+                    res = new ModNumber(num, i);
                 }
             }
             return res;

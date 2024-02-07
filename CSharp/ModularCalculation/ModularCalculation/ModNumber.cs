@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
@@ -60,17 +61,20 @@ namespace ModularCalculation
         }
         public ModNumber(byte[] n)
         {
-            //unsafe
-            //{
-            //    fixed (ulong* pN = &num[0])
-            //    {
-            //        byte* pByte = (byte*)pN;
-            //        for (int i = 0; i < n.Length; i++)
-            //        {
-            //            pByte[i] = n[i];
-            //        }
-            //    }
-            //}
+#if UNSAFE
+            unsafe
+            {
+                fixed (ulong* pN = &num[0])
+                {
+                    byte* pByte = (byte*)pN;
+                    for (int i = 0; i < n.Length; i++)
+                    {
+                        pByte[i] = n[i];
+                    }
+                }
+            }
+#else
+
             int lCount = n.Length / LSIZE;
             ulong tmp;
             for (int i = 0; i < lCount; i++)
@@ -91,19 +95,22 @@ namespace ModularCalculation
                 tmp |= ((ulong)n[lCount * LSIZE + j] << j * 8);
             }
             num[lCount] = tmp;
+#endif
+        }
+
+#if UNSAFE
+        unsafe public ModNumber(byte* pNumber, int len)
+        {
+            fixed (ulong* p = num)
+            {
+                byte* pB = (byte*)p;
+                for (int i = 0; i < len; i++)
+                    pB[i] = pNumber[i];
+            }
+
 
         }
-        //unsafe public ModNumber (byte *pNumber, int len)
-        //{
-        //    fixed (ulong *p = num)
-        //    {
-        //        byte* pB = (byte*)p;
-        //        for (int i = 0; i < len; i++)
-        //            pB[i] = pNumber[i];
-        //    }
-
-
-        //}
+#else
         public ModNumber (ulong [] num, int byteLen)
         {
             int lCount = byteLen / LSIZE;
@@ -122,6 +129,7 @@ namespace ModularCalculation
             }
             this.num[lCount] = tmp;
         }
+#endif
         public override bool Equals(object? other)
         {
             if (other is ModNumber om)
@@ -153,6 +161,8 @@ namespace ModularCalculation
                 if (num[i] != 0ul)
                     throw new ArgumentException("Modulus is too large!");
         }
+
+#if UNSAFE
         unsafe public static byte[] convertEndianess(byte * b, int cb)
         {
             byte[] res = new byte[cb];
@@ -162,6 +172,18 @@ namespace ModularCalculation
             }
             return res;
         }
+#else
+        public static byte[] convertEndianess(byte[] b, int cb, int start = 0)
+        {
+            byte[] res = new byte[cb];
+            for (int i = 0; i < cb; i++)
+            {
+                res[i] = b[(cb+start) - i - 1];
+            }
+            return res;
+        }
+
+#endif
         public static byte[] convertEndianess(byte[] b)
         {
             byte[] res = new byte[b.Length];
@@ -171,6 +193,7 @@ namespace ModularCalculation
         }
         public byte[] convertEndianess(int cb = 0)
         {
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = &num[0])
@@ -180,9 +203,58 @@ namespace ModularCalculation
                     return convertEndianess(pB, n);
                 }
             }
+#else
+            int n = cb > 0 ? cb : (int)GetByteCount();
+            byte[] res = new byte[n];
+            int lCount = n / LSIZE;
+            int lSize = n % LSIZE;
+            ulong mask;
+            for (int i = 0; i < lCount; i++)
+            {
+                mask = 0xff;
+                for(int j = 0; j < LSIZE; j++)
+                {
+                    ulong tmp = num[i] & mask;
+                    res [n - (i * LSIZE + j) - 1] = (byte)(tmp >> j * 8);
+                    mask <<= 8;
+                }
+            }
+            mask = 0xff;
+            for (int j = 0; j < lSize; j++)
+            {
+                ulong tmp = num[lCount] & mask;
+                res[n - (lCount * LSIZE + j) - 1] = (byte)(tmp >> j * 8);
+                mask <<= 8;
+            }
+            return res;
+#endif
         }
+
+#if !UNSAFE
+        public uint[] ToUintArray()
+        {
+            uint []result = new uint[ICOUNT];
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            for (int i = 0; i < LCOUNT; i++)
+            {
+                result[i * 2] = (uint)(num[i] & lomask);
+                result[i * 2 + 1] = (uint)((num[i] & himask) >> ISIZE * 8);
+            }
+            return result;
+        }
+        public ModNumber (uint[] arr)
+        {
+            for (int i = 0; i < LCOUNT; i++)
+            {
+                num[i] = arr[i * 2];
+                num[i] |= ((ulong)arr[i * 2 + 1]) << ISIZE * 8;
+            }
+        }
+#endif
         public static ModNumber operator -(ModNumber l, uint r)
         {
+#if UNSAFE
             ModNumber result = new ModNumber();
             l.num.CopyTo(result.num, 0);
             unsafe
@@ -208,14 +280,35 @@ namespace ModularCalculation
                     }
 
                 }
+#else
+            uint[] resUint = l.ToUintArray();
+            uint carry = 0;
+            uint ltmp = resUint[0];
+            if (ltmp < r)
+                carry = 1;
+            resUint[0] = ltmp - r;
+            for (int i = 1; carry > 0 && i < ICOUNT; i++)
+            {
+                if (carry <= resUint[i])
+                {
+                    resUint[i] -= carry;
+                    carry = 0;
+                }
+                else
+                    resUint[i] -= carry;
+
             }
+            ModNumber result = new ModNumber(resUint); 
+#endif
+        
             return result;
         }
         public static ModNumber operator -(ModNumber l, ModNumber r)
         {
-            ModNumber result = new ModNumber();
             if (l == r)
-                return result;              // Optimization
+                return new ModNumber();              // Optimization
+#if UNSAFE
+            ModNumber result = new ModNumber();
             l.num.CopyTo(result.num, 0);
             unsafe
             {
@@ -244,8 +337,28 @@ namespace ModularCalculation
                     }
 
                 }
-
+#else
+            uint[] resUint = l.ToUintArray();
+            uint[] lUint = l.ToUintArray();
+            uint[] rUint = r.ToUintArray();
+            uint carry = 0;
+            for (int i = 0; i < ICOUNT; i++)
+            {
+                uint ltmp = lUint[i];
+                uint rtmp = rUint[i];
+                if (ltmp >= carry)
+                {
+                    ltmp -= carry;
+                    carry = 0;
+                }
+                else
+                    ltmp -= carry;
+                if (ltmp < rtmp)
+                    carry = 1;
+                resUint[i] = ltmp - rtmp;
             }
+            ModNumber result = new ModNumber(resUint);
+#endif
             return result;
         }
 
@@ -1255,6 +1368,7 @@ namespace ModularCalculation
             result.AddRange(outerASN);
             byte[] resultArray = result.ToArray();
             byte[] resultLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte *p = resultArray)
@@ -1262,6 +1376,10 @@ namespace ModularCalculation
                     resultLittleEndian = ModNumber.convertEndianess(p, resultArray.Length);
                 }
             }
+#else
+            resultLittleEndian = ModNumber.convertEndianess(resultArray);
+
+#endif
             ModNumber res = new ModNumber(resultLittleEndian);
             return res;
         }
@@ -1673,6 +1791,7 @@ namespace ModularCalculation
             List<object> result = removedMask.ParseBERASNString();
             byte [] hashBigEndian = (byte [])result[1];
             byte[] hashLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte* pb = hashBigEndian)
@@ -1681,6 +1800,10 @@ namespace ModularCalculation
 
                 }
             }
+#else
+            hashLittleEndian = ModNumber.convertEndianess(hashBigEndian);
+
+#endif
             ModNumber retval = new ModNumber(hashLittleEndian);
             return retval;
 
@@ -1736,6 +1859,7 @@ namespace ModularCalculation
             cbPrime1 += keyBlob[16];
             int cbPrime2 = keyBlob[21] * 0x100;
             cbPrime2 += keyBlob[20];
+#if UNSAFE
             unsafe
             {
                 fixed(byte *pData = &keyBlob[24])
@@ -1766,6 +1890,33 @@ namespace ModularCalculation
                     rsaParameters.PrivExp = new ModNumber(privExpLittleEndian);
                 }
             }
+#else
+            int offset = 24;
+            byte[] pubExpLittleEndian = ModNumber.convertEndianess(keyBlob, cbPubExp, offset);
+            rsaParameters.PubExp = new ModNumber(pubExpLittleEndian);
+            offset += cbPubExp;
+            byte[] modulusLittleEndian = ModNumber.convertEndianess(keyBlob, cbModulus, offset);
+            rsaParameters.Modulus = new ModNumber(modulusLittleEndian);
+            offset += cbModulus;
+            byte[] prime1LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Prime1 = new ModNumber(prime1LittleEndian);
+            offset += cbPrime1;
+            byte[] prime2LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime2, offset);
+            rsaParameters.Prime2 = new ModNumber(prime2LittleEndian);
+            offset += cbPrime2;
+            byte[] exp1LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Exp1 = new ModNumber(exp1LittleEndian);
+            offset += cbPrime1;
+            byte[] exp2LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime2, offset);
+            rsaParameters.Exp2 = new ModNumber(exp2LittleEndian);
+            offset += cbPrime2;
+            byte[] coefficientLittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Coefficient = new ModNumber(coefficientLittleEndian);
+            offset += cbPrime1;
+            byte[] privExpLittleEndian = ModNumber.convertEndianess(keyBlob, cbModulus, offset);
+            rsaParameters.PrivExp = new ModNumber(privExpLittleEndian);
+
+#endif
             return rsaParameters;
         }
         private ModNumber PubExp;
@@ -1792,6 +1943,7 @@ namespace ModularCalculation
         public byte [] CalculateDSASignature(ModNumber Q, ModNumber x, byte[] hash, bool DEREncoded)
         {
             byte[] hashLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte* p = &hash[0])
@@ -1799,6 +1951,10 @@ namespace ModularCalculation
                     hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
                 }
             }
+#else
+            hashLittleEndian = ModNumber.convertEndianess(hash);
+
+#endif
             ModNumber mHash = new ModNumber(hashLittleEndian);
             int nLen = (int)Q.GetByteCount();
             if (hash.Length > nLen)
@@ -1957,6 +2113,7 @@ namespace ModularCalculation
         {
             byte[] rLittleEndian;
             byte[] sLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed (byte* pr = r)
@@ -1966,8 +2123,14 @@ namespace ModularCalculation
                     sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
                 }
             }
+#else
+            rLittleEndian = ModNumber.convertEndianess(r);
+            sLittleEndian = ModNumber.convertEndianess(s);
+
+#endif
             ModNumber mHash;
             int bcQ = (int)Q.GetByteCount();
+#if UNSAFE
             unsafe
             {
                 fixed (byte* p = hash)
@@ -1980,6 +2143,15 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            byte[] hashLittleEndian = ModNumber.convertEndianess(hash);
+            mHash = new ModNumber(hashLittleEndian);
+            if (hash.Length > bcQ)
+            {
+                mHash = ModNumber.GetLeftMostBytes(mHash, bcQ);
+            }
+
+#endif
             ModNumber mr = new ModNumber(rLittleEndian);
             ModNumber ms = new ModNumber(sLittleEndian);
             if (!(mr < Q && ms < Q))
@@ -2059,6 +2231,8 @@ namespace ModularCalculation
             byteLength += keyBlob[4];
             if (byteLength != ModNumber.MaxMod)
                 throw new ApplicationException("Keylength not equal to MAXMOD!");
+#endif
+#if SMALLMOD && UNSAFE
             unsafe
             {
                 fixed (byte* pData = &keyBlob[32])
@@ -2080,7 +2254,26 @@ namespace ModularCalculation
                     dsaParameters.x = new ModNumber(xLittleEndian);
                 }
             }
-#elif MEDMOD || LARGEMODSIGNATURE
+#endif
+#if SMALLMOD && !UNSAFE
+            int offset = 32;
+            byte[] qLittleEndian = ModNumber.convertEndianess(keyBlob, 20, offset);
+            dsaParameters.Q = new ModNumber(qLittleEndian);
+            offset += 20;
+            byte[] pLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.P = new ModNumber(pLittleEndian);
+            offset += byteLength;
+            byte[] gLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.g = new ModNumber(gLittleEndian);
+            offset += byteLength;
+            byte[] yLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.y = new ModNumber(yLittleEndian);
+            offset += byteLength;
+            byte[] xLittleEndian = ModNumber.convertEndianess(keyBlob, 20, offset);
+            dsaParameters.x = new ModNumber(xLittleEndian);
+
+#endif
+#if MEDMOD || LARGEMODSIGNATURE
             if (keyBlob[0] != 0x44 && keyBlob[1] != 0x50 && keyBlob[2] != 0x56 && keyBlob[3] != 0x32)
                 throw new ApplicationException("Key structure not of type RSA Full Private!");
             int byteLength = keyBlob[5] * 0x100;
@@ -2091,6 +2284,8 @@ namespace ModularCalculation
             seedLength += keyBlob[16];
             int groupSize = keyBlob[21] * 0x100;
             groupSize += keyBlob[20];
+#endif
+#if (MEDMOD || LARGEMODSIGNATURE) && UNSAFE
             unsafe
             {
                 fixed (byte* pData = &keyBlob[28 + seedLength])
@@ -2112,6 +2307,23 @@ namespace ModularCalculation
                     dsaParameters.x = new ModNumber(xLittleEndian);
                 }
             }
+#endif
+#if (MEDMOD || LARGEMODSIGNATURE) && !UNSAFE
+            int offset = 28 + seedLenght;
+            byte[] qLittleEndian = ModNumber.convertEndianess(keyBlob, groupSize, offset);
+            dsaParameters.Q = new ModNumber(qLittleEndian);
+            offset += 20;
+            byte[] pLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.P = new ModNumber(pLittleEndian);
+            offset += byteLength;
+            byte[] gLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.g = new ModNumber(gLittleEndian);
+            offset += byteLength;
+            byte[] yLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.y = new ModNumber(yLittleEndian);
+            offset += byteLength;
+            byte[] xLittleEndian = ModNumber.convertEndianess(keyBlob, groupSize, offset);
+            dsaParameters.x = new ModNumber(xLittleEndian);
 
 #endif
             return dsaParameters;

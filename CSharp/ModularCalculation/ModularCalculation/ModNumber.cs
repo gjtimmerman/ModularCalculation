@@ -260,10 +260,8 @@ namespace ModularCalculation
             unsafe
             {
                 fixed (ulong* pNum = &l.num[0])
-                fixed (ulong* pRes = &mres.num[0])
                 {
                     uint* pNumi = (uint*)pNum;
-                    uint* pResi = (uint*)pRes;
                     int firstNonzeroWord;
                     for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
                     {
@@ -1455,7 +1453,7 @@ namespace ModularCalculation
                 {
                     uint* pRint = (uint*)pR;
                     int limit;
-                    for (limit = ModNumber.ICOUNT; limit >= 0; limit--)
+                    for (limit = ModNumber.ICOUNT-1; limit >= 0; limit--)
                     {
                         if (pRint[limit] != 0)
                             break;

@@ -2670,10 +2670,10 @@ namespace ModularCalculation
             }
 #endif
 #if (MEDMOD || LARGEMODSIGNATURE) && !UNSAFE
-            int offset = 28 + seedLenght;
+            int offset = 28 + seedLength;
             byte[] qLittleEndian = ModNumber.convertEndianess(keyBlob, groupSize, offset);
             dsaParameters.Q = new ModNumber(qLittleEndian);
-            offset += 20;
+            offset += groupSize;
             byte[] pLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
             dsaParameters.P = new ModNumber(pLittleEndian);
             offset += byteLength;

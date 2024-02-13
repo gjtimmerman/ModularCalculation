@@ -550,7 +550,7 @@ public class ModularCalculationTest {
         assertThrows(ArithmeticException.class,() ->  ModNumber.modulo(ml, mr));
     }
     @Test
-    public void TestModulo1000By1()
+    public void modulo1000By1()
     {
         ModNumber ml = new ModNumber(1000L);
         ModNumber mr = new ModNumber(1l);
@@ -558,12 +558,75 @@ public class ModularCalculationTest {
         assertEquals(mexp, ModNumber.modulo(ml,  mr));
     }
     @Test
-    public void TestModuloZeroBy1()
+    public void moduloZeroBy1()
     {
         ModNumber ml = new ModNumber(0L);
         ModNumber mr = new ModNumber(1l);
         ModNumber mexp = new ModNumber(0L);
         assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void modulo1000By2()
+    {
+        ModNumber ml = new ModNumber(1000L);
+        ModNumber mr = new ModNumber(2l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void modulo1001By2()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(2l);
+        ModNumber mexp = new ModNumber(1L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void modulo1001By2001()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(2001l);
+        ModNumber mexp = new ModNumber(1001L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void modulo1001By1001()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(1001l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void modulo101By5()
+    {
+        ModNumber ml = new ModNumber(101L);
+        ModNumber mr = new ModNumber(5l);
+        ModNumber mexp = new ModNumber(1L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void moduloDivide2Pow64ByEight()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[1] = 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(8L);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp,  ModNumber.modulo(ml, mr));
+
+    }
+    @Test
+    public void moduloDivideAllFsBy2Pow16()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+            l[i] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(65536L);
+        ModNumber mexp = new ModNumber(65535L);
+        assertEquals(mexp,  ModNumber.modulo(ml, mr));
+
     }
 
 }

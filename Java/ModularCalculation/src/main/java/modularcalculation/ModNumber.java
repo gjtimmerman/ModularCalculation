@@ -85,6 +85,8 @@ public class ModNumber {
     public void fromIntArray(int[] arr) {
         for (int i = 0; i < LCOUNT; i++) {
             num[i] = arr[i * 2];
+            num[i] <<= ISIZE * 8;
+            num[i] >>>= ISIZE * 8;
             num[i] |= ((long) arr[i * 2 + 1]) << ISIZE * 8;
         }
 
@@ -332,11 +334,11 @@ public class ModNumber {
             if (l.num[i] == r.num[i])
                 continue;
             else
-                if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                         return l.num[i] < r.num[i];
-                else if (l.num[i] < 0L && r.num[i] > 0L) {
+                else if (l.num[i] < 0L && r.num[i] >= 0L) {
                         return false;
-                } else if (l.num[i] > 0L && r.num[i] < 0L) {
+                } else if (l.num[i] >= 0L && r.num[i] < 0L) {
                     return true;
                 }
 
@@ -350,11 +352,11 @@ public class ModNumber {
             if (l.num[i] == r.num[i])
                 continue;
             else
-            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] < r.num[i];
-            else if (l.num[i] < 0L && r.num[i] > 0L) {
+            else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return false;
-            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+            } else if (l.num[i] >= 0L && r.num[i] < 0L) {
                 return true;
             }
 
@@ -369,11 +371,11 @@ public class ModNumber {
             if (l.num[i] == r.num[i])
                 continue;
             else
-            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] > r.num[i];
-            else if (l.num[i] < 0L && r.num[i] > 0L) {
+            else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return true;
-            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+            } else if (l.num[i] >= 0L && r.num[i] < 0L) {
                 return false;
             }
         }
@@ -386,11 +388,11 @@ public class ModNumber {
             if (l.num[i] == r.num[i])
                 continue;
             else
-            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] > r.num[i];
-            else if (l.num[i] < 0L && r.num[i] > 0L) {
+            else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return true;
-            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+            } else if (l.num[i] >= 0L && r.num[i] < 0L) {
                 return false;
             }
         }

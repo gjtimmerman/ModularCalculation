@@ -1,5 +1,7 @@
 package modularcalculation;
 
+import java.util.Arrays;
+
 public class ModNumber {
     public final static int MaxMod = 1024 / 8;
 
@@ -116,12 +118,16 @@ public class ModNumber {
         int[] resInt = l.toIntArray();
         int carry = 0;
         long ltmp = resInt[0];
-        if (ltmp < 0)
-            ltmp >>>= ModNumber.ISIZE * 8;
+        if (ltmp < 0) {
+            ltmp <<= ISIZE * 8;
+            ltmp >>>= ISIZE * 8;
+        }
         long lr = 0;
         lr = r;
-        if (r < 0)
-            lr >>>= ModNumber.ISIZE * 8;
+        if (lr < 0) {
+            lr <<= ISIZE * 8;
+            lr >>>= ISIZE * 8;
+        }
         if (ltmp < lr)
             carry = 1;
         resInt[0] = (int) (ltmp - lr);
@@ -152,11 +158,15 @@ public class ModNumber {
         int carry = 0;
         for (int i = 0; i < ICOUNT; i++) {
             long ltmp = lInt[i];
-            if (ltmp < 0)
-                ltmp >>>= ModNumber.ISIZE * 8;
+            if (ltmp < 0) {
+                ltmp <<= ISIZE * 8;
+                ltmp >>>= ISIZE * 8;
+            }
             long rtmp = rInt[i];
-            if (rtmp < 0)
-                rtmp >>>= ModNumber.ISIZE * 8;
+            if (rtmp < 0) {
+                rtmp <<= ISIZE * 8;
+                rtmp >>>= ISIZE * 8;
+            }
             if (ltmp >= carry) {
                 ltmp -= carry;
                 carry = 0;
@@ -176,7 +186,55 @@ public class ModNumber {
         return mResult;
     }
 
+    private ModNumber addAssignScalar(int lpos, int scalar) {
+        if (lpos >= ICOUNT)
+            throw new IllegalArgumentException("lpos out of range");
+        long res = 0L;
+        long lomask = 0xffffffff;
+        long himask = lomask << ISIZE * 8;
+        int[] thisIntArray = toIntArray();
+        long tmp = thisIntArray[lpos];
+        if (tmp < 0) {
+            tmp <<= ISIZE * 8;
+            tmp >>>= ISIZE * 8;
 
+        }
+
+        res = tmp + scalar;
+        thisIntArray[lpos++] = (int) (res & lomask);
+        while ((res & himask) != 0L && lpos < ICOUNT)
+        {
+            tmp = thisIntArray[lpos];
+            if (tmp < 0) {
+                tmp <<= ISIZE * 8;
+                tmp >>>= ISIZE * 8;
+
+            }
+            res =  tmp + ((res & himask) >> ISIZE * 8);
+            thisIntArray[lpos++] = (int) (res & lomask);
+        }
+        fromIntArray(thisIntArray);
+        return this;
+    }
+    public static ModNumber addAssignScalar(ModNumber l, int scalar)
+    {
+        ModNumber mres = new ModNumber(l);
+        mres.addAssignScalar(0, scalar);
+        return mres;
+    }
+    public static ModNumber add(ModNumber l, ModNumber r) {
+        ModNumber mres = new ModNumber(l);
+        int[] rUint = r.toIntArray();
+        for (int i = 0; i < ICOUNT; i++) {
+            mres.addAssignScalar(i, rUint[i]);
+        }
+        return mres;
+    }
+    public static ModNumber addAssign(ModNumber l, ModNumber r) {
+        ModNumber mres = add(l, r);
+        l.num = mres.num;
+        return mres;
+    }
     public static ModNumber shiftLeft(ModNumber n, int i) {
         int words = 0;
         if (i >= ISIZE * 8) {
@@ -232,5 +290,210 @@ public class ModNumber {
         ModNumber mres = shiftRight(n, i);
         n.num = mres.num;
         return mres;
+    }
+
+    public DivideModuloScalarResult divideAndModulo(int scalar, boolean onlyModulo) {
+        if (scalar == 0)
+            throw new ArithmeticException("Division by zero not allowed!");
+        int modRes;
+        long himask = 0xffffffffL << ISIZE * 8;
+        int[] resInt = new int[ICOUNT];
+        int[] nInt = toIntArray();
+        long tmp = 0L;
+        for (int i = ModNumber.ICOUNT - 1; i >= 0; i--) {
+            tmp |= nInt[i];
+            if (tmp < 0)
+                tmp >>>= ModNumber.ISIZE * 8;
+            if (scalar <= tmp) {
+                if (!onlyModulo)
+                    resInt[i] = (int) (tmp / scalar);
+                tmp %= scalar;
+
+            }
+            tmp <<= ModNumber.ISIZE * 8;
+        }
+        modRes = (int) ((tmp & himask) >>> ISIZE * 8);
+        ModNumber mres = new ModNumber(resInt);
+        return new DivideModuloScalarResult(mres, modRes);
+    }
+    public ModNumber divide(int scalar) {
+        DivideModuloScalarResult result = divideAndModulo(scalar, false);
+        return result.div();
+    }
+    public int modulo(int scalar) {
+        DivideModuloScalarResult result = divideAndModulo(scalar, true);
+        return result.mod();
+    }
+
+    public static boolean lessThan(ModNumber l, ModNumber r)
+    {
+        for (int i = LCOUNT - 1; i >= 0; i--)
+        {
+            if (l.num[i] == r.num[i])
+                continue;
+            else
+                if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                        return l.num[i] < r.num[i];
+                else if (l.num[i] < 0L && r.num[i] > 0L) {
+                        return false;
+                } else if (l.num[i] > 0L && r.num[i] < 0L) {
+                    return true;
+                }
+
+        }
+        return false;
+    }
+    public static boolean lessThanOrEqual(ModNumber l, ModNumber r)
+    {
+        for (int i = LCOUNT - 1; i >= 0; i--)
+        {
+            if (l.num[i] == r.num[i])
+                continue;
+            else
+            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                return l.num[i] < r.num[i];
+            else if (l.num[i] < 0L && r.num[i] > 0L) {
+                return false;
+            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+                return true;
+            }
+
+        }
+        return true;
+    }
+
+    public static boolean greaterThan(ModNumber l, ModNumber r)
+    {
+        for (int i = LCOUNT - 1; i >= 0; i--)
+        {
+            if (l.num[i] == r.num[i])
+                continue;
+            else
+            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                return l.num[i] > r.num[i];
+            else if (l.num[i] < 0L && r.num[i] > 0L) {
+                return true;
+            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+                return false;
+            }
+        }
+        return false;
+    }
+    public static boolean greaterThanOrEqual(ModNumber l, ModNumber r)
+    {
+        for (int i = LCOUNT - 1; i >= 0; i--)
+        {
+            if (l.num[i] == r.num[i])
+                continue;
+            else
+            if ((l.num[i] > 0L && r.num[i] > 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                return l.num[i] > r.num[i];
+            else if (l.num[i] < 0L && r.num[i] > 0L) {
+                return true;
+            } else if (l.num[i] > 0L && r.num[i] < 0L) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int FindFirstNonZeroBitInWord(int word)
+    {
+        long mask = 1L << (LSIZE * 8 - 1);
+        for (int i = 0; i < LSIZE * 8; i++)
+        {
+            if ((num[word] & mask) != 0)
+                return i;
+            mask >>>= 1;
+        }
+        return LSIZE * 8;
+    }
+
+    public static DivideAndModuloResult divideAndModulo(ModNumber l, ModNumber r, boolean onlyModulo)
+    {
+        ModNumber divRes = new ModNumber(0L);
+        ModNumber mzero = new ModNumber(0L);
+        if (r.equals(mzero))
+            throw new ArithmeticException();
+        ModNumber mone = new ModNumber(1L);
+        if (r.equals(mone))                      // Optimization
+        {
+            divRes.num = Arrays.copyOf(l.num, l.num.length);
+            return new DivideAndModuloResult(divRes, new ModNumber(0L));
+        }
+        ModNumber mtwo = new ModNumber(2L);
+        ModNumber modRes = new ModNumber(0L);
+        if (r.equals(mtwo))                      // Optimization
+        {
+            divRes = ModNumber.shiftRight(l, 1);
+            if ((l.num[0] & 0x1L) > 0)
+            modRes = new ModNumber(1L);
+            return new DivideAndModuloResult(divRes, modRes);
+        }
+        modRes.num = Arrays.copyOf(l.num, l.num.length);
+        if (ModNumber.lessThan(l, r))
+        {
+
+            return new DivideAndModuloResult(mzero, modRes);
+        }
+        if (l.equals(r))
+        {
+            return new DivideAndModuloResult(mone, mzero);
+        }
+        int firstNonzeroWordl = 0;
+        int firstNonzeroWordr = 0;
+        for (int i = LCOUNT - 1; i >= 0; i--)
+            if (l.num[i] != 0)
+            {
+                firstNonzeroWordl = i;
+                break;
+            }
+        for (int i = LCOUNT - 1; i >= 0; i--)
+            if (r.num[i] != 0)
+            {
+                firstNonzeroWordr = i;
+                break;
+            }
+        int nonZeroDifference = firstNonzeroWordl - firstNonzeroWordr;
+        for (int i = 0; i <= nonZeroDifference; i++)
+        {
+            long[] divisor = new long[LCOUNT];
+            long[] rShiftedLeft = new long[LCOUNT];
+            for (int j = 0; j <= firstNonzeroWordr; j++)
+            {
+                rShiftedLeft[j + nonZeroDifference - i] = r.num[j];
+            }
+            divisor[nonZeroDifference - i] = 1L;
+            ModNumber mRShiftedLeft = new ModNumber(rShiftedLeft);
+            ModNumber mDivisor = new ModNumber(divisor);
+            int firstBitl = (int)((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
+            int firstBitr = (int)((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
+            int firstBitDifference = firstBitl - firstBitr;
+            for (int j = 0; j <= firstBitDifference; j++)
+            {
+                ModNumber rShiftedLeftBits = new ModNumber(mRShiftedLeft);
+                ModNumber mDivisorShiftedLeftBits = new ModNumber(mDivisor);
+                ModNumber.shiftLeftAssign(rShiftedLeftBits, firstBitDifference - j);
+                if (!onlyModulo)
+                    ModNumber.shiftLeftAssign(mDivisorShiftedLeftBits, firstBitDifference - j);
+                while (ModNumber.greaterThanOrEqual(modRes, rShiftedLeftBits))
+                {
+                    ModNumber.subtractAssign(modRes, rShiftedLeftBits);
+                    if (!onlyModulo)
+                        ModNumber.addAssign(divRes, mDivisorShiftedLeftBits);
+                }
+            }
+        }
+        return new DivideAndModuloResult(divRes, modRes);
+    }
+    public static ModNumber divide(ModNumber ml, ModNumber mr)
+    {
+        DivideAndModuloResult result = divideAndModulo(ml, mr, false);
+        return result.div();
+    }
+    public static ModNumber modulo(ModNumber ml, ModNumber mr)
+    {
+        DivideAndModuloResult result = divideAndModulo(ml, mr, true);
+        return result.mod();
     }
 }

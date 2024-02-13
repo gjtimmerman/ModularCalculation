@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ModularCalculationTest {
 
@@ -542,6 +541,29 @@ public class ModularCalculationTest {
         ModNumber ml = new ModNumber(l);
         ModNumber.shiftRightAssign(ml, ModNumber.NSIZE - ModNumber.LSIZE * 8);
         assertEquals(mexp, ml);
+    }
+    @Test
+    public void moduloDivideByZero()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(0L);
+        assertThrows(ArithmeticException.class,() ->  ModNumber.modulo(ml, mr));
+    }
+    @Test
+    public void TestModulo1000By1()
+    {
+        ModNumber ml = new ModNumber(1000L);
+        ModNumber mr = new ModNumber(1l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
+    }
+    @Test
+    public void TestModuloZeroBy1()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(1l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.modulo(ml,  mr));
     }
 
 }

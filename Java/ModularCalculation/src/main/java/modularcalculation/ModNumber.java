@@ -58,7 +58,7 @@ public class ModNumber {
         if (lSize == 0)
             return;
         long tmp = 0L;
-        long mask = 0xff;
+        long mask = 0xffL;
         for (int j = 0; j < lSize; j++) {
             long masked = num[lCount] & mask;
             tmp |= masked;
@@ -73,7 +73,7 @@ public class ModNumber {
 
     public int[] toIntArray() {
         int[] result = new int[ICOUNT];
-        long lomask = 0xffffffff;
+        long lomask = 0xffffffffL;
         long himask = lomask << ISIZE * 8;
         for (int i = 0; i < LCOUNT; i++) {
             result[i * 2] = (int) (num[i] & lomask);
@@ -118,18 +118,13 @@ public class ModNumber {
 
     public static ModNumber subtractScalar(ModNumber l, int r) {
         int[] resInt = l.toIntArray();
+        long lomask = 0xffffffffL;
         int carry = 0;
         long ltmp = resInt[0];
-        if (ltmp < 0) {
-            ltmp <<= ISIZE * 8;
-            ltmp >>>= ISIZE * 8;
-        }
+        ltmp &= lomask;
         long lr = 0;
         lr = r;
-        if (lr < 0) {
-            lr <<= ISIZE * 8;
-            lr >>>= ISIZE * 8;
-        }
+        lr &= lomask;
         if (ltmp < lr)
             carry = 1;
         resInt[0] = (int) (ltmp - lr);
@@ -158,17 +153,12 @@ public class ModNumber {
         int[] lInt = l.toIntArray();
         int[] rInt = r.toIntArray();
         int carry = 0;
+        long lomask = 0xffffffffL;
         for (int i = 0; i < ICOUNT; i++) {
             long ltmp = lInt[i];
-            if (ltmp < 0) {
-                ltmp <<= ISIZE * 8;
-                ltmp >>>= ISIZE * 8;
-            }
+            ltmp &= lomask;
             long rtmp = rInt[i];
-            if (rtmp < 0) {
-                rtmp <<= ISIZE * 8;
-                rtmp >>>= ISIZE * 8;
-            }
+            rtmp &= lomask;
             if (ltmp >= carry) {
                 ltmp -= carry;
                 carry = 0;
@@ -196,22 +186,14 @@ public class ModNumber {
         long himask = lomask << ISIZE * 8;
         int[] thisIntArray = toIntArray();
         long tmp = thisIntArray[lpos];
-        if (tmp < 0) {
-            tmp <<= ISIZE * 8;
-            tmp >>>= ISIZE * 8;
-
-        }
+        tmp &= lomask;
         long scalarLong = scalar & lomask;
         res = tmp + scalarLong;
         thisIntArray[lpos++] = (int) (res & lomask);
         while ((res & himask) != 0L && lpos < ICOUNT)
         {
             tmp = thisIntArray[lpos];
-            if (tmp < 0) {
-                tmp <<= ISIZE * 8;
-                tmp >>>= ISIZE * 8;
-
-            }
+            tmp &= lomask;
             res =  tmp + ((res & himask) >> ISIZE * 8);
             thisIntArray[lpos++] = (int) (res & lomask);
         }
@@ -282,13 +264,16 @@ public class ModNumber {
             words = i / (ISIZE * 8);
             i %= ISIZE * 8;
         }
-        long lomask = 0xffffffff;
+        long lomask = 0xffffffffL;
         long himask = lomask << ISIZE * 8;
         int[] resInt = new int[ICOUNT];
         int[] nInt = n.toIntArray();
         resInt[ICOUNT - 1] = nInt[ICOUNT - words - 1] << i;
         for (int j = ICOUNT - 2; j >= words; j--) {
-            long tmp = ((long) (nInt[j - words])) << i;
+            long nIntLong = nInt[j - words];
+            nIntLong &= lomask;
+            nIntLong <<= i;
+            long tmp = nIntLong;
             resInt[j + 1] |= (int) ((tmp & himask) >>> ISIZE * 8);
             resInt[j] = (int) (tmp & lomask);
         }
@@ -530,9 +515,17 @@ public class ModNumber {
         DivideAndModuloResult result = divideAndModulo(ml, mr, false);
         return result.div();
     }
+
     public static ModNumber modulo(ModNumber ml, ModNumber mr)
     {
         DivideAndModuloResult result = divideAndModulo(ml, mr, true);
         return result.mod();
     }
+    public static ModNumber moduloAssign(ModNumber ml, ModNumber mr)
+    {
+        DivideAndModuloResult result = divideAndModulo(ml, mr, true);
+        ml.num = result.mod().num;
+        return result.mod();
+    }
+
 }

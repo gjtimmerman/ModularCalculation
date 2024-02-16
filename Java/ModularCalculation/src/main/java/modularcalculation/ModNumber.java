@@ -192,7 +192,7 @@ public class ModNumber {
         if (lpos >= ICOUNT)
             throw new IllegalArgumentException("lpos out of range");
         long res = 0L;
-        long lomask = 0xffffffff;
+        long lomask = 0xffffffffL;
         long himask = lomask << ISIZE * 8;
         int[] thisIntArray = toIntArray();
         long tmp = thisIntArray[lpos];
@@ -201,8 +201,8 @@ public class ModNumber {
             tmp >>>= ISIZE * 8;
 
         }
-
-        res = tmp + scalar;
+        long scalarLong = scalar & lomask;
+        res = tmp + scalarLong;
         thisIntArray[lpos++] = (int) (res & lomask);
         while ((res & himask) != 0L && lpos < ICOUNT)
         {
@@ -235,6 +235,43 @@ public class ModNumber {
     public static ModNumber addAssign(ModNumber l, ModNumber r) {
         ModNumber mres = add(l, r);
         l.num = mres.num;
+        return mres;
+    }
+
+    public static ModNumber productScalar(ModNumber l, int scalar) {
+        ModNumber mres = new ModNumber(0L);
+        long lomask = 0xffffffffL;
+        long himask = lomask << ISIZE * 8;
+        int[] lInt = l.toIntArray();
+        int firstNonzeroWord;
+        for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--) {
+            if (lInt[firstNonzeroWord] != 0)
+                break;
+        }
+        for (int i = 0; i <= firstNonzeroWord; i++) {
+            long lintTmp = lInt[i];
+            lintTmp &= lomask;
+            long tmpres = lintTmp * scalar;
+            mres.addAssignScalar(i, (int) (tmpres & lomask));
+            if (i < ICOUNT - 1) {
+                lintTmp = tmpres & himask;
+                lintTmp >>>= ISIZE * 8;
+                mres.addAssignScalar(i + 1, (int) lintTmp);
+            }
+        }
+        return mres;
+    }
+    public static ModNumber product(ModNumber ml, ModNumber mr) {
+        ModNumber mres = new ModNumber(0L);
+        int[] rInt = mr.toIntArray();
+        int firstNonzeroWord;
+        for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--) {
+            if (rInt[firstNonzeroWord] != 0)
+                break;
+        }
+        for (int i = 0; i <= firstNonzeroWord; i++) {
+            addAssign(mres,ModNumber.shiftLeft(ModNumber.productScalar(ml, rInt[i]), ISIZE * 8 * i));
+        }
         return mres;
     }
     public static ModNumber shiftLeft(ModNumber n, int i) {

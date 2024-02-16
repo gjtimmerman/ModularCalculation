@@ -628,5 +628,61 @@ public class ModularCalculationTest {
         assertEquals(mexp,  ModNumber.modulo(ml, mr));
 
     }
+    @Test
+    public void moduloDivideAllFsByAllFs()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+            l[i] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp,  ModNumber.modulo(ml, ml));
+
+    }
+    @Test
+    public void moduloDivideAllFsByAllFsAndZeroLowWord()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = ~0L;
+            r[i] = ~0L;
+        }
+        r[0] = 0L;
+        exp[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        assertEquals(mexp,  ModNumber.modulo(ml, mr));
+
+    }
+    @Test
+    public void TestModuloDivideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne()
+    {
+        ModNumber mnprime1 = new ModNumber(355687428095999L);
+        int prime2 = 39916799;
+        ModNumber mnprime2 = new ModNumber(prime2);
+        ModNumber product = ModNumber.productScalar(mnprime1, prime2);
+        ModNumber res1 = ModNumber.modulo(product, mnprime1);
+        ModNumber res2 = ModNumber.modulo(product, mnprime2);
+        ModNumber mexp1 = new ModNumber(0L);
+        assertEquals(mexp1, res1);
+        assertEquals(mexp1, res2);
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mnprime1MinusOne = ModNumber.subtract(mnprime1,mone);
+        ModNumber mnprime2MinusOne = ModNumber.subtract(mnprime2, mone);
+        ModNumber productMinusPrime1 = ModNumber.subtract(product, mnprime1);
+        ModNumber productMinusPrime2 = ModNumber.subtract(product, mnprime2);
+        ModNumber res3 = ModNumber.modulo(productMinusPrime1, mnprime2MinusOne);
+        ModNumber res4 = ModNumber.modulo(productMinusPrime2, mnprime1MinusOne);
+        ModNumber res5 = ModNumber.modulo(productMinusPrime1, mnprime1);
+        ModNumber res6 = ModNumber.modulo(productMinusPrime2, mnprime2);
+        assertEquals(mexp1, res3);
+        assertEquals(mexp1, res4);
+        assertEquals(mexp1, res5);
+        assertEquals(mexp1, res6);
+
+    }
 
 }

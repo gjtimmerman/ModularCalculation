@@ -199,11 +199,15 @@ public class ModNumber {
         fromIntArray(thisIntArray);
         return this;
     }
-
-    public static ModNumber addAssignScalar(ModNumber l, int scalar) {
+    public static ModNumber addScalar(ModNumber l, int scalar) {
         ModNumber mres = new ModNumber(l);
         mres.addAssignScalar(0, scalar);
         return mres;
+    }
+
+    public static ModNumber addAssignScalar(ModNumber l, int scalar) {
+        l.addAssignScalar(0, scalar);
+        return l;
     }
 
     public static ModNumber add(ModNumber l, ModNumber r) {

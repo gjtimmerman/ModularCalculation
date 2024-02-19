@@ -1265,5 +1265,484 @@ public class ModularCalculationTest {
         assertEquals(mexp6, res6);
 
     }
+    @Test
+    public void equalTrue()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(ml);
+        assertEquals(ml, mr);
+    }
+    @Test
+    public void subtractEqualNumbers()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(ml);
+        ModNumber mres = ModNumber.subtract(ml, mr);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void equalNotTrueFirstSection()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+            r[i] = i;
+        }
+        r[0] -= 1;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        assertNotEquals(ml, mr);
+
+    }
+    @Test
+    public void equalNotTrueLastSection()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+            r[i] = i;
+        }
+        r[ModNumber.LCOUNT - 1] -= 1;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        assertNotEquals(ml, mr);
+
+    }
+    @Test
+    public void lessThanTrue()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(2L);
+        assertTrue(ModNumber.lessThan(ml,  mr));
+    }
+    @Test
+    public void lessThanFalse()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(2L);
+        assertFalse(ModNumber.lessThan(mr,  ml));
+    }
+    @Test
+    public void greaterThanTrueForLargeDifference()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = 1L;
+        r[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        assertTrue(ModNumber.greaterThan(ml,  mr));
+
+    }
+    @Test
+    public void lessThanFalseForLargeDifference()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = 1L;
+        r[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        assertFalse(ModNumber.lessThan(ml,  mr));
+
+    }
+    @Test
+    public void lessThanFalseForEquality()
+    {
+        ModNumber ml = new ModNumber(1234L);
+        ModNumber mr = new ModNumber(ml);
+        assertFalse( ModNumber.lessThan(ml, mr));
+
+    }
+    @Test
+    public void lessThanFalseForEqualityOfZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(ml);
+        assertFalse( ModNumber.lessThan(ml, mr));
+
+    }
+    @Test
+    public void lessOrEqualTrueForLessThan()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(2L);
+        assertTrue( ModNumber.lessThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void lessOrEqualFalseForGreaterThan()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(2L);
+        assertFalse( ModNumber.lessThanOrEqual(mr, ml));
+
+    }
+    @Test
+    public void lessOrEqualTrueForEquality()
+    {
+        ModNumber ml = new ModNumber(1234L);
+        ModNumber mr = new ModNumber(ml);
+        assertTrue( ModNumber.lessThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void lessOrEqualTrueForEqualityOfZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(ml);
+        assertTrue( ModNumber.lessThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void greaterThanTrue()
+    {
+        ModNumber ml = new ModNumber(2L);
+        ModNumber mr = new ModNumber(1L);
+        assertTrue(ModNumber.greaterThan(ml,  mr));
+    }
+    @Test
+    public void greaterThanFalse()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(2L);
+        assertFalse(ModNumber.greaterThan(ml,  mr));
+    }
+
+
+    @Test
+    public void greaterThanFalseForEquality()
+    {
+        ModNumber ml = new ModNumber(1234L);
+        ModNumber mr = new ModNumber(ml);
+        assertFalse( ModNumber.greaterThan(ml, mr));
+
+    }
+    @Test
+    public void greaterThanFalseForEqualityOfZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(ml);
+        assertFalse( ModNumber.greaterThan(ml, mr));
+
+    }
+    @Test
+    public void greaterOrEqualTrueForGreaterThan()
+    {
+        ModNumber ml = new ModNumber(2L);
+        ModNumber mr = new ModNumber(1L);
+        assertTrue( ModNumber.greaterThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void greaterOrEqualFalseForLessThan()
+    {
+        ModNumber ml = new ModNumber(2L);
+        ModNumber mr = new ModNumber(1L);
+        assertFalse( ModNumber.greaterThanOrEqual(mr, ml));
+
+    }
+    @Test
+    public void greaterOrEqualTrueForEquality()
+    {
+        ModNumber ml = new ModNumber(1234L);
+        ModNumber mr = new ModNumber(ml);
+        assertTrue( ModNumber.greaterThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void greaterOrEqualTrueForEqualityOfZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(ml);
+        assertTrue( ModNumber.greaterThanOrEqual(ml, mr));
+
+    }
+    @Test
+    public void addAssignScalarOneToZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber.addAssignScalar(ml, 1);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addScalarOneToZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.addScalar(ml, 1);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignScalarOneToFirstSectionMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = 1L;
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.addAssignScalar(ml,1);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addScalarOneToFirstSectionMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = 1L;
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres =  ModNumber.addScalar(ml,1);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignScalarOneToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber.addAssignScalar(ml, 1);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addScalarOneToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.addScalar(ml, 1);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignScalarMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0xFEL);
+        ModNumber.addAssignScalar(ml, 0xFF);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addScalarMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0xFEL);
+        ModNumber mres =  ModNumber.addScalar(ml, 0xFF);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignOneToZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber.addAssign(ml, mr);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addOneToZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.add(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignOneToFirstSectionMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(1L);
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = 1L;
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.addAssign(ml,mr);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addOneToFirstSectionMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(1L);
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = 1L;
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres =  ModNumber.add(ml,mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignOneToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber.addAssign(ml, mr);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addSelfAssignMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[0] -= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.addAssign(ml, ml);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addAssignFirstWordMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(~0L);
+        ModNumber mexp = new ModNumber(~0L - 1);
+        ModNumber.addAssign(ml, mr);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addFirstWordMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(~0L);
+        ModNumber mexp = new ModNumber(~0L - 1);
+        ModNumber mres = ModNumber.add(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void addAssignMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            r[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[0] -= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.addAssign(ml, mr);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void addMaxToMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            r[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[0] -= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.add(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarByZero()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber.productAssignScalar(ml, 0);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalarByZero()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.productScalar(ml, 0);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarByOne()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(ml);
+        ModNumber.productAssignScalar(ml, 1);
+        assertEquals(mexp, ml);
+    }
 
 }

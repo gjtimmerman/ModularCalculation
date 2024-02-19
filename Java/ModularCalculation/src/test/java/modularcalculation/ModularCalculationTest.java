@@ -1744,5 +1744,154 @@ public class ModularCalculationTest {
         ModNumber.productAssignScalar(ml, 1);
         assertEquals(mexp, ml);
     }
+    @Test
+    public void productScalarByOne()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(ml);
+        ModNumber mres = ModNumber.productScalar(ml, 1);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+            exp[i] = i * 2;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.productAssignScalar(ml, 2);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalarByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = i;
+            exp[i] = i * 2;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.productScalar(ml, 2);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarAllFFFFByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[0] ^= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.productAssignScalar(ml, 2);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalarAllFFFFByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[0] ^= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.productScalar(ml, 2);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarFsBy2Pow16()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        exp[1] = ~0L >>> (ModNumber.LSIZE * 8 - 16);
+        exp[0] = ~0L << 16;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.productAssignScalar(ml, 65536);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalarFsBy2Pow16()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        exp[1] = ~0L >>> (ModNumber.LSIZE * 8 - 16);
+        exp[0] = ~0L << 16;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.productScalar(ml, 65536);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalarAllAsByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = 0xaaaaaaaaaaaaaaaaL;
+            exp[i] = (l[i] << 1) + 1;
+        }
+        exp[0] = l[0] << 1;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber.productAssignScalar(ml, 2);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalarAllAsByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = 0xaaaaaaaaaaaaaaaaL;
+            exp[i] = (l[i] << 1) + 1;
+        }
+        exp[0] = l[0] << 1;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.productScalar(ml, 2);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void productAssignScalar9sDecBy9sDec()
+    {
+        ModNumber ml = new ModNumber(99999999L);
+        ModNumber mexp = ModNumber.stomn("9999999800000001", 10);
+        ModNumber.productAssignScalar(ml, 99999999);
+        assertEquals(mexp, ml);
+    }
+    @Test
+    public void productScalar9sDecBy9sDec()
+    {
+        ModNumber ml = new ModNumber(99999999L);
+        ModNumber mexp = ModNumber.stomn("9999999800000001", 10);
+        ModNumber mres = ModNumber.productScalar(ml, 99999999);
+        assertEquals(mexp, mres);
+    }
 
 }

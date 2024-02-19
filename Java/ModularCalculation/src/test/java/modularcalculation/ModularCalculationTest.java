@@ -1059,5 +1059,211 @@ public class ModularCalculationTest {
         assertEquals(mexpMod, result6.mod());
 
     }
+    @Test
+    public void divideAndModuloDivideProductOfLargePrimesByBothPrimesAndByBothPrimesMinusOne()
+    {
+        ModNumber mnprime1 = ModNumber.stomn("C882E9B30B9F87F47AD7653886EF5CD53D9CAA96D2B83C24C643F024B86CDFE61DE6627F0C63B3CBB885DD3212C77CBE47A3469E5EA2FAD245984A75D866AAF3", 16);
+        ModNumber mnprime2 = ModNumber.stomn("E1668918F4DD83B3066B32577933BD27B1FFA8F49907637863750304EFCBDB1DCC86362EEBC81ACD68B7E0C0BCE35B1BC0F353F16B59C5E7636AF1464805CAB3", 16);
+        ModNumber product = ModNumber.product(mnprime1, mnprime2);
+        DivideAndModuloResult result1 = ModNumber.divideAndModulo(product, mnprime1, false);
+        DivideAndModuloResult result2 = ModNumber.divideAndModulo(product, mnprime2, false);
+        ModNumber mexpDiv1 = new ModNumber(mnprime2);
+        ModNumber mexpDiv2 = new ModNumber(mnprime1);
+        ModNumber mexpMod = new ModNumber(0L);
+        assertEquals(mexpDiv1, result1.div());
+        assertEquals(mexpDiv2, result2.div());
+        assertEquals(mexpMod, result1.mod());
+        assertEquals(mexpMod, result2.mod());
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mnprime1MinusOne = ModNumber.subtract(mnprime1,mone);
+        ModNumber mnprime2MinusOne = ModNumber.subtract(mnprime2, mone);
+        ModNumber productMinusPrime1 = ModNumber.subtract(product, mnprime1);
+        ModNumber productMinusPrime2 = ModNumber.subtract(product, mnprime2);
+        ModNumber mexpDiv3 = new ModNumber(mnprime1);
+        ModNumber mexpDiv4 = new ModNumber(mnprime2);
+        ModNumber mexpDiv5 = new ModNumber(mnprime2MinusOne);
+        ModNumber mexpDiv6 = new ModNumber(mnprime1MinusOne);
+
+        DivideAndModuloResult result3 = ModNumber.divideAndModulo(productMinusPrime1, mnprime2MinusOne, false);
+        DivideAndModuloResult result4 = ModNumber.divideAndModulo(productMinusPrime2, mnprime1MinusOne, false);
+        DivideAndModuloResult result5 = ModNumber.divideAndModulo(productMinusPrime1, mnprime1, false);
+        DivideAndModuloResult result6 = ModNumber.divideAndModulo(productMinusPrime2, mnprime2, false);
+        assertEquals(mexpDiv3, result3.div());
+        assertEquals(mexpDiv4, result4.div());
+        assertEquals(mexpDiv5, result5.div());
+        assertEquals(mexpDiv6, result6.div());
+        assertEquals(mexpMod, result3.mod());
+        assertEquals(mexpMod, result4.mod());
+        assertEquals(mexpMod, result5.mod());
+        assertEquals(mexpMod, result6.mod());
+
+    }
+    @Test
+    public void divideByZero()
+    {
+        ModNumber ml = new ModNumber(1L);
+        ModNumber mr = new ModNumber(0L);
+        assertThrows(ArithmeticException.class,() ->  ModNumber.divide(ml, mr));
+    }
+    @Test
+    public void divide1000By1()
+    {
+        ModNumber ml = new ModNumber(1000L);
+        ModNumber mr = new ModNumber(1l);
+        ModNumber mexp = new ModNumber(1000L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divideZeroBy1()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mr = new ModNumber(1l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide1000By2()
+    {
+        ModNumber ml = new ModNumber(1000L);
+        ModNumber mr = new ModNumber(2l);
+        ModNumber mexp = new ModNumber(500L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide1001By2()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(2l);
+        ModNumber mexp = new ModNumber(500L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide1001By2001()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(2001l);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide1001By1001()
+    {
+        ModNumber ml = new ModNumber(1001L);
+        ModNumber mr = new ModNumber(1001l);
+        ModNumber mexp = new ModNumber(1L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide101By5()
+    {
+        ModNumber ml = new ModNumber(101L);
+        ModNumber mr = new ModNumber(5l);
+        ModNumber mexp = new ModNumber(20L);
+        assertEquals(mexp, ModNumber.divide(ml,  mr));
+    }
+    @Test
+    public void divide2Pow64ByEight()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[1] = 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(8L);
+        ModNumber mexp = ModNumber.shiftRight(ml,3);
+        assertEquals(mexp,  ModNumber.divide(ml, mr));
+
+    }
+    @Test
+    public void divideAllFsBy2Pow16()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[ModNumber.LCOUNT - 1] ^= (0xffffL << (ModNumber.LSIZE * 8 - 16));
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(65536L);
+        ModNumber mexp = new ModNumber(exp);
+        assertEquals(mexp,  ModNumber.divide(ml, mr));
+
+    }
+    @Test
+    public void divideAllFsLeftAndRightWordByAllFsRightWord()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        r[0] = ~0L;
+        exp[0] = 1L;
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        exp[ModNumber.LCOUNT - 1] = 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        assertEquals(mexp, ModNumber.divide(ml, mr));
+
+    }
+
+    @Test
+    public void divideAllFsByAllFs()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+            l[i] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(1L);
+        assertEquals(mexp,  ModNumber.divide(ml, ml));
+
+    }
+    @Test
+    public void divideAllFsByAllFsAndZeroLowWord()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = ~0L;
+            r[i] = ~0L;
+        }
+        r[0] = 0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(1L);
+        assertEquals(mexp,  ModNumber.divide(ml, mr));
+
+    }
+    @Test
+    public void divideProductOfPrimesByBothPrimesAndByBothPrimesMinusOne()
+    {
+        ModNumber mnprime1 = new ModNumber(355687428095999L);
+        int prime2 = 39916799;
+        ModNumber mnprime2 = new ModNumber(prime2);
+        ModNumber product = ModNumber.productScalar(mnprime1, prime2);
+        ModNumber res1 = ModNumber.divide(product, mnprime1);
+        ModNumber res2 = ModNumber.divide(product, mnprime2);
+        ModNumber mexp1 = new ModNumber(prime2);
+        ModNumber mexp2 = new ModNumber(mnprime1);
+        assertEquals(mexp1, res1);
+        assertEquals(mexp2, res2);
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mnprime1MinusOne = ModNumber.subtract(mnprime1,mone);
+        ModNumber mnprime2MinusOne = ModNumber.subtract(mnprime2, mone);
+        ModNumber productMinusPrime1 = ModNumber.subtract(product, mnprime1);
+        ModNumber productMinusPrime2 = ModNumber.subtract(product, mnprime2);
+        ModNumber res3 = ModNumber.divide(productMinusPrime1, mnprime2MinusOne);
+        ModNumber res4 = ModNumber.divide(productMinusPrime2, mnprime1MinusOne);
+        ModNumber res5 = ModNumber.divide(productMinusPrime1, mnprime1);
+        ModNumber res6 = ModNumber.divide(productMinusPrime2, mnprime2);
+        ModNumber mexp3 = new ModNumber(mnprime1);
+        ModNumber mexp4 = new ModNumber(prime2);
+        ModNumber mexp5 = new ModNumber(mnprime2MinusOne);
+        ModNumber mexp6 = new ModNumber(mnprime1MinusOne);
+        assertEquals(mexp3, res3);
+        assertEquals(mexp4, res4);
+        assertEquals(mexp5, res5);
+        assertEquals(mexp6, res6);
+
+    }
 
 }

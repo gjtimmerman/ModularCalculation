@@ -190,22 +190,22 @@ public class ModNumber {
         long scalarLong = scalar & lomask;
         res = tmp + scalarLong;
         thisIntArray[lpos++] = (int) (res & lomask);
-        while ((res & himask) != 0L && lpos < ICOUNT)
-        {
+        while ((res & himask) != 0L && lpos < ICOUNT) {
             tmp = thisIntArray[lpos];
             tmp &= lomask;
-            res =  tmp + ((res & himask) >> ISIZE * 8);
+            res = tmp + ((res & himask) >> ISIZE * 8);
             thisIntArray[lpos++] = (int) (res & lomask);
         }
         fromIntArray(thisIntArray);
         return this;
     }
-    public static ModNumber addAssignScalar(ModNumber l, int scalar)
-    {
+
+    public static ModNumber addAssignScalar(ModNumber l, int scalar) {
         ModNumber mres = new ModNumber(l);
         mres.addAssignScalar(0, scalar);
         return mres;
     }
+
     public static ModNumber add(ModNumber l, ModNumber r) {
         ModNumber mres = new ModNumber(l);
         int[] rUint = r.toIntArray();
@@ -214,6 +214,7 @@ public class ModNumber {
         }
         return mres;
     }
+
     public static ModNumber addAssign(ModNumber l, ModNumber r) {
         ModNumber mres = add(l, r);
         l.num = mres.num;
@@ -224,6 +225,8 @@ public class ModNumber {
         ModNumber mres = new ModNumber(0L);
         long lomask = 0xffffffffL;
         long himask = lomask << ISIZE * 8;
+        long scalarLong = scalar;
+        scalarLong &= lomask;
         int[] lInt = l.toIntArray();
         int firstNonzeroWord;
         for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--) {
@@ -233,7 +236,7 @@ public class ModNumber {
         for (int i = 0; i <= firstNonzeroWord; i++) {
             long lintTmp = lInt[i];
             lintTmp &= lomask;
-            long tmpres = lintTmp * scalar;
+            long tmpres = lintTmp * scalarLong;
             mres.addAssignScalar(i, (int) (tmpres & lomask));
             if (i < ICOUNT - 1) {
                 lintTmp = tmpres & himask;
@@ -243,6 +246,12 @@ public class ModNumber {
         }
         return mres;
     }
+    public static ModNumber productAssignScalar(ModNumber l, int scalar) {
+        ModNumber result = productScalar(l, scalar);
+        l.num = result.num;
+        return result;
+    }
+
     public static ModNumber product(ModNumber ml, ModNumber mr) {
         ModNumber mres = new ModNumber(0L);
         int[] rInt = mr.toIntArray();
@@ -252,10 +261,11 @@ public class ModNumber {
                 break;
         }
         for (int i = 0; i <= firstNonzeroWord; i++) {
-            addAssign(mres,ModNumber.shiftLeft(ModNumber.productScalar(ml, rInt[i]), ISIZE * 8 * i));
+            addAssign(mres, ModNumber.shiftLeft(ModNumber.productScalar(ml, rInt[i]), ISIZE * 8 * i));
         }
         return mres;
     }
+
     public static ModNumber shiftLeft(ModNumber n, int i) {
         int words = 0;
         if (i >= ISIZE * 8) {
@@ -340,41 +350,38 @@ public class ModNumber {
         ModNumber mres = new ModNumber(resInt);
         return new DivideModuloScalarResult(mres, modRes);
     }
+
     public ModNumber divide(int scalar) {
         DivideModuloScalarResult result = divideAndModulo(scalar, false);
         return result.div();
     }
+
     public int modulo(int scalar) {
         DivideModuloScalarResult result = divideAndModulo(scalar, true);
         return result.mod();
     }
 
-    public static boolean lessThan(ModNumber l, ModNumber r)
-    {
-        for (int i = LCOUNT - 1; i >= 0; i--)
-        {
+    public static boolean lessThan(ModNumber l, ModNumber r) {
+        for (int i = LCOUNT - 1; i >= 0; i--) {
             if (l.num[i] == r.num[i])
                 continue;
-            else
-                if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
-                        return l.num[i] < r.num[i];
-                else if (l.num[i] < 0L && r.num[i] >= 0L) {
-                        return false;
-                } else if (l.num[i] >= 0L && r.num[i] < 0L) {
-                    return true;
-                }
+            else if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+                return l.num[i] < r.num[i];
+            else if (l.num[i] < 0L && r.num[i] >= 0L) {
+                return false;
+            } else if (l.num[i] >= 0L && r.num[i] < 0L) {
+                return true;
+            }
 
         }
         return false;
     }
-    public static boolean lessThanOrEqual(ModNumber l, ModNumber r)
-    {
-        for (int i = LCOUNT - 1; i >= 0; i--)
-        {
+
+    public static boolean lessThanOrEqual(ModNumber l, ModNumber r) {
+        for (int i = LCOUNT - 1; i >= 0; i--) {
             if (l.num[i] == r.num[i])
                 continue;
-            else
-            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            else if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] < r.num[i];
             else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return false;
@@ -386,14 +393,11 @@ public class ModNumber {
         return true;
     }
 
-    public static boolean greaterThan(ModNumber l, ModNumber r)
-    {
-        for (int i = LCOUNT - 1; i >= 0; i--)
-        {
+    public static boolean greaterThan(ModNumber l, ModNumber r) {
+        for (int i = LCOUNT - 1; i >= 0; i--) {
             if (l.num[i] == r.num[i])
                 continue;
-            else
-            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            else if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] > r.num[i];
             else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return true;
@@ -403,14 +407,12 @@ public class ModNumber {
         }
         return false;
     }
-    public static boolean greaterThanOrEqual(ModNumber l, ModNumber r)
-    {
-        for (int i = LCOUNT - 1; i >= 0; i--)
-        {
+
+    public static boolean greaterThanOrEqual(ModNumber l, ModNumber r) {
+        for (int i = LCOUNT - 1; i >= 0; i--) {
             if (l.num[i] == r.num[i])
                 continue;
-            else
-            if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
+            else if ((l.num[i] >= 0L && r.num[i] >= 0L) || (l.num[i] < 0L && r.num[i] < 0L))
                 return l.num[i] > r.num[i];
             else if (l.num[i] < 0L && r.num[i] >= 0L) {
                 return true;
@@ -421,11 +423,9 @@ public class ModNumber {
         return true;
     }
 
-    private int FindFirstNonZeroBitInWord(int word)
-    {
+    private int FindFirstNonZeroBitInWord(int word) {
         long mask = 1L << (LSIZE * 8 - 1);
-        for (int i = 0; i < LSIZE * 8; i++)
-        {
+        for (int i = 0; i < LSIZE * 8; i++) {
             if ((num[word] & mask) != 0)
                 return i;
             mask >>>= 1;
@@ -433,8 +433,7 @@ public class ModNumber {
         return LSIZE * 8;
     }
 
-    public static DivideAndModuloResult divideAndModulo(ModNumber l, ModNumber r, boolean onlyModulo)
-    {
+    public static DivideAndModuloResult divideAndModulo(ModNumber l, ModNumber r, boolean onlyModulo) {
         ModNumber divRes = new ModNumber(0L);
         ModNumber mzero = new ModNumber(0L);
         if (r.equals(mzero))
@@ -451,57 +450,49 @@ public class ModNumber {
         {
             divRes = ModNumber.shiftRight(l, 1);
             if ((l.num[0] & 0x1L) > 0)
-            modRes = new ModNumber(1L);
+                modRes = new ModNumber(1L);
             return new DivideAndModuloResult(divRes, modRes);
         }
         modRes.num = Arrays.copyOf(l.num, l.num.length);
-        if (ModNumber.lessThan(l, r))
-        {
+        if (ModNumber.lessThan(l, r)) {
 
             return new DivideAndModuloResult(mzero, modRes);
         }
-        if (l.equals(r))
-        {
+        if (l.equals(r)) {
             return new DivideAndModuloResult(mone, mzero);
         }
         int firstNonzeroWordl = 0;
         int firstNonzeroWordr = 0;
         for (int i = LCOUNT - 1; i >= 0; i--)
-            if (l.num[i] != 0)
-            {
+            if (l.num[i] != 0) {
                 firstNonzeroWordl = i;
                 break;
             }
         for (int i = LCOUNT - 1; i >= 0; i--)
-            if (r.num[i] != 0)
-            {
+            if (r.num[i] != 0) {
                 firstNonzeroWordr = i;
                 break;
             }
         int nonZeroDifference = firstNonzeroWordl - firstNonzeroWordr;
-        for (int i = 0; i <= nonZeroDifference; i++)
-        {
+        for (int i = 0; i <= nonZeroDifference; i++) {
             long[] divisor = new long[LCOUNT];
             long[] rShiftedLeft = new long[LCOUNT];
-            for (int j = 0; j <= firstNonzeroWordr; j++)
-            {
+            for (int j = 0; j <= firstNonzeroWordr; j++) {
                 rShiftedLeft[j + nonZeroDifference - i] = r.num[j];
             }
             divisor[nonZeroDifference - i] = 1L;
             ModNumber mRShiftedLeft = new ModNumber(rShiftedLeft);
             ModNumber mDivisor = new ModNumber(divisor);
-            int firstBitl = (int)((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
-            int firstBitr = (int)((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
+            int firstBitl = (int) ((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
+            int firstBitr = (int) ((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
             int firstBitDifference = firstBitl - firstBitr;
-            for (int j = 0; j <= firstBitDifference; j++)
-            {
+            for (int j = 0; j <= firstBitDifference; j++) {
                 ModNumber rShiftedLeftBits = new ModNumber(mRShiftedLeft);
                 ModNumber mDivisorShiftedLeftBits = new ModNumber(mDivisor);
                 ModNumber.shiftLeftAssign(rShiftedLeftBits, firstBitDifference - j);
                 if (!onlyModulo)
                     ModNumber.shiftLeftAssign(mDivisorShiftedLeftBits, firstBitDifference - j);
-                while (ModNumber.greaterThanOrEqual(modRes, rShiftedLeftBits))
-                {
+                while (ModNumber.greaterThanOrEqual(modRes, rShiftedLeftBits)) {
                     ModNumber.subtractAssign(modRes, rShiftedLeftBits);
                     if (!onlyModulo)
                         ModNumber.addAssign(divRes, mDivisorShiftedLeftBits);
@@ -510,22 +501,126 @@ public class ModNumber {
         }
         return new DivideAndModuloResult(divRes, modRes);
     }
-    public static ModNumber divide(ModNumber ml, ModNumber mr)
-    {
+
+    public static ModNumber divide(ModNumber ml, ModNumber mr) {
         DivideAndModuloResult result = divideAndModulo(ml, mr, false);
         return result.div();
     }
 
-    public static ModNumber modulo(ModNumber ml, ModNumber mr)
-    {
+    public static ModNumber modulo(ModNumber ml, ModNumber mr) {
         DivideAndModuloResult result = divideAndModulo(ml, mr, true);
         return result.mod();
     }
-    public static ModNumber moduloAssign(ModNumber ml, ModNumber mr)
-    {
+
+    public static ModNumber moduloAssign(ModNumber ml, ModNumber mr) {
         DivideAndModuloResult result = divideAndModulo(ml, mr, true);
         ml.num = result.mod().num;
         return result.mod();
+    }
+
+    public static String adjustStringLength(String s, int desiredLength) {
+        StringBuilder result;
+        if (desiredLength < s.length()) {
+            throw new IllegalArgumentException("Value to large");
+        }
+        result = new StringBuilder("0".repeat(desiredLength - s.length()));
+        result.append(s);
+
+        return result.toString();
+
+    }
+    public static ModNumber stomnHexBase(String s) {
+        s = adjustStringLength(s, HexStringLength);
+        long[] n = new long[LCOUNT];
+        for (int i = 0; i < HexStringLength; i += LSIZE*2)
+        {
+            String tmp = s.substring(i, i + LSIZE);
+            long tmpLong = Long.parseLong(tmp, 16);
+            tmpLong <<= ISIZE * 8;
+            tmp = s.substring(i + LSIZE, i + LSIZE * 2);
+            tmpLong |= Long.parseLong(tmp, 16);
+            n[LCOUNT - i/(LSIZE*2) - 1] = tmpLong;
+        }
+        ModNumber mres = new ModNumber(n);
+        return mres;
+    }
+    public static ModNumber stomnOctalBase(String s) {
+        long[] n = new long[LCOUNT];
+        long buffer = 0L;
+        int bitCount = 0;
+        int firstBits = (ModNumber.NSIZE % 3 == 0) ? 0 : 3 - ModNumber.NSIZE % 3;
+        long mask = 4L;
+        String expandedStr = adjustStringLength(s, ModNumber.OctalStringLength);
+        for (int i = 0; i < ModNumber.OctalStringLength; i++)
+        {
+            if (!Character.isDigit(expandedStr.charAt(i)) || expandedStr.charAt(i) == '8' || expandedStr.charAt(i) == '9')
+                throw new IllegalArgumentException("Only octal digits allowed!");
+            long digit = (long)expandedStr.charAt(i) - '0';
+            for (int j = 0; j < 3; j++)
+            {
+                buffer <<= 1;
+                long res = digit & mask;
+                res >>>= 2;
+                buffer |= res;
+                digit <<= 1;
+                if (firstBits != 0)
+                {
+                    firstBits--;
+                    continue;
+                }
+                bitCount++;
+                if (bitCount % (8 * ModNumber.LSIZE) == 0)
+                {
+                    n[ModNumber.LCOUNT - (bitCount / (8 * ModNumber.LSIZE))] = buffer;
+                    buffer = 0L;
+                }
+            }
+        }
+        return new ModNumber(n);
+
+    }
+    public static ModNumber stomnDecimalBase(String s) {
+        ModNumber mres = new ModNumber(0L);
+        s = adjustStringLength(s, DecimalStringLength);
+        for(int i = 0; i < DecimalStringLength;i++)
+        {
+            if (!Character.isDigit(s.charAt(i)))
+                throw new IllegalArgumentException("Only digits allowed");
+            int digit = (int)s.charAt(i) - '0';
+            ModNumber.productAssignScalar(mres, 10);
+            mres.addAssignScalar(0, digit);
+        }
+        return mres;
+
+    }
+    public static ModNumber stomn(String s, int digitBase)
+    {
+        if (!(digitBase == 8 || digitBase == 10 || digitBase == 16))
+            throw new IllegalArgumentException("Only base 8, 10 and 16 are valid");
+        if (s.length() == 0)
+            return new ModNumber(0);
+        int i;
+        for (i = 0; i < s.length(); i++)
+        {
+            if (!Character.isWhitespace(s.charAt(i)))
+                break;
+        }
+        if (i > 0)
+            s = s.substring(i);
+        if (s.charAt(0) == '-')
+            throw new IllegalArgumentException("Only positive numbers allowed");
+        if (s.charAt(i) == '+')
+            s = s.substring(1);
+        switch(digitBase)
+        {
+            case 8:
+                return stomnOctalBase(s);
+            case 10:
+                return stomnDecimalBase(s);
+            case 16:
+                return stomnHexBase(s);
+        }
+        throw new IllegalArgumentException("Only base 8, 10 and 16 are valid");
     }
 
 }

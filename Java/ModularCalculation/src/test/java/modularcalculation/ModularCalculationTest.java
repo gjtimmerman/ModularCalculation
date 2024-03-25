@@ -1893,5 +1893,92 @@ public class ModularCalculationTest {
         ModNumber mres = ModNumber.productScalar(ml, 99999999);
         assertEquals(mexp, mres);
     }
-
+    @Test
+    public void divideScalarByZero()
+    {
+        ModNumber ml = new ModNumber(1L);
+        assertThrows(ArithmeticException.class,() ->  ml.divide( 0));
+    }
+    @Test
+    public void divideScalarZeroBy1()
+    {
+        ModNumber ml = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        assertEquals(mexp, ml.divide(1));
+    }
+    @Test
+    public void divideScalarNonZeroBy1()
+    {
+        ModNumber ml = new ModNumber(123456L);
+        ModNumber mexp = new ModNumber(123456L);
+        assertEquals(mexp, ml.divide(1));
+    }
+    @Test
+    public void divideScalarNonZeroBy2()
+    {
+        ModNumber ml = new ModNumber(24690L);
+        ModNumber mexp = new ModNumber(12345L);
+        assertEquals(mexp, ml.divide(2));
+    }
+    @Test
+    public void divideScalarAll9sBy3()
+    {
+        long []l = new long[ModNumber.LCOUNT];
+        long []exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = 999999999999999999L;
+            exp[i] = 333333333333333333L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        assertEquals(mexp, ml.divide(3));
+    }
+    @Test
+    public void divideScalarAll9sBy2AndMultipliedBy2()
+    {
+        long []l = new long[ModNumber.LCOUNT];
+        long []exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = 999999999999999999L;
+            exp[i] = l[i];
+        }
+        exp[0] -= 1;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres1 = ml.divide(2);
+        ModNumber mres2 = ModNumber.productScalar(mres1,2);
+        assertEquals(mexp, mres2);
+    }
+    @Test
+    public void divideScalarMaxUlongTimes2By2()
+    {
+        long []l = new long[ModNumber.LCOUNT];
+        long []exp = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        l[1] = 1;
+        exp[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres1 = ml.divide(2);
+        assertEquals(mexp, mres1);
+    }
+    @Test
+    public void divideScalarAllAsBy2()
+    {
+        long []l = new long[ModNumber.LCOUNT];
+        long []exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = 0xaaaaaaaaaaaaaaaaL;
+            exp[i] = 0x5555555555555555L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+        assertEquals(mexp, ml.divide(2));
+    }
+    @Test
+    public void toStringIllegalBase()
+    {
+        final ModNumber ml = new ModNumber(0L);
+        assertThrows(IllegalArgumentException.class, () -> ml.toString(11));
+    }
 }

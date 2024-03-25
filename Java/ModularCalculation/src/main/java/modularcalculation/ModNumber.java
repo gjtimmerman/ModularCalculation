@@ -91,6 +91,32 @@ public class ModNumber {
         }
 
     }
+    public static int[] ShiftIntArrayR(int[] arr, int bitCount)
+    {
+        if (bitCount == 0)
+            return arr;
+        for (int i = 0; i < bitCount; i++)
+        {
+            arr[0] >>>= 1;
+            if ((arr[1] & 0x01) != 0)
+                arr[0] |= 0x80000000;
+            arr[1] >>= 1;
+        }
+        return arr;
+    }
+    public static int[] ShiftIntArrayL(int[] arr, int bitCount)
+    {
+        if (bitCount == 0)
+            return arr;
+        for (int i = 0; i < bitCount; i++)
+        {
+            arr[1] <<= 1;
+            if ((arr[0] & 0x80000000) != 0)
+                arr[1] |= 0x01;
+            arr[0] <<= 1;
+        }
+        return arr;
+    }
 
     @Override
     public boolean equals(Object other) {
@@ -339,9 +365,9 @@ public class ModNumber {
         int[] nInt = toIntArray();
         long tmp = 0L;
         for (int i = ModNumber.ICOUNT - 1; i >= 0; i--) {
-            tmp |= nInt[i];
-            if (tmp < 0)
-                tmp >>>= ModNumber.ISIZE * 8;
+            long mask = 0xffffffffL;
+            long nLong = nInt[i] & mask;
+            tmp |= nLong;
             if (scalar <= tmp) {
                 if (!onlyModulo)
                     resInt[i] = (int) (tmp / scalar);
@@ -625,6 +651,61 @@ public class ModNumber {
                 return stomnHexBase(s);
         }
         throw new IllegalArgumentException("Only base 8, 10 and 16 are valid");
+    }
+    public String toString_OctBase() {
+        StringBuilder res = new StringBuilder("0".repeat( ModNumber.OctalStringLength));
+        int mask = 7;
+        int[] thisInt = toIntArray();
+        int[] buffer = new int[2];
+        buffer[0] = thisInt[0];
+        int tripleCount = 0;
+        int wordCount = 0;
+        for (int i = 0; i < ModNumber.NSIZE; i++)
+        {
+            if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+            {
+                if ((wordCount / (8 * ModNumber.ISIZE) + 1) < ModNumber.ICOUNT)
+                {
+                    buffer[1] = thisInt[wordCount / (8 * ModNumber.ISIZE) + 1];
+                }
+            }
+            if (tripleCount++ % 3 == 0)
+            {
+                int numToPrint = buffer[0] & mask;
+                char charToPrint = (char)('0' + numToPrint);
+                res.setCharAt(ModNumber.OctalStringLength - (tripleCount / 3) - 1,charToPrint);
+            }
+            buffer = ShiftIntArrayR(buffer, 1);
+        }
+        return res.toString();
+    }
+    public String toString_DecBase() {
+        return "";
+    }
+    public String toString_HexBase() {
+        StringBuilder res = new StringBuilder(ModNumber.HexStringLength + 1);
+        int buflen = ModNumber.LSIZE * 2;
+        String formatStr = "%" + buflen + "x";
+        for (int i = ModNumber.LCOUNT - 1; i >= 0; i--)
+        {
+            String digits = String.format(formatStr, num[i]);
+            res.append(digits);
+        }
+        return res.toString();
+    }
+    public String toString(int nBase)
+    {
+        switch(nBase)
+        {
+            case 8:
+                return toString_OctBase();
+            case 10:
+                return toString_DecBase();
+            case 16:
+                return toString_HexBase();
+            default:
+                throw new IllegalArgumentException("Base must be 8, 10 or 16");
+        }
     }
 
 }

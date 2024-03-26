@@ -2,6 +2,8 @@ package modularcalculation;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModularCalculationTest {
@@ -2516,5 +2518,595 @@ public class ModularCalculationTest {
         assertEquals(s.toString(), resStr);
     }
 
+    @Test
+    public void serializationHexForZero() {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        String filename = "TestSerializationHexForZero.txt";
+        try {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mzero.write(bw, 16);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 16);
+            assertEquals(mexp, mres);
+        } catch (IOException e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationHexForOne()
+    {
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        String filename = "TestSerializationHexForOne.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mone.write(bw, 16);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 16);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationHexForSixteen()
+    {
+        ModNumber ml = new ModNumber(16L);
+        ModNumber mexp = new ModNumber(16L);
+        String filename = "TestSerializationHexForSixteen.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 16);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 16);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationHexForAllFF()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationHexForAllFF.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 16);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 16);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationHexForIncreasingSequence()
+    {
+        byte[] l = new byte[ModNumber.NCOUNT];
+        byte[] exp = new byte[ModNumber.NCOUNT];
+        for (int i = 0; i < ModNumber.NCOUNT; i++)
+        {
+            l[i] = (byte)i;
+            exp[i] = (byte)i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationHexForIncreasingSequence.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 16);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 16);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationOctForZero() {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        String filename = "TestSerializationOctForZero.txt";
+        try {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mzero.write(bw, 8);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 8);
+            assertEquals(mexp, mres);
+        } catch (IOException e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationOctForOne()
+    {
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        String filename = "TestSerializationOctForOne.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mone.write(bw, 8);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 8);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationOctForSixteen()
+    {
+        ModNumber ml = new ModNumber(16L);
+        ModNumber mexp = new ModNumber(16L);
+        String filename = "TestSerializationOctForSixteen.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 8);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 8);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationOctForAllFF()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationOctForAllFF.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 8);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 8);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationOctForIncreasingSequence()
+    {
+        byte[] l = new byte[ModNumber.NCOUNT];
+        byte[] exp = new byte[ModNumber.NCOUNT];
+        for (int i = 0; i < ModNumber.NCOUNT; i++)
+        {
+            l[i] = (byte)i;
+            exp[i] = (byte)i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationOctForIncreasingSequence.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 8);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 8);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+
+    }
+    @Test
+    public void serializationDecForZero() {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        String filename = "TestSerializationDecForZero.txt";
+        try {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mzero.write(bw, 10);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 10);
+            assertEquals(mexp, mres);
+        } catch (IOException e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationDecForOne()
+    {
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        String filename = "TestSerializationDecForOne.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            mone.write(bw, 10);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 10);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationDecForSixteen()
+    {
+        ModNumber ml = new ModNumber(16L);
+        ModNumber mexp = new ModNumber(16L);
+        String filename = "TestSerializationDecForSixteen.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 10);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 10);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationDecForAllFF()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationDecForAllFF.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 10);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 10);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+    }
+    @Test
+    public void serializationDecForIncreasingSequence()
+    {
+        byte[] l = new byte[ModNumber.NCOUNT];
+        byte[] exp = new byte[ModNumber.NCOUNT];
+        for (int i = 0; i < ModNumber.NCOUNT; i++)
+        {
+            l[i] = (byte)i;
+            exp[i] = (byte)i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mexp = new ModNumber(exp);
+
+        String filename = "TestSerializationDecForIncreasingSequence.txt";
+        try
+        {
+            FileWriter fw = new FileWriter(filename);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ml.write(bw, 10);
+            bw.close();
+            FileReader fr = new FileReader(filename);
+            BufferedReader br = new BufferedReader(fr);
+            ModNumber mres = ModNumber.read(br, 10);
+            assertEquals(mexp, mres);
+        }
+        catch (IOException   e) {
+            fail();
+        }
+    }
+    @Test
+    public void multiplyByZero()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+            l[i] = (long)i;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyByOne()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = (long) i;
+            exp[i] = (long) i;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = (long) i;
+            exp[i] = (long) i * 2;
+        }
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyAllFFByTwo()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT - 1; i++) {
+            l[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        exp[ModNumber.LCOUNT - 1] = 1L;
+        exp[0] -= 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyFsByTwoPower16()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = ~0L >>> (ModNumber.LSIZE * 8 - 16);
+        exp[0] = ~0L << 16;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(65536L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyAllFFByAllFF()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++) {
+            l[i] = ~0L;
+            r[i] = ~0L;
+        }
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyEightsByTwo()
+    {
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x1111111111111110L;
+        exp[1] = 0x1L;
+        ModNumber ml = new ModNumber(0x8888888888888888L);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyNinesDecByNinesDec()
+    {
+        ModNumber ml = new ModNumber(9999999999999999L);
+        ModNumber mr = new ModNumber(9999999999999999L);
+        String exp = "99999999999999980000000000000001";
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyTwoBlockNinesDecByTwoBlockNinesDec()
+    {
+        String tmp = "9999999999999999";
+        String l = tmp + tmp;
+        String r = l;
+        ModNumber ml = ModNumber.stomn(l, 10);
+        ModNumber mr = ModNumber.stomn(r, 10);
+        String exp = "9999999999999999999999999999999800000000000000000000000000000001";
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyFourBlockNinesDecByFourBlockNinesDec()
+    {
+        String tmp = "9999999999999999";
+        String tmp2 = tmp + tmp;
+        String l = tmp2 + tmp2;
+        String r = l;
+        ModNumber ml = ModNumber.stomn(l, 10);
+        ModNumber mr = ModNumber.stomn(r, 10);
+        String exp = "99999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000001";
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyEightBlockNinesDecByEightBlockNinesDec()
+    {
+        String tmp = "9999999999999999";
+        String tmp2 = tmp + tmp;
+        String tmp3 = tmp2 + tmp2;
+        String l = tmp3 + tmp3;
+        String r = l;
+        ModNumber ml = ModNumber.stomn(l, 10);
+        ModNumber mr = ModNumber.stomn(r, 10);
+        String exp = "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = ModNumber.product(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplySixteenBlockNinesDecBySixteenBlockNinesDec()
+    {
+        if (ModNumber.MaxMod > 1024 / 8) {
+            String tmp = "9999999999999999";
+
+            String tmp2 = tmp + tmp;
+            String tmp3 = tmp2 + tmp2;
+            String tmp4 = tmp3 + tmp3;
+            String l = tmp4 + tmp4;
+            String r = l;
+            ModNumber ml = ModNumber.stomn(l, 10);
+            ModNumber mr = ModNumber.stomn(r, 10);
+            String exp = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = ModNumber.product(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyThirtyOneBlockNinesDecByThirtyOneBlockNinesDec()
+    {
+        if (ModNumber.MaxMod == 4096 / 8) {
+            String tmp1 = "9999999999999999";
+
+            String tmp2 = tmp1 + tmp1;
+            String tmp3 = tmp2 + tmp2;
+            String tmp4 = tmp3 + tmp3;
+            String tmp5 = tmp4 + tmp4;
+            String l =tmp5 + tmp4 + tmp3 + tmp2 + tmp1;
+            String r = l;
+            ModNumber ml = ModNumber.stomn(l, 10);
+            ModNumber mr = ModNumber.stomn(r, 10);
+            String exp = "99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999980000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = ModNumber.product(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyThirtyTwoBlockNinesDecByThirtyTwoBlockNinesDec()
+    {
+        if (ModNumber.MaxMod == 4096 / 8) {
+            String tmp1 = "9999999999999999";
+
+            String tmp2 = tmp1 + tmp1;
+            String tmp3 = tmp2 + tmp2;
+            String tmp4 = tmp3 + tmp3;
+            String tmp5 = tmp4 + tmp4;
+            String l =tmp5 + tmp5;
+            String r = l;
+            ModNumber ml = ModNumber.stomn(l, 10);
+            ModNumber mr = ModNumber.stomn(r, 10);
+            String exp = "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001";
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = ModNumber.product(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
 
 }

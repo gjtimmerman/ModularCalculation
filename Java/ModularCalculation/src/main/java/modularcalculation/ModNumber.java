@@ -1,5 +1,6 @@
 package modularcalculation;
 
+import java.io.*;
 import java.util.Arrays;
 
 public class ModNumber {
@@ -717,5 +718,11 @@ public class ModNumber {
                 throw new IllegalArgumentException("Base must be 8, 10 or 16");
         }
     }
-
+    public void write(BufferedWriter osw, int base) throws IOException {
+        osw.write(toString(base));
+    }
+    public static ModNumber read(BufferedReader isr, int base) throws IOException {
+        String inputStr = isr.readLine();
+        return ModNumber.stomn(inputStr, base);
+    }
 }

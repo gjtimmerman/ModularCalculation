@@ -1981,4 +1981,43 @@ public class ModularCalculationTest {
         final ModNumber ml = new ModNumber(0L);
         assertThrows(IllegalArgumentException.class, () -> ml.toString(11));
     }
+    @Test
+    public void toStringOctalForZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        String exp = "0".repeat(ModNumber.OctalStringLength);
+        String res = ml.toString(8);
+        assertEquals(exp, res);
+    }
+
+    @Test
+    public void toStringOctalForOne()
+    {
+        ModNumber ml = new ModNumber(1L);
+        String exp = "0".repeat(ModNumber.OctalStringLength - 1);
+        exp += "1";
+        String res = ml.toString(8);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringOctalForEight()
+    {
+        ModNumber ml = new ModNumber(8L);
+        String exp = "0".repeat(ModNumber.OctalStringLength - 2);
+        exp += "10";
+        String res = ml.toString(8);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void TestToStringOctalForEightScale6()
+    {
+        ModNumber ml = new ModNumber(8L);
+        ScaledNumber sn = new ScaledNumber(ml, 6, false);
+        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 2);
+        exp += "10.0000000000000000";
+        String res = sn.toString(8);
+        assertEquals(exp, res);
+    }
+
 }

@@ -2009,7 +2009,7 @@ public class ModularCalculationTest {
         assertEquals(exp, res);
     }
     @Test
-    public void TestToStringOctalForEightScale6()
+    public void toStringOctalForEightScale6()
     {
         ModNumber ml = new ModNumber(8L);
         ScaledNumber sn = new ScaledNumber(ml, 6, false);
@@ -2019,5 +2019,502 @@ public class ModularCalculationTest {
         String res = sn.toString(8);
         assertEquals(exp, res);
     }
+    @Test
+    public void toStringOctalFor0x012345678910Scale6()
+    {
+        ModNumber ml = new ModNumber(0x012345678910L);
+        ScaledNumber sn = new ScaledNumber(ml, 6, true);
+        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft());
+        exp += ".0022150531704420";
+        String res = sn.toString(8);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringOctalForMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        String exp = "7".repeat(ModNumber.OctalStringLength - 1);
+        int left = ModNumber.NCOUNT * 8 % 3;
+        switch (left)
+        {
+            case 0:
+                exp = "7" + exp;
+                break;
+            case 1:
+                exp = "1" + exp;
+                break;
+            case 2:
+                exp = "3" + exp;
+                break;
+        }
+        String res = ml.toString(8);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringOctalForMaxScale6()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        ScaledNumber sn = new ScaledNumber(ml, 6, true);
+        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        String exp = "7".repeat(stringLengthResult.digitsLeft() - 1);
+        int left = (ModNumber.NCOUNT - 6) * 8 % 3;
+        switch (left)
+        {
+            case 0:
+                exp = "7" + exp;
+                break;
+            case 1:
+                exp = "1" + exp;
+                break;
+            case 2:
+                exp = "3" + exp;
+                break;
+        }
+        exp += ".7777777777777777";
+        String res = sn.toString(8);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringOctalForMaxesAndZeros()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT - 6; i += 6)
+        {
+            for (int j = 0; j < 3; j++)
+                l[i + j] = ~0L;
+            for (int j = 3; j < 6; j++)
+                l[i + j] = 0L;
+        }
+        for (int i = ModNumber.LCOUNT - (ModNumber.LCOUNT % 6); i < ModNumber.LCOUNT; i++)
+            l[i] = 0;
+        ModNumber ml = new ModNumber(l);
+        StringBuilder exp = new StringBuilder(ModNumber.OctalStringLength);
+        exp.append("0".repeat(ModNumber.OctalStringLength % 128));
+        for (int i = ModNumber.OctalStringLength % 128; i < ModNumber.OctalStringLength; i += 128)
+        {
+            exp.append("0".repeat(64));
+            exp.append("7".repeat(64));
+        }
+        String res = ml.toString(8);
+        assertEquals(exp.toString(), res);
+
+    }
+    @Test
+    public void toStringHexForZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        String exp = "0".repeat(ModNumber.HexStringLength);
+        String res = ml.toString(16);
+        assertEquals(exp, res);
+    }
+
+    @Test
+    public void toStringHexForOne()
+    {
+        ModNumber ml = new ModNumber(1L);
+        String exp = "0".repeat(ModNumber.HexStringLength - 1);
+        exp += "1";
+        String res = ml.toString(16);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringHexForSixteen()
+    {
+        ModNumber ml = new ModNumber(16L);
+        String exp = "0".repeat(ModNumber.HexStringLength - 2);
+        exp += "10";
+        String res = ml.toString(16);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringHexForMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        String exp = "F".repeat(ModNumber.HexStringLength);
+        String res = ml.toString(16);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringDecimalForZero()
+    {
+        ModNumber ml = new ModNumber(0L);
+        String exp = "0".repeat(ModNumber.DecimalStringLength);
+        String res = ml.toString(10);
+        assertEquals(exp, res);
+    }
+
+    @Test
+    public void toStringDecimalForOne()
+    {
+        ModNumber ml = new ModNumber(1L);
+        String exp = "0".repeat(ModNumber.DecimalStringLength - 1);
+        exp += "1";
+        String res = ml.toString(10);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringDecimalForTen()
+    {
+        ModNumber ml = new ModNumber(10L);
+        String exp = "0".repeat(ModNumber.DecimalStringLength - 2);
+        exp += "10";
+        String res = ml.toString(10);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringDecimalForMaxIntPlusOne()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = 1L << ModNumber.ISIZE * 8;
+        ModNumber ml = new ModNumber(l);
+        String exp = "0".repeat(ModNumber.DecimalStringLength - 10);
+        exp += "4294967296";
+        String res = ml.toString(10);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringDecimalForMaxInt()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long mask = 0xffffffffL;
+        l[0] = ~0 & mask;
+        ModNumber ml = new ModNumber(l);
+        String exp = "0".repeat(ModNumber.DecimalStringLength - 10);
+        exp += "4294967295";
+        String res = ml.toString(10);
+        assertEquals(exp, res);
+    }
+    @Test
+    public void toStringDecimalForMax()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            l[i] = ~0L;
+        }
+        ModNumber ml = new ModNumber(l);
+        String res = ml.toString(10);
+        ModNumber exp = ModNumber.stomn(res, 10);
+        assertEquals(exp, ml);
+    }
+    @Test
+    public void toModularNumberIllegalBase()
+    {
+        final String s = "";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 11));
+    }
+    @Test
+    public void toModularNumberIllegalChar()
+    {
+        final String s = "123456789ABCDEFG";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 16));
+    }
+    @Test
+    public void toModularNumberHexForEmptyString()
+    {
+        final String s = "";
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.stomn(s, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexForOne()
+    {
+        final String s = "1";
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.stomn(s, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexForSixteen()
+    {
+        final String s = "10";
+        ModNumber mexp = new ModNumber(16L);
+        ModNumber mres = ModNumber.stomn(s, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexForSixteenWithLeadingZeros()
+    {
+        final String s = "000000000000000000000000010";
+        ModNumber mexp = new ModNumber(16L);
+        ModNumber mres = ModNumber.stomn(s, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexForSixteenWithLeadingMinusSign()
+    {
+        final String s = "-10";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 16));
+    }
+    @Test
+    public void toModularNumberHexForSixteenWithLeadingPlusSign()
+    {
+        final String s = "+10";
+        ModNumber mexp = new ModNumber(16L);
+        ModNumber mres = ModNumber.stomn(s, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexForMax()
+    {
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            exp[i] = ~0L;
+        }
+        ModNumber mexp = new ModNumber(exp);
+        String str = "F".repeat(ModNumber.HexStringLength);
+        ModNumber mres = ModNumber.stomn(str, 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexIncreasingSequenceByteInput()
+    {
+        byte[] exp = new byte[ModNumber.NCOUNT];
+        for (int i = 0; i < ModNumber.NCOUNT; i++)
+        {
+            exp[i] = (byte)(i % 16);
+        }
+        ModNumber mexp = new ModNumber(exp);
+        StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+        for (int i = 0; i * 2 < ModNumber.HexStringLength % 32; i++)
+        {
+            String s = String.format("%02X", (ModNumber.HexStringLength % 32) / 2 - i - 1);
+            stringBuilder.append(s);
+        }
+        for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+        {
+            stringBuilder.append("0F0E0D0C0B0A09080706050403020100");
+        }
+        ModNumber mres = ModNumber.stomn(stringBuilder.toString(), 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexIncreasingSequence()
+    {
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i + 1 < ModNumber.LCOUNT; i+=2)
+        {
+            exp[i] = 0x0706050403020100L;
+            exp[i + 1] = 0x0F0E0D0C0B0A0908L;
+        }
+        ModNumber mexp = new ModNumber(exp);
+        StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+        for (int i = 0; i  < ModNumber.HexStringLength % 32; i++)
+        {
+            stringBuilder.append("0");
+        }
+        for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+        {
+            stringBuilder.append("0F0E0D0C0B0A09080706050403020100");
+        }
+        ModNumber mres = ModNumber.stomn(stringBuilder.toString(), 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberHexIncreasingSequenceSwitched()
+    {
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i + 1 < ModNumber.LCOUNT; i+=2)
+        {
+            exp[i] = 0x08090A0B0C0D0E0FL;
+            exp[i + 1] = 0x0001020304050607L;
+        }
+        ModNumber mexp = new ModNumber(exp);
+        StringBuilder stringBuilder = new StringBuilder(ModNumber.HexStringLength);
+        for (int i = 0; i  < ModNumber.HexStringLength % 32; i++)
+        {
+            stringBuilder.append("0");
+        }
+        for (int i = ModNumber.HexStringLength % 32; i < ModNumber.HexStringLength; i += 32)
+        {
+            stringBuilder.append("000102030405060708090A0B0C0D0E0F");
+        }
+        ModNumber mres = ModNumber.stomn(stringBuilder.toString(), 16);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForEmptyString()
+    {
+        final String s = "";
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalIllegalChar()
+    {
+        final String s = "123456789A";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 10));
+    }
+    @Test
+    public void toModularNumberDecimalWithLeadingSpaces()
+    {
+        final String s = "        9";
+        ModNumber mexp = new ModNumber(9L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+
+    @Test
+    public void toModularNumberDecimalForOne()
+    {
+        final String s = "1";
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForTen()
+    {
+        final String s = "10";
+        ModNumber mexp = new ModNumber(10L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForTenWithLeadingZeros()
+    {
+        final String s = "000000000000000000000000010";
+        ModNumber mexp = new ModNumber(10L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForTenWithLeadingMinusSign()
+    {
+        final String s = "-10";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 10));
+    }
+    @Test
+    public void toModularNumberDecimalForTenWithLeadingPlusSign()
+    {
+        final String s = "+10";
+        ModNumber mexp = new ModNumber(10L);
+        ModNumber mres = ModNumber.stomn(s, 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForTenNines()
+    {
+        ModNumber mexp = new ModNumber(0x2540BE3FFL);
+        StringBuilder s = new StringBuilder(ModNumber.DecimalStringLength);
+        s.append("0".repeat(ModNumber.DecimalStringLength - 10));
+        s.append("9".repeat(10));
+        ModNumber mres = ModNumber.stomn(s.toString(), 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberDecimalForEighteenNines()
+    {
+        ModNumber mexp = new ModNumber(0xDE0B6B3A763FFFFL);
+        StringBuilder s = new StringBuilder(ModNumber.DecimalStringLength);
+        s.append("0".repeat(ModNumber.DecimalStringLength - 18));
+        s.append("9".repeat(18));
+        ModNumber mres = ModNumber.stomn(s.toString(), 10);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalForEmptyString()
+    {
+        final String s = "";
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = ModNumber.stomn(s, 8);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalIllegalChar()
+    {
+        final String s = "123456789A";
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s, 8));
+    }
+
+    @Test
+    public void toModularNumberOctalForOne()
+    {
+        final String s = "1";
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.stomn(s, 8);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalForSixteen()
+    {
+        final String s = "20";
+        ModNumber mexp = new ModNumber(16L);
+        ModNumber mres = ModNumber.stomn(s, 8);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalForEightWithLeadingZeros()
+    {
+        final String s = "000000000000000000000000010";
+        ModNumber mexp = new ModNumber(8L);
+        ModNumber mres = ModNumber.stomn(s, 8);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalForMax()
+    {
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.LCOUNT; i++)
+        {
+            exp[i] = ~0L;
+        }
+        ModNumber mexp = new ModNumber(exp);
+        StringBuilder s = new StringBuilder(ModNumber.OctalStringLength);
+        s.append("7".repeat(ModNumber.OctalStringLength));
+        switch (ModNumber.NSIZE % 3)
+        {
+            case 0:
+                break;
+            case 1:
+                s.setCharAt(0, '1' );
+                break;
+            case 2:
+                s.setCharAt(0, '3');
+                break;
+        }
+
+        ModNumber mres = ModNumber.stomn(s.toString(), 8);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void toModularNumberOctalForStringTooLarge()
+    {
+        StringBuilder s = new StringBuilder(ModNumber.OctalStringLength + 16);
+        for (int i = 0; i < ModNumber.OctalStringLength + 1; i += 16)
+            s.append("0706050403020100");
+        assertThrows(IllegalArgumentException.class, () -> ModNumber.stomn(s.toString(), 8));
+    }
+    @Test
+    public void toModularNumberOctalIncreasingSequenceByteInput()
+    {
+        StringBuilder s = new StringBuilder(ModNumber.OctalStringLength);
+        s.append("0".repeat(ModNumber.OctalStringLength % 16));
+        for (int i = ModNumber.OctalStringLength % 16; i < ModNumber.OctalStringLength; i += 16)
+            s.append("0001020304050607");
+        ModNumber mres = ModNumber.stomn(s.toString(), 8);
+        String resStr = mres.toString(8);
+        assertEquals(s.toString(), resStr);
+    }
+
 
 }

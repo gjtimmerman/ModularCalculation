@@ -100,7 +100,7 @@ public class ModNumber {
             arr[0] >>>= 1;
             if ((arr[1] & 0x01) != 0)
                 arr[0] |= 0x80000000;
-            arr[1] >>= 1;
+            arr[1] >>>= 1;
         }
         return arr;
     }
@@ -639,7 +639,7 @@ public class ModNumber {
             s = s.substring(i);
         if (s.charAt(0) == '-')
             throw new IllegalArgumentException("Only positive numbers allowed");
-        if (s.charAt(i) == '+')
+        if (s.charAt(0) == '+')
             s = s.substring(1);
         switch(digitBase)
         {
@@ -680,12 +680,22 @@ public class ModNumber {
         return res.toString();
     }
     public String toString_DecBase() {
-        return "";
+        StringBuilder res = new StringBuilder(ModNumber.DecimalStringLength);
+        res.append("0".repeat(ModNumber.DecimalStringLength));
+        ModNumber tmp = new ModNumber(this);
+        for (int i = 0; i < ModNumber.DecimalStringLength; i++)
+        {
+            int digit = tmp.modulo( 10);
+            tmp = tmp.divide( 10);
+            res.setCharAt(ModNumber.DecimalStringLength - i - 1, (char)('0' + (char)digit));
+        }
+        return res.toString();
+
     }
     public String toString_HexBase() {
         StringBuilder res = new StringBuilder(ModNumber.HexStringLength + 1);
         int buflen = ModNumber.LSIZE * 2;
-        String formatStr = "%" + buflen + "x";
+        String formatStr = "%0" + buflen + "X";
         for (int i = ModNumber.LCOUNT - 1; i >= 0; i--)
         {
             String digits = String.format(formatStr, num[i]);

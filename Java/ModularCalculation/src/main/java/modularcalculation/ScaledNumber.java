@@ -61,10 +61,10 @@ public class ScaledNumber
         int mask = 7;
         int wordsToSkip = scale / ModNumber.ISIZE;
         int bitsToSkip = (scale % ModNumber.ISIZE) * 8;
-        int[] mnUint = mn.toIntArray();
+        int[] mnInt = mn.toIntArray();
         int[] buffer = new int[2];
-        buffer[0] = mnUint[wordsToSkip];
-        buffer[1] = mnUint[wordsToSkip + 1];
+        buffer[0] = mnInt[wordsToSkip];
+        buffer[1] = mnInt[wordsToSkip + 1];
         int tripleCount = 0;
         StringLengthResult stringLengthResult = CalculateOctalStringLength();
         res.append("0".repeat( stringLengthResult.digitsToSkip() + stringLengthResult.digitsLeft() + 1));
@@ -76,7 +76,7 @@ public class ScaledNumber
             if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
             {
                 if (wordCount / (8 * ModNumber.ISIZE) + 1 < ModNumber.ICOUNT - wordsToSkip)
-                    buffer[1] = mnUint[wordsToSkip+wordCount / (8 * ModNumber.ISIZE) + 1];
+                    buffer[1] = mnInt[wordsToSkip+wordCount / (8 * ModNumber.ISIZE) + 1];
                 else
                     buffer[1] = 0;
             }
@@ -88,10 +88,10 @@ public class ScaledNumber
             }
             buffer = ModNumber.ShiftIntArrayR(buffer, 1);
         }
-        buffer[1] = mnUint[wordsToSkip];
+        buffer[1] = mnInt[wordsToSkip];
         if (wordsToSkip > 0)
         {
-            buffer[0] = mnUint[wordsToSkip-1];
+            buffer[0] = mnInt[wordsToSkip-1];
         }
         else
             buffer[0] = 0;
@@ -102,7 +102,7 @@ public class ScaledNumber
         {
             if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
                 if (wordCount < (wordsToSkip * ModNumber.ISIZE * 8))
-                    buffer[0] = mnUint[wordsToSkip -1 - (wordCount / (8 * ModNumber.ISIZE))];
+                    buffer[0] = mnInt[wordsToSkip -1 - (wordCount / (8 * ModNumber.ISIZE))];
                 else
                     buffer[0] = 0;
             if (tripleCount++ % 3 == 0)
@@ -157,7 +157,7 @@ public class ScaledNumber
     {
         int bufLen = ModNumber.LSIZE * 2;
         StringBuilder sb = new StringBuilder(bufLen * ModNumber.LCOUNT + 1);
-        String formatStr = "%" + bufLen + "X";
+        String formatStr = "%0" + bufLen + "X";
         for (int i = ModNumber.LCOUNT - 1; i >= 0; i--)
         {
             String tmp = String.format(formatStr,this.mn.num[i]);

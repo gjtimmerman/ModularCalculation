@@ -82,7 +82,12 @@ public class ModNumber {
         }
         return result;
     }
-
+    void CheckMax(int size)
+    {
+        for (int i = size; i < ModNumber.LCOUNT; i++)
+            if (num[i] != 0L)
+        throw new IllegalArgumentException("Modulus is too large!");
+    }
     public void fromIntArray(int[] arr) {
         for (int i = 0; i < LCOUNT; i++) {
             num[i] = arr[i * 2];

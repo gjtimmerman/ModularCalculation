@@ -3108,5 +3108,68 @@ public class ModularCalculationTest {
             assertEquals(mexp, mres);
         }
     }
+    @Test
+    public void multGroupModAboveMax()
+    {
+        long[] n = new long[ModNumber.LCOUNT];
+        n[ModNumber.COUNTMOD] = 1L;
+        final ModNumber mn = new ModNumber(n);
+        assertThrows(IllegalArgumentException.class,() -> new MultGroupMod(mn));
+    }
+    @Test
+    public void multiplyMultGroupModByZero()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = (long)i;
+            n[i] = (long)i;
+        }
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModByOne()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = (long)i;
+            n[i] = (long)i;
+        }
+        n[0] += 1;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(ml);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModByTwoResultEqMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = (long)i;
+            n[i] = (long)i * 2;
+        }
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
 
 }

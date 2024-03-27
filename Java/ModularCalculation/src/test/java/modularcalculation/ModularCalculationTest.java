@@ -3695,5 +3695,65 @@ public class ModularCalculationTest {
             assertEquals(mexp, mres);
         }
     }
+    @Test
+    public void TestGcdOfOneAndZero()
+    {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mone = new ModNumber(1L);
+        assertThrows(IllegalArgumentException.class,() -> ModNumber.gcd(mone, mzero));
+    }
+    @Test
+    public void TestGcdOfZeroAndOne()
+    {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mone = new ModNumber(1L);
+        assertThrows(IllegalArgumentException.class,() -> ModNumber.gcd(mzero, mone));
+    }
+    @Test
+    public void TestGcdOf100OneAnd()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.gcd(monehundred, mone);
+        assertEquals(mexp, mres);
+    }
+
+    @Test
+    public void TestGcdOfOneAnd100()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber mone = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.gcd(mone, monehundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void TestGcdOf101And100()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandone = new ModNumber(101L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = ModNumber.gcd(monehundredandone, monehundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void TestGcdOf102And100()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandtwo = new ModNumber(102L);
+        ModNumber mexp = new ModNumber(2L);
+        ModNumber mres = ModNumber.gcd(monehundredandtwo, monehundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void TestGcdOf10And102()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandtwo = new ModNumber(102L);
+        ModNumber mexp = new ModNumber(2L);
+        ModNumber mres = ModNumber.gcd(monehundred, monehundredandtwo);
+        assertEquals(mexp, mres);
+    }
 
 }

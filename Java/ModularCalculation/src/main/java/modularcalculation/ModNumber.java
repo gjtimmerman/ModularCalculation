@@ -553,6 +553,46 @@ public class ModNumber {
         ml.num = result.mod().num;
         return result.mod();
     }
+    private static void swap(ModNumber ml, ModNumber mr)
+    {
+        ModNumber tmp = ml;
+        ml = mr;
+        mr = tmp;
+    }
+
+    public static ModNumber gcd(ModNumber ml, ModNumber mr)
+    {
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber mone = new ModNumber(1L);
+        if (ml.equals(mzero) || mr.equals(mzero))
+            throw new IllegalArgumentException("Division by Zero not allowed!");
+        if (ml.equals(mone))
+            return mone;
+        if (mr.equals(mone))
+            return mone;
+        if (ml.equals(mr))
+            return new ModNumber(ml);
+        ModNumber lcopy = new ModNumber(ml);
+        ModNumber rcopy = new ModNumber(mr);
+        if (ModNumber.lessThan(lcopy, rcopy))
+            swap(lcopy, rcopy);
+        ModNumber tmp = ModNumber.modulo(lcopy , rcopy);
+        while (!(tmp.equals(mone)))
+        {
+            if (tmp.equals(mzero))
+                return new ModNumber(rcopy);
+            lcopy = rcopy;
+            rcopy = tmp;
+            tmp = ModNumber.modulo(lcopy, rcopy);
+        }
+        return new ModNumber(tmp);
+    }
+    public static ModNumber lcm(ModNumber ml, ModNumber mr)
+    {
+        ModNumber GcdRes = gcd(ml, mr);
+        ModNumber lDivGcd = ModNumber.divide(ml , GcdRes);
+        return ModNumber.product(lDivGcd , mr);
+    }
 
     public static String adjustStringLength(String s, int desiredLength) {
         StringBuilder result;

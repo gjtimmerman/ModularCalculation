@@ -3171,5 +3171,529 @@ public class ModularCalculationTest {
         ModNumber mres = mgm.Mult(ml, mr);
         assertEquals(mexp, mres);
     }
+    @Test
+    public void multiplyMultGroupModByTwoResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = (long)i;
+            n[i] = (long)i * 2;
+            exp[i] = (long)i * 2;
+        }
+        n[0] += 1;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModAllFFFFByTwoResultEqMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = ~0L;
+            n[i] = ~0L;
+        }
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModAllFFFFByTwoResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD - 1; i++)
+        {
+            l[i] = ~0L;
+            n[i] = ~0L;
+            exp[i] = ~0L;
+        }
+        n[ModNumber.COUNTMOD - 1] = 1L;
+        exp[ModNumber.COUNTMOD - 1] = 1L;
+        exp[0] -= 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(2L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFsByPow16ResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        n[2] = 1L;
+        exp[1] = ~0L >>> (ModNumber.LSIZE * 8 - 16);
+        exp[0] = ~0L << 16;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(65536L);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFsByFsResultModOne3rdBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = ~0L;
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        n[2] = 1L;
+        exp[1] = ~0L - 1L;
+        exp[0] = 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFsByFsResultModOne2ndBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = ~0L;
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        n[1] = 1L;
+        exp[0] = 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFsByFsResultModEs1thBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = ~0L;
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        n[0] = 0xEEEEEEEEEEEEEEEEL;
+        exp[0] = 0x1111111111111111L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModAllFsByAllFsResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = ~0L;
+            r[i] = ~0L;
+        }
+        long[] n = new long[ModNumber.LCOUNT];
+        n[ModNumber.LCOUNT - 3] = 1L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModAllFsByAllFsResultGreaterMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        long[] r = new long[ModNumber.LCOUNT];
+        for (int i = 0; i < ModNumber.COUNTMOD; i++)
+        {
+            l[i] = ~0L;
+            r[i] = ~0L;
+        }
+        long[] n = new long[ModNumber.LCOUNT];
+        n[1] = 1L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupMod8sBy2ResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = 0x8888888888888888L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = 2L;
+        long[] n = new long[ModNumber.LCOUNT];
+        n[2] = 1L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x1111111111111110L;
+        exp[1] = 1L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupMod8sBy2ResultGreaterMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = 0x8888888888888888L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = 2L;
+        long[] n = new long[ModNumber.LCOUNT];
+        n[1] = 1L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x1111111111111110L;
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupMod9sDecBy9sDecResultLessMod()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[0] = 9999999999999999L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = 9999999999999999L;
+        long[] n = new long[ModNumber.LCOUNT];
+        n[4] = 1L;
+        String exp = "99999999999999980000000000000001";
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModTwoBlock9sDecByTwoBlock9sDecResultLessMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        String rstr = lstr;
+        long[] n = new long[ModNumber.LCOUNT];
+        n[4] = 1L;
+        String exp = "9999999999999999";
+        exp += "9999999999999998";
+        exp += "0000000000000000";
+        exp += "0000000000000001";
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModTwoBlock9sDecByTwoBlock9sDecResultGreaterMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        String rstr = lstr;
+        String nstr = "10000000000000000";
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = ModNumber.stomn(nstr, 10);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFourBlock9sDecByFourBlock9sDecResultLessMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        lstr += lstr;
+        String rstr = lstr;
+        long[] n = new long[ModNumber.LCOUNT];
+        n[8] = 1L;
+        String exp = "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999999";
+        exp += "9999999999999998";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000000";
+        exp += "0000000000000001";
+        ModNumber mn = new ModNumber(n);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = ModNumber.stomn(exp, 10);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModFourBlock9sDecByFourBlock9sDecResultGreaterMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        lstr += lstr;
+        String rstr = lstr;
+        String nstr = "10000000000000000";
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = ModNumber.stomn(nstr, 10);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultLessMod()
+    {
+        if (ModNumber.MaxMod >= 2048 /8) {
+            String lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            String rstr = lstr;
+            long[] n = new long[ModNumber.LCOUNT];
+            n[16] = 1L;
+            String exp = "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999998";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = ModNumber.stomn(lstr, 10);
+            ModNumber mr = ModNumber.stomn(rstr, 10);
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = mgm.Mult(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyMultGroupModEightBlock9sDecByEightBlock9sDecResultGreaterMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        lstr += lstr;
+        lstr += lstr;
+        String rstr = lstr;
+        String nstr = "10000000000000000";
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = ModNumber.stomn(nstr, 10);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModSixteenBlock9sDecBySixteenBlock9sDecResultLessMod()
+    {
+        if (ModNumber.MaxMod >= 4096 /8) {
+            String lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            String rstr = lstr;
+            long[] n = new long[ModNumber.LCOUNT];
+            n[32] = 1L;
+            String exp = "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999999";
+            exp += "9999999999999998";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = ModNumber.stomn(lstr, 10);
+            ModNumber mr = ModNumber.stomn(rstr, 10);
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = mgm.Mult(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyMultGroupModSixteenBlock9sDecBySixteenBlock9sDecResultGreaterMod()
+    {
+        String lstr = "9999999999999999";
+        lstr += lstr;
+        lstr += lstr;
+        lstr += lstr;
+        lstr += lstr;
+        String rstr = lstr;
+        String nstr = "10000000000000000";
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 1L;
+        ModNumber mn = ModNumber.stomn(nstr, 10);
+        MultGroupMod mgm = new MultGroupMod(mn);
+        ModNumber ml = ModNumber.stomn(lstr, 10);
+        ModNumber mr = ModNumber.stomn(rstr, 10);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mgm.Mult(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void multiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultLessMod()
+    {
+        if (ModNumber.MaxMod >= 4096 /8) {
+            String lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr = lstr.substring(0, ModNumber.NCOUNT - 24);
+            String rstr = lstr;
+            long[] n = new long[ModNumber.LCOUNT];
+            n[ModNumber.LCOUNT - 2] = 1L;
+            String exp = "";
+            for (int i = 0; i < 30; i++)
+                exp += "9999999999999999";
+            exp += "9999999999999998";
+            for (int i = 0; i < 30; i++)
+                exp += "0000000000000000";
+            exp += "0000000000000001";
+            ModNumber mn = new ModNumber(n);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = ModNumber.stomn(lstr, 10);
+            ModNumber mr = ModNumber.stomn(rstr, 10);
+            ModNumber mexp = ModNumber.stomn(exp, 10);
+            ModNumber mres = mgm.Mult(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyMultGroupModThirtyOneBlock9sDecByThirtyOneBlock9sDecResultGreaterMod()
+    {
+        if (ModNumber.MaxMod >= 2048 /8) {
+            String lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr = lstr.substring(0, ModNumber.NCOUNT - 24);
+            String rstr = lstr;
+            String nstr = "10000000000000000";
+            long[] exp = new long[ModNumber.LCOUNT];
+            exp[0] = 1L;
+            ModNumber mn = ModNumber.stomn(nstr, 10);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = ModNumber.stomn(lstr, 10);
+            ModNumber mr = ModNumber.stomn(rstr, 10);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
+    @Test
+    public void multiplyMultGroupModThirtyTwoBlock9sDecByThirtyTwoBlock9sDecResultGreaterMod()
+    {
+        if (ModNumber.MaxMod >= 2048 /8) {
+            String lstr = "9999999999999999";
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            lstr += lstr;
+            String rstr = lstr;
+            String nstr = "10000000000000000";
+            long[] exp = new long[ModNumber.LCOUNT];
+            exp[0] = 1L;
+            ModNumber mn = ModNumber.stomn(nstr, 10);
+            MultGroupMod mgm = new MultGroupMod(mn);
+            ModNumber ml = ModNumber.stomn(lstr, 10);
+            ModNumber mr = ModNumber.stomn(rstr, 10);
+            ModNumber mexp = new ModNumber(exp);
+            ModNumber mres = mgm.Mult(ml, mr);
+            assertEquals(mexp, mres);
+        }
+    }
 
 }

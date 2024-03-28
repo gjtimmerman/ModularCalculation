@@ -82,12 +82,7 @@ public class ModNumber {
         }
         return result;
     }
-    void CheckMax(int size)
-    {
-        for (int i = size; i < ModNumber.LCOUNT; i++)
-            if (num[i] != 0L)
-        throw new IllegalArgumentException("Modulus is too large!");
-    }
+
     public void fromIntArray(int[] arr) {
         for (int i = 0; i < LCOUNT; i++) {
             num[i] = arr[i * 2];
@@ -147,6 +142,33 @@ public class ModNumber {
                 throw new IllegalArgumentException("Modulus is too large!");
     }
 
+    public int getByteCount()
+    {
+        for (int i = LCOUNT - 1; i >= 0; i--)
+        {
+            if (num[i] != 0)
+            {
+                long mask = 0xffL << (LSIZE - 1) * 8;
+                for (int j = 0; j < LSIZE; j++)
+                {
+                    if ((num[i] & mask) != 0L)
+                    {
+                        return (int)(i * LSIZE + (LSIZE - j));
+                    }
+                    mask >>>= 8;
+                }
+            }
+        }
+        return 0;
+    }
+    public short getDoubleByteValue(int cb)
+    {
+        int lCount = cb / 4;
+        int sCount = cb % 4;
+        long mask = 0xffffL << (sCount*16);
+        return (short)((num[lCount] & mask) >>> (sCount*16));
+
+    }
 
     public static ModNumber subtractScalar(ModNumber l, int r) {
         int[] resInt = l.toIntArray();
@@ -348,7 +370,9 @@ public class ModNumber {
         int[] nInt = n.toIntArray();
         resInt[0] = nInt[words] >>> i;
         for (int j = 0; j < ICOUNT - words - 1; j++) {
-            long tmp = ((long) nInt[j + words + 1]) << ((ISIZE * 8) - i);
+            long mask = 0xFFFFFFFFL;
+            long nIntjpluswordsplus1 = ((long)nInt[j + words + 1]) & mask;
+            long tmp = nIntjpluswordsplus1 << ((ISIZE * 8) - i);
             resInt[j] |= (int) (tmp & lomask);
             resInt[j + 1] = (int) ((tmp & himask) >>> ISIZE * 8);
         }
@@ -592,6 +616,54 @@ public class ModNumber {
         ModNumber GcdRes = gcd(ml, mr);
         ModNumber lDivGcd = ModNumber.divide(ml , GcdRes);
         return ModNumber.product(lDivGcd , mr);
+    }
+    public ModNumber sqrt()
+    {
+        ModNumber mzero = new ModNumber(0L);
+        if (this.equals(mzero))
+            return new ModNumber(mzero);
+        ModNumber mone = new ModNumber(1L);
+        if (this.equals(mone))
+            return new ModNumber(mone);
+        ModNumber mres = new ModNumber(0L);
+        ModNumber mdivisor = new ModNumber(0L);
+        ModNumber mremainder = new ModNumber(0L);
+        int doubleByteCount = (getByteCount() - 1) / 2;
+        long longMask = 0xFFFFL;
+        for (int i = (int)doubleByteCount; i >= 0; i--)
+        {
+            short tmp = getDoubleByteValue(i);
+            ModNumber.shiftLeftAssign(mremainder, 16);
+            ModNumber.shiftLeftAssign(mdivisor, 8);
+            ModNumber.shiftLeftAssign(mres, 8);
+            long ltmp = ((long)tmp) & longMask;
+            mremainder.num[0] |= ltmp;
+
+            if (mremainder.equals(mzero))
+                continue;
+            short counter = 1;
+            ModNumber.addAssignScalar(mdivisor, 1);
+            ModNumber mDivisorTimesCounter = ModNumber.productScalar(mdivisor, counter);
+            while (ModNumber.lessThan(mDivisorTimesCounter, mremainder))
+            {
+                ModNumber.addAssignScalar(mdivisor, 1);
+                mDivisorTimesCounter = ModNumber.productScalar(mdivisor, ++counter);
+            }
+            if (mDivisorTimesCounter.equals(mremainder))
+            {
+                mremainder = new ModNumber(0L);
+
+            }
+            else
+            {
+                ModNumber.subtractAssignScalar(mdivisor, 1);
+                mDivisorTimesCounter = ModNumber.productScalar(mdivisor, --counter);
+                ModNumber.subtractAssign(mremainder , mDivisorTimesCounter);
+            }
+            ModNumber.addAssignScalar(mdivisor,counter);
+            ModNumber.addAssignScalar(mres, counter);
+        }
+        return mres;
     }
 
     public static String adjustStringLength(String s, int desiredLength) {

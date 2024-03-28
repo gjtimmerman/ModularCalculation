@@ -13,7 +13,7 @@ public class MultGroupMod
         ModNumber modone = new ModNumber(1L);
         if (n.equals(modone))
             throw new IllegalArgumentException("Modulus cannot be one!");
-        n.CheckMax(ModNumber.COUNTMOD);
+        n.checkMax(ModNumber.COUNTMOD);
         this.n = new ModNumber(n);
     }
     private ModNumber n;

@@ -136,16 +136,21 @@ public class ScaledNumber
         {
             sb.append('.');
             ModNumber tmpFraction = new ModNumber(mn);
+            String tmpFractionStr1 = tmpFraction.toString_DecBase();
             ModNumber divisor = new ModNumber(1L);
             for (int i = 0; i < scale * 2; i++)
                 ModNumber.productAssignScalar(divisor, 10);
             tmpFraction = ModNumber.product(tmpFraction, divisor);
+            String tmpFractionStr2 = tmpFraction.toString_DecBase();
             ModNumber.shiftRightAssign(tmpFraction, scale * 8);
+            String tmpFractionStr3 = tmpFraction.toString_DecBase();
             ModNumber.moduloAssign(tmpFraction, divisor);
+            String tmpFractionStr4 = tmpFraction.toString_DecBase();
             for (int i = 0; i < scale * 2; i++)
             {
                 divisor = divisor.divide(10);
                 ModNumber resTmp = ModNumber.divide(tmpFraction, divisor);
+                String resTmpStr = resTmp.toString_DecBase();
                 int digit = resTmp.modulo(10);
                 sb.append((char)('0' + digit));
             }
@@ -170,10 +175,10 @@ public class ScaledNumber
         }
         return sb.toString();
     }
-//    public ScaledNumber Sqrt()
-//    {
-//        ModNumber rt = mn.Sqrt();
-//        return new ScaledNumber(rt, scale / 2, true);
-//    }
+    public ScaledNumber sqrt()
+    {
+        ModNumber rt = mn.sqrt();
+        return new ScaledNumber(rt, scale / 2, true);
+    }
 }
 

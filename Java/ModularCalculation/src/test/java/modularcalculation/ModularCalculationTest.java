@@ -3696,21 +3696,21 @@ public class ModularCalculationTest {
         }
     }
     @Test
-    public void TestGcdOfOneAndZero()
+    public void gcdOfOneAndZero()
     {
         ModNumber mzero = new ModNumber(0L);
         ModNumber mone = new ModNumber(1L);
         assertThrows(IllegalArgumentException.class,() -> ModNumber.gcd(mone, mzero));
     }
     @Test
-    public void TestGcdOfZeroAndOne()
+    public void gcdOfZeroAndOne()
     {
         ModNumber mzero = new ModNumber(0L);
         ModNumber mone = new ModNumber(1L);
         assertThrows(IllegalArgumentException.class,() -> ModNumber.gcd(mzero, mone));
     }
     @Test
-    public void TestGcdOf100OneAnd()
+    public void gcdOf100OneAnd()
     {
         ModNumber monehundred = new ModNumber(100L);
         ModNumber mone = new ModNumber(1L);
@@ -3720,7 +3720,7 @@ public class ModularCalculationTest {
     }
 
     @Test
-    public void TestGcdOfOneAnd100()
+    public void gcdOfOneAnd100()
     {
         ModNumber monehundred = new ModNumber(100L);
         ModNumber mone = new ModNumber(1L);
@@ -3729,7 +3729,7 @@ public class ModularCalculationTest {
         assertEquals(mexp, mres);
     }
     @Test
-    public void TestGcdOf101And100()
+    public void gcdOf101And100()
     {
         ModNumber monehundred = new ModNumber(100L);
         ModNumber monehundredandone = new ModNumber(101L);
@@ -3738,7 +3738,7 @@ public class ModularCalculationTest {
         assertEquals(mexp, mres);
     }
     @Test
-    public void TestGcdOf102And100()
+    public void gcdOf102And100()
     {
         ModNumber monehundred = new ModNumber(100L);
         ModNumber monehundredandtwo = new ModNumber(102L);
@@ -3747,13 +3747,296 @@ public class ModularCalculationTest {
         assertEquals(mexp, mres);
     }
     @Test
-    public void TestGcdOf10And102()
+    public void gcdOf100And102()
     {
         ModNumber monehundred = new ModNumber(100L);
         ModNumber monehundredandtwo = new ModNumber(102L);
         ModNumber mexp = new ModNumber(2L);
         ModNumber mres = ModNumber.gcd(monehundred, monehundredandtwo);
         assertEquals(mexp, mres);
+    }
+    @Test
+    public void gcdOf400And600()
+    {
+        ModNumber mfourhundred = new ModNumber(400L);
+        ModNumber msixhundred = new ModNumber(600L);
+        ModNumber mexp = new ModNumber(200L);
+        ModNumber mres = ModNumber.gcd(mfourhundred, msixhundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void gcdOfAllFin2ndBlockAndAllFin1thBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = ~0L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.gcd(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void gcdOfAllFinLastBlockAndAllFin2ndBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[1] = ~0L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.gcd(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void gcdOfAllFinLastBlockAndAllAin3rdBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[2] = 0xaaaaaaaaaaaaaaaaL;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[2] = 0xaaaaaaaaaaaaaaaaL;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.gcd(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void gcdOfAllFinLastBlockAndAllBin3rdBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[2] = 0xbbbbbbbbbbbbbbbbL;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[2] = 0x1111111111111111L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.gcd(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOf101And100()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandone = new ModNumber(101L);
+        ModNumber mexp = new ModNumber(10100L);
+        ModNumber mres = ModNumber.lcm(monehundredandone, monehundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOf102And100()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandtwo = new ModNumber(102L);
+        ModNumber mexp = new ModNumber(5100L);
+        ModNumber mres = ModNumber.lcm(monehundredandtwo, monehundred);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOf100And102()
+    {
+        ModNumber monehundred = new ModNumber(100L);
+        ModNumber monehundredandtwo = new ModNumber(102L);
+        ModNumber mexp = new ModNumber(5100L);
+        ModNumber mres = ModNumber.lcm(monehundred,monehundredandtwo );
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOf400And600()
+    {
+        ModNumber msixhundred = new ModNumber(600L);
+        ModNumber mfourhundred = new ModNumber(400L);
+        ModNumber mexp = new ModNumber(1200L);
+        ModNumber mres = ModNumber.lcm(mfourhundred,msixhundred );
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOfAllFin2ndBlockAndAllFin1thBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[0] = ~0L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[1] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.lcm(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOfAllFinLastBlockAndAllFin2ndBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[1] = ~0L;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[ModNumber.LCOUNT - 1] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.lcm(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOfAllFinLastBlockAndAllAin3rdBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[2] = 0xaaaaaaaaaaaaaaaaL;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[ModNumber.LCOUNT - 1] = ~0L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.lcm(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void lcmOfAllFinLastBlockAndAllBin3rdBlock()
+    {
+        long[] l = new long[ModNumber.LCOUNT];
+        l[ModNumber.LCOUNT - 1] = ~0L;
+        long[] r = new long[ModNumber.LCOUNT];
+        r[2] = 0xbbbbbbbbbbbbbbbbL;
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[ModNumber.LCOUNT - 1] = 0xfffffffffffffff5L;
+        ModNumber ml = new ModNumber(l);
+        ModNumber mr = new ModNumber(r);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = ModNumber.lcm(ml, mr);
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfZero()
+    {
+        ModNumber mn = new ModNumber(0L);
+        ModNumber mexp = new ModNumber(0L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfOne()
+    {
+        ModNumber mn = new ModNumber(1L);
+        ModNumber mexp = new ModNumber(1L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfFour()
+    {
+        ModNumber mn = new ModNumber(4L);
+        ModNumber mexp = new ModNumber(2L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfTwentyFive()
+    {
+        ModNumber mn = new ModNumber(25L);
+        ModNumber mexp = new ModNumber(5L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfOneHundredAndSixtyNine()
+    {
+        ModNumber mn = new ModNumber(169L);
+        ModNumber mexp = new ModNumber(13L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOf152399025()
+    {
+        ModNumber mn = new ModNumber(152399025L);
+        ModNumber mexp = new ModNumber(12345L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOf1524157875019052100()
+    {
+        ModNumber mn = new ModNumber(1524157875019052100L);
+        ModNumber mexp = new ModNumber(1234567890L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOf152415787532374345526722756()
+    {
+        ModNumber mn = ModNumber.stomn("152415787532374345526722756", 10);
+        ModNumber mexp = new ModNumber(12345678901234L);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOfAllFsSquared()
+    {
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        int numInts = ModNumber.LCOUNT % 2 == 0 ? ModNumber.LCOUNT : ModNumber.LCOUNT - 1;
+        for (int i = numInts / 2; i < numInts; i++)
+            n[i] = ~0L;
+        n[numInts / 2] <<= 1;
+        n[0] = 1;
+        for (int i = 0; i < numInts / 2; i++)
+            exp[i] = ~0L;
+        ModNumber mn = new ModNumber(n);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtOf1InLastWord()
+    {
+        long[] n = new long[ModNumber.LCOUNT];
+        long[] exp = new long[ModNumber.LCOUNT];
+        int numInts = ModNumber.LCOUNT % 2 == 1 ? ModNumber.LCOUNT : ModNumber.LCOUNT - 1;
+        n[numInts-1] = 1;
+        exp[(numInts -1 )/2] = 1L;
+        ModNumber mn = new ModNumber(n);
+        ModNumber mexp = new ModNumber(exp);
+        ModNumber mres = mn.sqrt();
+        assertEquals(mexp, mres);
+    }
+    @Test
+    public void sqrtPrecision18Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 18, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 19);
+        exp += "1.6A09E667F3BCC908B2";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision18Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 18, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.414213562373095048";
+        assertEquals(18/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
     }
 
 }

@@ -18,7 +18,7 @@ public class ScaledNumber
             return false;
         else {
             if (obj instanceof ScaledNumber other)
-                return scale == other.scale && mn == other.mn;
+                return scale == other.scale && mn.equals(other.mn);
             else
                 return false;
         }
@@ -41,7 +41,7 @@ public class ScaledNumber
                 throw new IllegalArgumentException("Base must be 8, 10 or 16");
         }
     }
-    public StringLengthResult CalculateOctalStringLength() {
+    public StringLengthResult calculateOctalStringLength() {
         int integralDigits;
         int fractionDigits;
 
@@ -66,7 +66,7 @@ public class ScaledNumber
         buffer[0] = mnInt[wordsToSkip];
         buffer[1] = mnInt[wordsToSkip + 1];
         int tripleCount = 0;
-        StringLengthResult stringLengthResult = CalculateOctalStringLength();
+        StringLengthResult stringLengthResult = calculateOctalStringLength();
         res.append("0".repeat( stringLengthResult.digitsToSkip() + stringLengthResult.digitsLeft() + 1));
         res.setCharAt(stringLengthResult.digitsLeft(), '.');
         int wordCount = bitsToSkip;

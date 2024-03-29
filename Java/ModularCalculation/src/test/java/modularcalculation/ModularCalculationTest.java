@@ -2015,7 +2015,7 @@ public class ModularCalculationTest {
     {
         ModNumber ml = new ModNumber(8L);
         ScaledNumber sn = new ScaledNumber(ml, 6, false);
-        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        StringLengthResult stringLengthResult = sn.calculateOctalStringLength();
         String exp = "0".repeat(stringLengthResult.digitsLeft() - 2);
         exp += "10.0000000000000000";
         String res = sn.toString(8);
@@ -2026,7 +2026,7 @@ public class ModularCalculationTest {
     {
         ModNumber ml = new ModNumber(0x012345678910L);
         ScaledNumber sn = new ScaledNumber(ml, 6, true);
-        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        StringLengthResult stringLengthResult = sn.calculateOctalStringLength();
         String exp = "0".repeat(stringLengthResult.digitsLeft());
         exp += ".0022150531704420";
         String res = sn.toString(8);
@@ -2068,7 +2068,7 @@ public class ModularCalculationTest {
         }
         ModNumber ml = new ModNumber(l);
         ScaledNumber sn = new ScaledNumber(ml, 6, true);
-        StringLengthResult stringLengthResult = sn.CalculateOctalStringLength();
+        StringLengthResult stringLengthResult = sn.calculateOctalStringLength();
         String exp = "7".repeat(stringLengthResult.digitsLeft() - 1);
         int left = (ModNumber.NCOUNT - 6) * 8 % 3;
         switch (left)
@@ -4015,6 +4015,20 @@ public class ModularCalculationTest {
         assertEquals(mexp, mres);
     }
     @Test
+    public void sqrtPrecision18Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 18, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x09e667f3bcc908b2L;
+        exp[1] = 0x016aL;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 18/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
     public void sqrtPrecision18Of2StrHex()
     {
         ModNumber mn = new ModNumber(2L);
@@ -4036,6 +4050,370 @@ public class ModularCalculationTest {
         exp += "1.414213562373095048";
         assertEquals(18/2, snres.scale);
         String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision18Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 18, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.324047463177167462204262";
+        assertEquals(18/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision16Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 16, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x6a09e667f3bcc908L;
+        exp[1] = 0x01L;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 16/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision16Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 16, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 17);
+        exp += "1.6A09E667F3BCC908";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision16Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 16, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.4142135623730950";
+        assertEquals(16/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision16Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 16, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.3240474631771674622040";
+        assertEquals(16/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision14Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 14, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016a09e667f3bcc9L;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 14/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision14Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 14, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 15);
+        exp += "1.6A09E667F3BCC9";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision14Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 14, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.41421356237309";
+        assertEquals(14/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision14Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 14, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.3240474631771674622";
+        assertEquals(14/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision12Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 12, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016a09e667f3bcL;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 12/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision12Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 12, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 13);
+        exp += "1.6A09E667F3BC";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision12Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 12, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.414213562373";
+        assertEquals(12/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision12Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 12, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.3240474631771674";
+        assertEquals(12/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision10Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 10, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016a09e667f3L;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 10/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision10Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 10, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 11);
+        exp += "1.6A09E667F3";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision10Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 10, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.4142135623";
+        assertEquals(10/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision10Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 10, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.32404746317714";
+        assertEquals(10/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision8Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 8, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016a09e667L;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 8/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision8Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 8, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 9);
+        exp += "1.6A09E667";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision8Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 8, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.41421356";
+        assertEquals(8/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision8Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 8, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.32404746316";
+        assertEquals(8/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision4Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 4, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016a09L;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 4/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision4Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 4, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 5);
+        exp += "1.6A09";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision4Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 4, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.4141";
+        assertEquals(4/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision4Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 4, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.324044";
+        assertEquals(4/2, snres.scale);
+        String resStr = snres.toString(8);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision2Of2()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 2, false);
+        ScaledNumber snres = sn.sqrt();
+        long[] exp = new long[ModNumber.LCOUNT];
+        exp[0] = 0x016aL;
+        ModNumber mexp = new ModNumber(exp);
+        ScaledNumber snexp = new ScaledNumber(mexp, 2/2,true);
+        assertEquals(snexp, snres);
+    }
+
+    @Test
+    public void sqrtPrecision2Of2StrHex()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 2, false);
+        String exp = "0".repeat(ModNumber.HexStringLength - 3);
+        exp += "1.6A";
+        ScaledNumber snres = sn.sqrt();
+        String resStr = snres.toString(16);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision2Of2StrDec()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 2, false);
+        ScaledNumber snres = sn.sqrt();
+        int integerStringLength = snres.calculateDecimalStringLengthLeft();
+        String exp = "0".repeat(integerStringLength - 1);
+        exp += "1.41";
+        assertEquals(2/2, snres.scale);
+        String resStr = snres.toString(10);
+        assertEquals(exp, resStr);
+    }
+    @Test
+    public void sqrtPrecision2Of2StrOctal()
+    {
+        ModNumber mn = new ModNumber(2L);
+        ScaledNumber sn = new ScaledNumber(mn, 2, false);
+        ScaledNumber snres = sn.sqrt();
+        StringLengthResult stringLengthResult = snres.calculateOctalStringLength();
+        String exp = "0".repeat(stringLengthResult.digitsLeft() - 1);
+        exp += "1.324";
+        assertEquals(2/2, snres.scale);
+        String resStr = snres.toString(8);
         assertEquals(exp, resStr);
     }
 

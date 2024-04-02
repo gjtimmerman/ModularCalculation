@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.Arrays;
 
 public class ModNumber {
-    public final static int MaxMod = 1024 / 8;
+    public final static int MaxMod = 4096 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;

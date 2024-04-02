@@ -70,7 +70,7 @@ public class ScaledNumber
         res.append("0".repeat( stringLengthResult.digitsToSkip() + stringLengthResult.digitsLeft() + 1));
         res.setCharAt(stringLengthResult.digitsLeft(), '.');
         int wordCount = bitsToSkip;
-        buffer = ModNumber.ShiftIntArrayR(buffer, wordCount);
+        buffer = ModNumber.shiftIntArrayR(buffer, wordCount);
         for (int i = scale * 8; i < ModNumber.NSIZE; i++)
         {
             if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
@@ -86,7 +86,7 @@ public class ScaledNumber
                 char charToPrint = (char)('0' + numToPrint);
                 res.setCharAt( stringLengthResult.digitsLeft()- (tripleCount / 3) - 1, charToPrint);
             }
-            buffer = ModNumber.ShiftIntArrayR(buffer, 1);
+            buffer = ModNumber.shiftIntArrayR(buffer, 1);
         }
         buffer[1] = mnInt[wordsToSkip];
         if (wordsToSkip > 0)
@@ -95,7 +95,7 @@ public class ScaledNumber
         }
         else
             buffer[0] = 0;
-        buffer = ModNumber.ShiftIntArrayL(buffer, (ModNumber.ISIZE * 8) - bitsToSkip);
+        buffer = ModNumber.shiftIntArrayL(buffer, (ModNumber.ISIZE * 8) - bitsToSkip);
         wordCount = ModNumber.ISIZE * 8 - bitsToSkip;
         tripleCount = 0;
         for (int i = 0; i < scale * 8; i++)
@@ -111,7 +111,7 @@ public class ScaledNumber
                 char charToPrint = (char)('0' + numToPrint);
                 res.setCharAt(stringLengthResult.digitsLeft() + (tripleCount / 3) + 1, charToPrint);
             }
-            buffer = ModNumber.ShiftIntArrayL(buffer, 1);
+            buffer = ModNumber.shiftIntArrayL(buffer, 1);
         }
         return res.toString();
     }

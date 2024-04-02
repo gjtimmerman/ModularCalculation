@@ -1,10 +1,13 @@
 package modularcalculation;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 4096 / 8;
+    public final static int MaxMod = 2048 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;
@@ -34,10 +37,12 @@ public class ModNumber {
     public ModNumber(byte[] n) {
         int lCount = n.length / LSIZE;
         long tmp;
+        long mask = 0xFFL;
         for (int i = 0; i < lCount; i++) {
             tmp = 0L;
             for (int j = 0; j < LSIZE; j++) {
-                tmp |= ((long) n[i * LSIZE + j] << j * 8);
+                long nElement = n[i * LSIZE + j] & mask;
+                tmp |= (nElement << j * 8);
             }
             num[i] = tmp;
         }
@@ -46,7 +51,8 @@ public class ModNumber {
             return;
         tmp = 0L;
         for (int j = 0; j < lSize; j++) {
-            tmp |= ((long) n[lCount * LSIZE + j] << j * 8);
+            long nElement = n[lCount * LSIZE + j] & mask;
+            tmp |=  nElement << j * 8;
         }
         num[lCount] = tmp;
     }
@@ -72,6 +78,77 @@ public class ModNumber {
         fromIntArray(arr);
     }
 
+    public byte[] convertEndianess(int cb)
+    {
+        int n = cb > 0 ? cb : getByteCount();
+        byte[] res = new byte[n];
+        int lCount = n / LSIZE;
+        int lSize = n % LSIZE;
+        long mask;
+        for (int i = 0; i < lCount; i++)
+        {
+            mask = 0xffL;
+            for(int j = 0; j < LSIZE; j++)
+            {
+                long tmp = num[i] & mask;
+                res [n - (i * LSIZE + j) - 1] = (byte)(tmp >>> j * 8);
+                mask <<= 8;
+            }
+        }
+        mask = 0xffL;
+        for (int j = 0; j < lSize; j++)
+        {
+            long tmp = num[lCount] & mask;
+            res[n - (lCount * LSIZE + j) - 1] = (byte)(tmp >>> j * 8);
+            mask <<= 8;
+        }
+        return res;
+    }
+
+    public static byte[] convertEndianess(byte[] b)
+    {
+        byte[] res = new byte[b.length];
+        for (int i = 0; i < b.length; i++)
+            res[i] = b[b.length - i - 1];
+        return res;
+    }
+
+
+    public char[] toCharArray()
+    {
+        char[] result = new char[num.length * LSIZE/Character.BYTES];
+        for (int i = 0; i < num.length; i++)
+        {
+            long charMask = 0xffffL;
+            for (int j = 0; j < LSIZE/Character.BYTES; j++)
+            {
+                long maskedChar = num[i] & charMask;
+                char cValue =  (char)(maskedChar >> j * Character.BYTES * 8);
+                result[i * LSIZE/Character.BYTES + j] = cValue;
+                charMask <<= 8 * Character.BYTES;
+            }
+        }
+        return result;
+    }
+
+    public byte[] toByteArray()
+    {
+        byte[] result = new byte[num.length*LSIZE];
+        for (int i = 0; i < num.length; i++)
+        {
+            long byteMask = 0xffL;
+            for (int j = 0; j < LSIZE; j++)
+            {
+                long numValue = num[i] & byteMask;
+                byte bValue = (byte)(numValue >>> j * 8);
+                result[i * LSIZE + j] = bValue;
+                byteMask <<= 8;
+            }
+        }
+        return result;
+    }
+
+
     public int[] toIntArray() {
         int[] result = new int[ICOUNT];
         long lomask = 0xffffffffL;
@@ -92,7 +169,7 @@ public class ModNumber {
         }
 
     }
-    public static int[] ShiftIntArrayR(int[] arr, int bitCount)
+    public static int[] shiftIntArrayR(int[] arr, int bitCount)
     {
         if (bitCount == 0)
             return arr;
@@ -105,7 +182,7 @@ public class ModNumber {
         }
         return arr;
     }
-    public static int[] ShiftIntArrayL(int[] arr, int bitCount)
+    public static int[] shiftIntArrayL(int[] arr, int bitCount)
     {
         if (bitCount == 0)
             return arr;
@@ -483,7 +560,7 @@ public class ModNumber {
         return true;
     }
 
-    private int FindFirstNonZeroBitInWord(int word) {
+    private int findFirstNonZeroBitInWord(int word) {
         long mask = 1L << (LSIZE * 8 - 1);
         for (int i = 0; i < LSIZE * 8; i++) {
             if ((num[word] & mask) != 0)
@@ -543,8 +620,8 @@ public class ModNumber {
             divisor[nonZeroDifference - i] = 1L;
             ModNumber mRShiftedLeft = new ModNumber(rShiftedLeft);
             ModNumber mDivisor = new ModNumber(divisor);
-            int firstBitl = (int) ((LSIZE * 8 - modRes.FindFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
-            int firstBitr = (int) ((LSIZE * 8 - mRShiftedLeft.FindFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
+            int firstBitl = (int) ((LSIZE * 8 - modRes.findFirstNonZeroBitInWord(firstNonzeroWordl)) + (LSIZE * 8 * firstNonzeroWordl));
+            int firstBitr = (int) ((LSIZE * 8 - mRShiftedLeft.findFirstNonZeroBitInWord(nonZeroDifference + firstNonzeroWordr - i)) + (LSIZE * 8 * (nonZeroDifference + firstNonzeroWordr - i)));
             int firstBitDifference = firstBitl - firstBitr;
             for (int j = 0; j <= firstBitDifference; j++) {
                 ModNumber rShiftedLeftBits = new ModNumber(mRShiftedLeft);
@@ -793,7 +870,7 @@ public class ModNumber {
                 char charToPrint = (char)('0' + numToPrint);
                 res.setCharAt(ModNumber.OctalStringLength - (tripleCount / 3) - 1,charToPrint);
             }
-            buffer = ShiftIntArrayR(buffer, 1);
+            buffer = shiftIntArrayR(buffer, 1);
         }
         return res.toString();
     }
@@ -842,4 +919,280 @@ public class ModNumber {
         String inputStr = isr.readLine();
         return ModNumber.stomn(inputStr, base);
     }
+    public ModNumber GetPKCS1Mask(boolean stable, int modulusSize)
+    {
+        int keyByteSize = (int)modulusSize;
+        int mSize = getByteCount();
+        int mCount = mSize / LSIZE;
+        if (keyByteSize - 11 < mSize)
+            throw new IllegalArgumentException("Message size greater than Key Byte size minus 11");
+        ModNumber res = new ModNumber(0L);
+        Random random = new Random();
+        int padSize = keyByteSize - mSize - 3;
+        int totalBytesLeft = keyByteSize % LSIZE;
+        int totalNumWords = keyByteSize / LSIZE;
+        if (totalBytesLeft > 1)
+            totalNumWords++;
+        long tmp = stable ? 0x0001L : 0x0002L;
+        int totalBytesShift = totalBytesLeft;
+        if (totalBytesLeft < 2)
+            totalBytesShift += 8;
+        for (int i = 0; i < totalBytesShift - 2; i++)
+        {
+            tmp <<= 8;
+            byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
+            short maskShort = (short)(mask & (short)0xFF);
+            tmp |= maskShort;
+        }
+        res.num[totalNumWords - 1] = tmp;
+        int padLeft = padSize - (totalBytesShift - 2);
+        int padLeftCount = padLeft / LSIZE;
+        int padLeftOver = padLeft % LSIZE;
+        for (int i = 0; i < padLeftCount; i++)
+        {
+            tmp = 0;
+            for (int j = 0; j < LSIZE; j++)
+            {
+                tmp <<= 8;
+                byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
+                short maskShort = (short)(mask & (short)0xFF);
+                tmp |= maskShort;
+
+            }
+            res.num[totalNumWords - i - 2] = tmp;
+        }
+        tmp = 0;
+        for (int j = 0; j < padLeftOver; j++)
+        {
+            byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
+            short maskShort = (short)(mask & (short)0xFF);
+            tmp |= maskShort;
+            tmp <<= 8;
+
+        }
+        tmp <<= (int)((LSIZE - padLeftOver - 1) * 8);
+        tmp |= num[mCount];
+        res.num[totalNumWords - padLeftCount - 2] = tmp;
+        for (int i = 0; i < mCount; i++)
+        {
+            res.num[i] = num[i];
+        }
+        return res;
+    }
+    public static ModNumber fromText(String text)
+    {
+        long[] res = new long[LCOUNT];
+        int textSize = (text.length() * Character.BYTES) / LSIZE;
+        int textLeft = (text.length() * Character.BYTES) % LSIZE;
+        if (textSize > LCOUNT)
+            throw new IllegalArgumentException("Text message too long!");
+        if (textSize == LCOUNT && textLeft > 0)
+            throw new IllegalArgumentException("Text message too long!");
+
+        for (int i = 0; i < textSize; i++)
+        {
+            for (int j = 0; j < LSIZE/Character.BYTES; j++)
+            {
+                long charAt = text.charAt(i * LSIZE / Character.BYTES + j) & 0xFFFFL;
+                res[i] |= (charAt) << (j * Character.BYTES*8);
+            }
+        }
+
+        long tmp = 0L;
+        for (int i = 0; i < textLeft / Character.BYTES; i++)
+        {
+            long c = text.charAt((textSize * LSIZE) / Character.BYTES + i);
+            c <<= Character.BYTES * 8 * i;
+            tmp |= c;
+        }
+        if (textLeft > 0)
+            res[textSize] = tmp;
+
+
+        return new ModNumber(res);
+    }
+    public String getText()
+    {
+        int byteCount = getByteCount();
+        if (byteCount % Character.BYTES != 0)
+            byteCount += Character.BYTES - byteCount % Character.BYTES;
+        StringBuilder res = new StringBuilder((int)byteCount/Character.BYTES);
+
+        char[] thisChar = toCharArray();
+        for (int i = 0; i < byteCount / Character.BYTES; i++)
+            res.append(thisChar[i]);
+
+        return res.toString();
+    }
+    ASNElementResult ReadASNElement(byte[] p, int i)
+    {
+        if (i == 0)
+            throw new IllegalArgumentException("Not a valid BER encodign");
+        switch(p[i] >> 6)
+        {
+            case 0:
+                switch(p[i] >> 5)
+                {
+                    case 0:
+                    case 1:
+
+                    {
+                        byte mask = (byte)0x1F;
+                        byte masked = (byte)(p[i] & mask);
+                        ASNElementType asnType = ASNElementType.fromByte(masked);
+                        switch(asnType)
+                        {
+                            case SEQUENCE:
+                                switch(p[i-1] >> 7)
+                                {
+                                    case 0:
+                                    {
+                                        byte mask2 = (byte)0x7F;
+                                        byte masked2 = (byte)(p[i-1] & mask2);
+                                        return new ASNElementResult(ASNElementType.SEQUENCE, masked2, i - 2);
+                                    }
+                                    default:
+                                        throw new IllegalArgumentException("Not a short length specifier!");
+
+                                }
+                            case OBJECT_IDENTIFIER:
+                                switch(p[i-1] >> 7)
+                                {
+                                    case 0:
+                                        byte mask2 = (byte)0x7F;
+                                        byte masked2 = (byte)(p[i - 1] & mask2);
+                                        return new ASNElementResult(ASNElementType.OBJECT_IDENTIFIER, masked2, i - 2);
+                                    default:
+                                        throw new IllegalArgumentException("Not a short length specifier!");
+                                }
+                            case NULL_VALUE:
+                                if (p[i - 1] != 0)
+                                    throw new IllegalArgumentException("Not a valid NULL object");
+                                return new ASNElementResult(ASNElementType.NULL_VALUE, p[i - 1], i - 2);
+                            case OCTET_STRING:
+                                switch(p[i-1] >> 7)
+                                {
+                                    case 0:
+                                        byte mask2 = (byte)0x7F;
+                                        byte masked2 = (byte)(p[i - 1] & mask2);
+                                        return new ASNElementResult(ASNElementType.OCTET_STRING, masked2, i - 2);
+                                    default:
+                                        throw new IllegalArgumentException("Not a short length specifier!");
+                                }
+                            case INTEGER_VALUE:
+                                switch(p[i-1] >> 7)
+                                {
+                                    case 0:
+                                        byte mask2 = (byte)0x7F;
+                                        byte masked2 = (byte)(p[i-1] & mask2);
+                                        return new ASNElementResult(ASNElementType.INTEGER_VALUE, masked2, i - 2);
+                                    default:
+                                        throw new IllegalArgumentException("Not a short length specifier!");
+
+                                }
+
+                        }
+
+
+                    }
+                    break;
+                    default:
+                        throw new IllegalArgumentException("Not a constructed ASN.1 type!");
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Not a native ASN.1 type!");
+
+        }
+        throw new IllegalArgumentException("Error");
+
+    }
+    public List<Object> ParseBERASNString()
+    {
+        List<Object> res = new ArrayList<Object>();
+        byte[] pC = toByteArray();
+
+        int i;
+        for (i = MaxMod - 1; i > 0; i--)
+            if (pC[i] != 0)
+                break;
+        ASNElementResult ASNElement1 = ReadASNElement(pC, i);
+        if (ASNElement1.type() == ASNElementType.SEQUENCE)
+        {
+            ASNElementResult ASNElement2 = ReadASNElement(pC, ASNElement1.index());
+            if (ASNElement2.type() == ASNElementType.SEQUENCE)
+            {
+                ASNElementResult ASNElement3 = ReadASNElement(pC, ASNElement2.index());
+                if (ASNElement3.type() == ASNElementType.OBJECT_IDENTIFIER)
+                {
+                    byte b = pC[ASNElement3.index()];
+                    String s = String.format("%d", (int)(b / 40));
+                    s += ".";
+                    s += String.format("%d", (int)(b % 40));
+                    s += ".";
+                    long number = 0L;
+                    for (int k = 1; k < ASNElement3.length(); k++)
+                    {
+                        byte mask = (byte)0x80;
+                        b = pC[ASNElement3.index() - k];
+                        number <<= 7;
+                        number |= (byte)(b & (byte)~mask);
+                        if ((b & mask) == 0)
+                        {
+                            s += String.format("%d", number);
+                            s += ".";
+                            number = 0L;
+                        }
+                    }
+                    res.add(s);
+                }
+                ASNElementResult ASNElement4 = ReadASNElement(pC, ASNElement3.index() - ASNElement3.length());
+                ASNElementResult ASNElement5 = ReadASNElement(pC, ASNElement4.index());
+                if (ASNElement5.type() == ASNElementType.OCTET_STRING)
+                {
+                    byte [] bytes = new byte [ASNElement5.length()];
+                    for (int k = 0; k < ASNElement5.length(); k++)
+                    {
+                        bytes[k] = pC[ASNElement5.index() - k];
+                    }
+                    res.add(bytes);
+
+                }
+            }
+            else if (ASNElement2.type() == ASNElementType.INTEGER_VALUE)
+            {
+                byte[] bytes = new byte[ASNElement2.length()];
+                for (int k = 0; k < ASNElement2.length(); k++)
+                {
+                    bytes[k] = pC[ASNElement2.index() - k];
+                }
+                res.add(bytes);
+                ASNElementResult ASNElement3 = ReadASNElement(pC, ASNElement2.index() - ASNElement2.length());
+                if (ASNElement3.type() == ASNElementType.INTEGER_VALUE)
+                {
+                    byte [] bytes2 = new byte[ASNElement3.length()];
+                    for (int k = 0; k < ASNElement3.length(); k++)
+                    {
+                        bytes2[k] = pC[ASNElement3.index() - k];
+
+                    }
+                    res.add(bytes2);
+                }
+            }
+        }
+
+        return res;
+    }
+    public static ModNumber getLeftMostBytes(ModNumber mn, int leftBytes)
+    {
+        byte[] leftMostBytes = new byte[leftBytes];
+
+        byte[] thisBytes = mn.toByteArray();
+        int numBytes = mn.getByteCount();
+        int mask = 0xff;
+        for (int i = 0; i < leftBytes; i++)
+            leftMostBytes[i] = (byte)(thisBytes[numBytes - leftBytes + i] & mask);
+        return new ModNumber(leftMostBytes);
+    }
+
 }

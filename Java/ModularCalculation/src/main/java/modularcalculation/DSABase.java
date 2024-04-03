@@ -22,6 +22,7 @@ abstract class DSABase
         ModNumber s;
         ModNumber mk;
         ModNumber mzero = new ModNumber(0L);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         int lSize = nLen / ModNumber.LSIZE;
         do
         {
@@ -43,7 +44,6 @@ abstract class DSABase
             final ModNumber mHashRef = mHash;
             ModNumber kInverse = null;
             final MultGroupMod mgm = new MultGroupMod(Q);
-            ExecutorService executorService = Executors.newFixedThreadPool(2);
             Future<ModNumber> result1 = executorService.submit(() ->  mgm.Inverse(mkRef));
             ModNumber hashPlusXr = null;
             Future<ModNumber> result2 = executorService.submit(() ->
@@ -61,7 +61,7 @@ abstract class DSABase
             }
             s = mgm.Mult(kInverse, hashPlusXr);
         } while (s == mzero);
-
+        executorService.shutdown();
         if (!(ModNumber.lessThan(s, Q) && ModNumber.lessThan(r, Q)))
             throw new IllegalArgumentException("Wrong signature");
         byte[] rBigEndian = r.convertEndianess(nLen);

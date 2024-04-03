@@ -88,6 +88,7 @@ public static DSACalculateU1U2MrResult DSACalculateU1U2Mr(ModNumber Q, byte[] ha
         {
             e.printStackTrace();
         }
+        executorService.shutdown();
         return new DSACalculateU1U2MrResult(u1, u2, mr);
 }
 public String sign(byte[] hash, boolean DEREncoded)
@@ -112,7 +113,7 @@ public boolean verify(byte[] hash, String signature, boolean DEREndoded)
         {
             e.printStackTrace();
         }
-
+        executorService.shutdown();
         ModNumber mv = ModNumber.modulo(mgm.Mult(mv1, mv2), Q);
         return mv.equals(u1U2MrResult.mr());
 }

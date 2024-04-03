@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 1024 / 8;
+    public final static int MaxMod = 4096 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;
@@ -919,7 +919,7 @@ public class ModNumber {
         String inputStr = isr.readLine();
         return ModNumber.stomn(inputStr, base);
     }
-    public ModNumber GetPKCS1Mask(boolean stable, int modulusSize)
+    public ModNumber getPKCS1Mask(boolean stable, int modulusSize)
     {
         int keyByteSize = (int)modulusSize;
         int mSize = getByteCount();
@@ -940,8 +940,9 @@ public class ModNumber {
         for (int i = 0; i < totalBytesShift - 2; i++)
         {
             tmp <<= 8;
-            byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
-            short maskShort = (short)(mask & (short)0xFF);
+            int randomInt = random.nextInt();
+            byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+            short maskShort = (short)(mask & 0xFF);
             tmp |= maskShort;
         }
         res.num[totalNumWords - 1] = tmp;
@@ -954,8 +955,9 @@ public class ModNumber {
             for (int j = 0; j < LSIZE; j++)
             {
                 tmp <<= 8;
-                byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
-                short maskShort = (short)(mask & (short)0xFF);
+                int randomInt = random.nextInt();
+                byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+                short maskShort = (short)(mask & 0xFF);
                 tmp |= maskShort;
 
             }
@@ -964,13 +966,14 @@ public class ModNumber {
         tmp = 0;
         for (int j = 0; j < padLeftOver; j++)
         {
-            byte mask = stable ? (byte)0xFF : (byte)(((byte)random.nextInt() % 0xFF) + 1);
-            short maskShort = (short)(mask & (short)0xFF);
+            int randomInt = random.nextInt();
+            byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+            short maskShort = (short)(mask & 0xFF);
             tmp |= maskShort;
             tmp <<= 8;
 
         }
-        tmp <<= (int)((LSIZE - padLeftOver - 1) * 8);
+        tmp <<= ((LSIZE - padLeftOver) * 8);
         tmp |= num[mCount];
         res.num[totalNumWords - padLeftCount - 2] = tmp;
         for (int i = 0; i < mCount; i++)
@@ -1194,5 +1197,93 @@ public class ModNumber {
             leftMostBytes[i] = (byte)(thisBytes[numBytes - leftBytes + i] & mask);
         return new ModNumber(leftMostBytes);
     }
+    public ModNumber removePKCS1Mask()
+    {
+        ModNumber res;
 
+        byte[] thisBytes = toByteArray();
+        int i;
+        for (i = num.length * LSIZE - 1; i >= 0; i--)
+            if (thisBytes[i] != 0)
+                break;
+        if (thisBytes[i + 1] != 0x00)
+            throw new IllegalArgumentException("Not a valid PKCS1 Mask");
+        if (thisBytes[i] == 0x01)
+            while (thisBytes[--i] == 0xFF && i >= 0)
+                ;
+        else if (thisBytes[i] == 0x02)
+            while (thisBytes[i] != 0x00 && i >= 0)
+                i--;
+            else
+                throw new IllegalArgumentException("Not a valid PKCS1 Mask");
+        if (thisBytes[i] != 0x00)
+            throw new IllegalArgumentException("Not a valid PKCS1 Mask");
+        res = new ModNumber(num, i);
+
+        return res;
+    }
+    public static ModNumber createBERASNString(byte[] hashBigEndian, String plainOid)
+    {
+        List<Byte> hashBigEndianList = new ArrayList<>();
+        for (int i = 0; i < hashBigEndian.length; i++)
+            hashBigEndianList.add(hashBigEndian[i]);
+        List<Integer> oidNumbers = new ArrayList<>();
+        int oldPos = 0;
+        int pos = plainOid.indexOf('.', oldPos);
+        while (pos != -1)
+        {
+            oidNumbers.add(Integer.parseInt(plainOid.substring(oldPos, pos)));
+            oldPos = pos + 1;
+            pos = plainOid.indexOf('.',oldPos);
+        }
+        oidNumbers.add(Integer.parseInt(plainOid.substring(oldPos)));
+        byte first = (byte)(oidNumbers.get(0) * 40);
+        first += (byte)oidNumbers.get(1).intValue();
+        List<Byte> encodedOid = new ArrayList<>();
+        encodedOid.add(first);
+        for (int i = 2; i < oidNumbers.size(); i++)
+        {
+            int oidPart = (int)oidNumbers.get(i);
+            byte divisor = (byte)0x80;
+            byte mask = (byte)0x7F;
+            List<Byte> oidByteList = new ArrayList<>();
+            byte oidByte = (byte)(oidPart % divisor);
+            oidByteList.add(oidByte);
+            oidPart >>>= 7;
+            while (oidPart > 0)
+            {
+                oidByte = (byte)((oidPart & mask) | divisor);
+                oidByteList.add(oidByte);
+                oidPart >>>= 7;
+            }
+            for (int j = oidByteList.size() - 1; j >= 0; j--)
+                encodedOid.add(oidByteList.get(j));
+        }
+        List<Byte> innerASN = new ArrayList<>();
+        List<Byte> outerASN = new ArrayList<>();
+        innerASN.add((byte)ASNElementType.OBJECT_IDENTIFIER.getElementNumber());
+        innerASN.add((byte)encodedOid.size());
+        innerASN.addAll(encodedOid);
+        innerASN.add((byte)ASNElementType.NULL_VALUE.getElementNumber());
+        innerASN.add((byte)0);
+        outerASN.add((byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20));
+        outerASN.add((byte)innerASN.size());
+        outerASN.addAll(innerASN);
+        outerASN.add((byte)(ASNElementType.OCTET_STRING.getElementNumber()));
+        outerASN.add((byte)hashBigEndian.length);
+        outerASN.addAll(hashBigEndianList);
+        List<Byte> result = new ArrayList<>();
+        result.add((byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20));
+        result.add((byte)outerASN.size());
+        result.addAll(outerASN);
+        byte[] resultArray = new byte[result.size()];
+        for (int i = 0; i < result.size(); i++)
+            resultArray[i] = result.get(i);
+        byte[] resultLittleEndian;
+
+        resultLittleEndian = ModNumber.convertEndianess(resultArray);
+
+        ModNumber res = new ModNumber(resultLittleEndian);
+        return res;
+    }
 }

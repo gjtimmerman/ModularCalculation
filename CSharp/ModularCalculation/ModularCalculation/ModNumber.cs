@@ -916,7 +916,8 @@ namespace ModularCalculation
                 tmp <<= 8;
 
             }
-            tmp <<= (int)((LSIZE - padLeftOver - 1) * 8);
+//            tmp <<= (int)((LSIZE - padLeftOver - 1) * 8); have to check!
+            tmp <<= (int)((LSIZE - padLeftOver) * 8);
             tmp |= num[mCount];
             res.num[totalNumWords - padLeftCount - 2] = tmp;
             for (uint i = 0; i < mCount; i++)

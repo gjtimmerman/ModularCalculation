@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 2048 / 8;
+    public final static int MaxMod = 1024 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;
@@ -1028,10 +1028,10 @@ public class ModNumber {
     {
         if (i == 0)
             throw new IllegalArgumentException("Not a valid BER encodign");
-        switch(p[i] >> 6)
+        switch(p[i] >>> 6)
         {
             case 0:
-                switch(p[i] >> 5)
+                switch(p[i] >>> 5)
                 {
                     case 0:
                     case 1:
@@ -1043,7 +1043,7 @@ public class ModNumber {
                         switch(asnType)
                         {
                             case SEQUENCE:
-                                switch(p[i-1] >> 7)
+                                switch(p[i-1] >>> 7)
                                 {
                                     case 0:
                                     {
@@ -1056,7 +1056,7 @@ public class ModNumber {
 
                                 }
                             case OBJECT_IDENTIFIER:
-                                switch(p[i-1] >> 7)
+                                switch(p[i-1] >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;
@@ -1070,7 +1070,7 @@ public class ModNumber {
                                     throw new IllegalArgumentException("Not a valid NULL object");
                                 return new ASNElementResult(ASNElementType.NULL_VALUE, p[i - 1], i - 2);
                             case OCTET_STRING:
-                                switch(p[i-1] >> 7)
+                                switch(p[i-1] >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;
@@ -1080,7 +1080,7 @@ public class ModNumber {
                                         throw new IllegalArgumentException("Not a short length specifier!");
                                 }
                             case INTEGER_VALUE:
-                                switch(p[i-1] >> 7)
+                                switch(p[i-1] >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;

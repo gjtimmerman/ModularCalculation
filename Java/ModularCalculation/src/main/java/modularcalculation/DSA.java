@@ -90,12 +90,12 @@ public static DSACalculateU1U2MrResult DSACalculateU1U2Mr(ModNumber Q, byte[] ha
         }
         return new DSACalculateU1U2MrResult(u1, u2, mr);
 }
-public String Sign(byte[] hash, boolean DEREncoded)
+public String sign(byte[] hash, boolean DEREncoded)
 {
         byte[] signature = CalculateDSASignature(Q, x, hash, DEREncoded);
         return ConvertSignatureToString(signature, DEREncoded);
 }
-public boolean Verify(byte[] hash, String signature, boolean DEREndoded)
+public boolean verify(byte[] hash, String signature, boolean DEREndoded)
 {
         final MultGroupMod mgm = new MultGroupMod(P);
         ModNumber mv1 = null;

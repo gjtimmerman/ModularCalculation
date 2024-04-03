@@ -102,7 +102,7 @@ abstract class DSABase
             StringBuilder sb = new StringBuilder(signature.length * 2);
             for (int i = 0; i < signature.length; i++)
             {
-                String tmp = String.format("%2X", (int)signature[i]);
+                String tmp = String.format("%02X", signature[i]);
                 sb.append(tmp);
             }
             return sb.toString();

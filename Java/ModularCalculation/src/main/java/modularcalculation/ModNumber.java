@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 4096 / 8;
+    public final static int MaxMod = 1024 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;
@@ -940,8 +940,7 @@ public class ModNumber {
         for (int i = 0; i < totalBytesShift - 2; i++)
         {
             tmp <<= 8;
-            int randomInt = random.nextInt();
-            byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+            byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
             short maskShort = (short)(mask & 0xFF);
             tmp |= maskShort;
         }
@@ -955,8 +954,7 @@ public class ModNumber {
             for (int j = 0; j < LSIZE; j++)
             {
                 tmp <<= 8;
-                int randomInt = random.nextInt();
-                byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+                byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
                 short maskShort = (short)(mask & 0xFF);
                 tmp |= maskShort;
 
@@ -966,8 +964,7 @@ public class ModNumber {
         tmp = 0;
         for (int j = 0; j < padLeftOver; j++)
         {
-            int randomInt = random.nextInt();
-            byte mask = stable ? (byte)0xFF : (byte)(randomInt & 0xFE + 1);
+            byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
             short maskShort = (short)(mask & 0xFF);
             tmp |= maskShort;
             tmp <<= 8;

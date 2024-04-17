@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 1024 / 8;
+    public final static int MaxMod = 4096 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;
@@ -1205,9 +1205,11 @@ public class ModNumber {
                 break;
         if (thisBytes[i + 1] != 0x00)
             throw new IllegalArgumentException("Not a valid PKCS1 Mask");
-        if (thisBytes[i] == 0x01)
-            while (thisBytes[--i] == 0xFF && i >= 0)
-                ;
+        if (thisBytes[i] == 0x01) {
+            int thisByte = thisBytes[--i] & 0x00FF;
+            while (thisByte == 0x00FF && i >= 0)
+                thisByte = thisBytes[--i] & 0x00FF;
+        }
         else if (thisBytes[i] == 0x02)
             while (thisBytes[i] != 0x00 && i >= 0)
                 i--;

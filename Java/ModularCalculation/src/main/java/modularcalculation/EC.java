@@ -16,7 +16,7 @@ public class EC
         if (p.IsAtInfinity)
             return true;
         ModNumber yKwad = mgm.Kwad(p.y);
-        return yKwad == CalculateRhs(p.x);
+        return yKwad.equals(CalculateRhs(p.x));
     }
     public ModNumber CalculateRhs(ModNumber x)
     {

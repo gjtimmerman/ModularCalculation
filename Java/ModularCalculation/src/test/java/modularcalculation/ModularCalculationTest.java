@@ -6308,5 +6308,20 @@ public class ModularCalculationTest {
             assertEquals(originalHash, decryptedHash);
         }
     }
+    @Test
+    public void edIsOnCurveA0B17Point00isFalse()
+    {
+        ModNumber p = new ModNumber(1000000L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mzero, new ModNumber(17L));
+        ECPoint pt = new ECPoint();
+        pt.x = mzero;
+        pt.y = mzero;
+        assertFalse(myEC.IsOnCurve(pt));
+
+    }
 
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ModNumber {
-    public final static int MaxMod = 4096 / 8;
+    public final static int MaxMod = 1024 / 8;
 
     public final static int LSIZE = 8;
     public final static int ISIZE = 4;

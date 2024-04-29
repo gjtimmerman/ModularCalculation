@@ -6712,5 +6712,728 @@ public class ModularCalculationTest {
         pt.y = new ModNumber(17L);
         assertTrue(myEC.IsOnCurve(pt));
     }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point22AndPoint2And17IsPtAtInfinity()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(2L);
+        pt1.y = new ModNumber(2L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(2L);
+        pt2.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.IsAtInfinity = true;
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point12AndPoint2And17IsPt13And8()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(2L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(2L);
+        pt2.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(8L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17AndPoint2And17IsPt16And2()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(17L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(2L);
+        pt2.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(16L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17AndPoint22IsPt13And11()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(17L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(2L);
+        pt2.y = new ModNumber(2L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(11L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17AndPoint97IsPt70()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(17L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(9L);
+        pt2.y = new ModNumber(7L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(7L);
+        exp.y = new ModNumber(0L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17Times3EqualToPt1And17AddPt18And4()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(7L);
+        assertEquals(exp, myEC.Mult(pt1, new ModNumber(3L)));
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(18L);
+        pt2.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17Times4EqualToPt1And17AddPt12EqualToPt1And17Times2Times2()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(1L);
+        pt1.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(7L);
+        exp.y = new ModNumber(0L);
+        assertEquals(exp, myEC.Mult(pt1, new ModNumber(4L)));
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(9L);
+        pt2.y = new ModNumber(7L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        ECPoint pt3 = new ECPoint();
+        pt3.x = new ModNumber(18L);
+        pt3.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Times2(pt3));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17SubGroup()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt = new ECPoint();
+        pt.x = new ModNumber(1L);
+        pt.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(18L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(2L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(7L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(3L)));
+        exp.x = new ModNumber(7L);
+        exp.y = new ModNumber(0L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(4L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(12L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(5L)));
+        exp.x = new ModNumber(18L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(6L)));
+        exp.x = new ModNumber(1L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(7L)));
+        exp.IsAtInfinity= true;
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(8L)));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17CoSet1()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(2L);
+        pt1.y = new ModNumber(2L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(1L);
+        pt2.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(11L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(10L);
+        exp.y = new ModNumber(16L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(12L);
+        exp.y = new ModNumber(18L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(17L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(10L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(16L);
+        exp.y = new ModNumber(17L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(2L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point1And17CoSet2()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt1 = new ECPoint();
+        pt1.x = new ModNumber(2L);
+        pt1.y = new ModNumber(17L);
+        ECPoint pt2 = new ECPoint();
+        pt2.x = new ModNumber(1L);
+        pt2.y = new ModNumber(17L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(16L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(9L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(17L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(12L);
+        exp.y = new ModNumber(1L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(10L);
+        exp.y = new ModNumber(3L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(8L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+        pt1.x = exp.x;
+        pt1.y = exp.y;
+        exp.x = new ModNumber(2L);
+        exp.y = new ModNumber(17L);
+        assertEquals(exp, myEC.Add(pt1, pt2));
+    }
+    @Test
+    public void ecAddCurveP19AMinus7B10Point22SubGroup()
+    {
+        ModNumber p = new ModNumber(19L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt = new ECPoint();
+        pt.x = new ModNumber(2L);
+        pt.y = new ModNumber(2L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(8L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(2L)));
+        exp.x = new ModNumber(1L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(3L)));
+        exp.x = new ModNumber(16L);
+        exp.y = new ModNumber(17L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(4L)));
+        exp.x = new ModNumber(10L);
+        exp.y = new ModNumber(3L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(5L)));
+        exp.x = new ModNumber(18L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(6L)));
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(7L)));
+        exp.x = new ModNumber(12L);
+        exp.y = new ModNumber(1L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(8L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(12L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(9L)));
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(10L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(10L)));
+        exp.x = new ModNumber(17L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(11L)));
+        exp.x = new ModNumber(7L);
+        exp.y = new ModNumber(0L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(12L)));
+        exp.x = new ModNumber(17L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(13L)));
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(9L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(14L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(7L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(15L)));
+        exp.x = new ModNumber(12L);
+        exp.y = new ModNumber(18L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(16L)));
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(17L)));
+        exp.x = new ModNumber(18L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(18L)));
+        exp.x = new ModNumber(10L);
+        exp.y = new ModNumber(16L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(19L)));
+        exp.x = new ModNumber(16L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(20L)));
+        exp.x = new ModNumber(1L);
+        exp.y = new ModNumber(17L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(21L)));
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(11L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(22L)));
+        exp.x = new ModNumber(2L);
+        exp.y = new ModNumber(17L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(23L)));
+        exp.IsAtInfinity= true;
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(24L)));
+    }
+    @Test
+    public void ecMultCurveP97AMinus7B10Point12IsOnCurve()
+    {
+        ModNumber p = new ModNumber(97L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt = new ECPoint();
+        pt.x = new ModNumber(1L);
+        pt.y = new ModNumber(2L);
+        assertTrue(myEC.IsOnCurve(pt));
+    }
+    @Test
+    public void ecMultCurveP97AMinus7B10Point22IsOnCurve()
+    {
+        ModNumber p = new ModNumber(97L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt = new ECPoint();
+        pt.x = new ModNumber(2L);
+        pt.y = new ModNumber(2L);
+        assertTrue(myEC.IsOnCurve(pt));
+    }
+    @Test
+    public void ecMultCurveP97AMinus7B10Point12SubGroup()
+    {
+        ModNumber p = new ModNumber(97L);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.IsAtInfinity = true;
+        ModNumber mzero = new ModNumber(0L);
+        EC myEC = new EC(mgm, g, mzero, mgm.Diff(mzero, new ModNumber(7L)), new ModNumber(10L));
+        ECPoint pt = new ECPoint();
+        pt.x = new ModNumber(1L);
+        pt.y = new ModNumber(2L);
+        ECPoint exp = new ECPoint();
+        exp.x = new ModNumber(96L);
+        exp.y = new ModNumber(93L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(2L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(71L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(3L)));
+        exp.x = new ModNumber(75L);
+        exp.y = new ModNumber(63L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(4L)));
+        exp.x = new ModNumber(24L);
+        exp.y = new ModNumber(59L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(5L)));
+        exp.x = new ModNumber(29L);
+        exp.y = new ModNumber(72L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(6L)));
+        exp.x = new ModNumber(49L);
+        exp.y = new ModNumber(72L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(7L)));
+        exp.x = new ModNumber(53L);
+        exp.y = new ModNumber(3L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(8L)));
+        exp.x = new ModNumber(51L);
+        exp.y = new ModNumber(53L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(9L)));
+        exp.x = new ModNumber(37L);
+        exp.y = new ModNumber(35L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(10L)));
+        exp.x = new ModNumber(43L);
+        exp.y = new ModNumber(8L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(11L)));
+        exp.x = new ModNumber(55L);
+        exp.y = new ModNumber(18L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(12L)));
+        exp.x = new ModNumber(19L);
+        exp.y = new ModNumber(25L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(13L)));
+        exp.x = new ModNumber(46L);
+        exp.y = new ModNumber(86L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(14L)));
+        exp.x = new ModNumber(44L);
+        exp.y = new ModNumber(60L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(15L)));
+        exp.x = new ModNumber(63L);
+        exp.y = new ModNumber(61L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(16L)));
+        exp.x = new ModNumber(36L);
+        exp.y = new ModNumber(57L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(17L)));
+        exp.x = new ModNumber(11L);
+        exp.y = new ModNumber(10L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(18L)));
+        exp.x = new ModNumber(74L);
+        exp.y = new ModNumber(56L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(19L)));
+        exp.x = new ModNumber(21L);
+        exp.y = new ModNumber(43L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(20L)));
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(51L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(21L)));
+        exp.x = new ModNumber(2L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(22L)));
+        exp.x = new ModNumber(94L);
+        exp.y = new ModNumber(95L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(23L)));
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(93L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(24L)));
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(10L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(25L)));
+        exp.x = new ModNumber(95L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(26L)));
+        exp.x = new ModNumber(23L);
+        exp.y = new ModNumber(45L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(27L)));
+        exp.x = new ModNumber(67L);
+        exp.y = new ModNumber(63L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(28L)));
+        exp.x = new ModNumber(79L);
+        exp.y = new ModNumber(67L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(29L)));
+        exp.x = new ModNumber(15L);
+        exp.y = new ModNumber(51L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(30L)));
+        exp.x = new ModNumber(69L);
+        exp.y = new ModNumber(51L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(31L)));
+        exp.x = new ModNumber(52L);
+        exp.y = new ModNumber(34L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(32L)));
+        exp.x = new ModNumber(41L);
+        exp.y = new ModNumber(68L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(33L)));
+        exp.x = new ModNumber(73L);
+        exp.y = new ModNumber(15L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(34L)));
+        exp.x = new ModNumber(54L);
+        exp.y = new ModNumber(76L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(35L)));
+        exp.x = new ModNumber(31L);
+        exp.y = new ModNumber(22L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(36L)));
+        exp.x = new ModNumber(87L);
+        exp.y = new ModNumber(70L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(37L)));
+        exp.x = new ModNumber(40L);
+        exp.y = new ModNumber(1L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(38L)));
+        exp.x = new ModNumber(81L);
+        exp.y = new ModNumber(10L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(39L)));
+        exp.x = new ModNumber(80L);
+        exp.y = new ModNumber(58L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(40L)));
+        exp.x = new ModNumber(64L);
+        exp.y = new ModNumber(0L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(41L)));
+        exp.x = new ModNumber(80L);
+        exp.y = new ModNumber(39L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(42L)));
+        exp.x = new ModNumber(81L);
+        exp.y = new ModNumber(87L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(43L)));
+        exp.x = new ModNumber(40L);
+        exp.y = new ModNumber(96L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(44L)));
+        exp.x = new ModNumber(87L);
+        exp.y = new ModNumber(27L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(45L)));
+        exp.x = new ModNumber(31L);
+        exp.y = new ModNumber(75L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(46L)));
+        exp.x = new ModNumber(54L);
+        exp.y = new ModNumber(21L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(47L)));
+        exp.x = new ModNumber(73L);
+        exp.y = new ModNumber(82L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(48L)));
+        exp.x = new ModNumber(41L);
+        exp.y = new ModNumber(29L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(49L)));
+        exp.x = new ModNumber(52L);
+        exp.y = new ModNumber(63L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(50L)));
+        exp.x = new ModNumber(69L);
+        exp.y = new ModNumber(46L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(51L)));
+        exp.x = new ModNumber(15L);
+        exp.y = new ModNumber(46L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(52L)));
+        exp.x = new ModNumber(79L);
+        exp.y = new ModNumber(30L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(53L)));
+        exp.x = new ModNumber(67L);
+        exp.y = new ModNumber(34L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(54L)));
+        exp.x = new ModNumber(23L);
+        exp.y = new ModNumber(52L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(55L)));
+        exp.x = new ModNumber(95L);
+        exp.y = new ModNumber(93L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(56L)));
+        exp.x = new ModNumber(5L);
+        exp.y = new ModNumber(87L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(57L)));
+        exp.x = new ModNumber(3L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(58L)));
+        exp.x = new ModNumber(94L);
+        exp.y = new ModNumber(2L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(59L)));
+        exp.x = new ModNumber(2L);
+        exp.y = new ModNumber(95L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(60L)));
+        exp.x = new ModNumber(13L);
+        exp.y = new ModNumber(46L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(61L)));
+        exp.x = new ModNumber(21L);
+        exp.y = new ModNumber(54L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(62L)));
+        exp.x = new ModNumber(74L);
+        exp.y = new ModNumber(41L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(63L)));
+        exp.x = new ModNumber(11L);
+        exp.y = new ModNumber(87L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(64L)));
+        exp.x = new ModNumber(36L);
+        exp.y = new ModNumber(40L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(65L)));
+        exp.x = new ModNumber(63L);
+        exp.y = new ModNumber(36L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(66L)));
+        exp.x = new ModNumber(44L);
+        exp.y = new ModNumber(37L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(67L)));
+        exp.x = new ModNumber(46L);
+        exp.y = new ModNumber(11L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(68L)));
+        exp.x = new ModNumber(19L);
+        exp.y = new ModNumber(72L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(69L)));
+        exp.x = new ModNumber(55L);
+        exp.y = new ModNumber(79L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(70L)));
+        exp.x = new ModNumber(43L);
+        exp.y = new ModNumber(89L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(71L)));
+        exp.x = new ModNumber(37L);
+        exp.y = new ModNumber(62L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(72L)));
+        exp.x = new ModNumber(51L);
+        exp.y = new ModNumber(44L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(73L)));
+        exp.x = new ModNumber(53L);
+        exp.y = new ModNumber(94L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(74L)));
+        exp.x = new ModNumber(49L);
+        exp.y = new ModNumber(25L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(75L)));
+        exp.x = new ModNumber(29L);
+        exp.y = new ModNumber(25L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(76L)));
+        exp.x = new ModNumber(24L);
+        exp.y = new ModNumber(38L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(77L)));
+        exp.x = new ModNumber(75L);
+        exp.y = new ModNumber(34L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(78L)));
+        exp.x = new ModNumber(9L);
+        exp.y = new ModNumber(26L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(79L)));
+        exp.x = new ModNumber(96L);
+        exp.y = new ModNumber(4L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(80L)));
+        exp.x = new ModNumber(1L);
+        exp.y = new ModNumber(95L);
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(81L)));
+        exp.IsAtInfinity= true;
+        assertEquals(exp, myEC.Mult(pt, new ModNumber(82L)));
+    }
+    @Test
+    public void ecSecp256k1Parameters()
+    {
+        ModNumber p = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        g.y = ModNumber.stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        ModNumber n = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mzero;
+        ModNumber b = new ModNumber(0x07L);
+        EC myEC = new EC(mgm, g, n, a, b);
+        assertTrue(myEC.IsOnCurve(g));
+        ECPoint gTimesN = myEC.Mult(g, n);
+        assertTrue(gTimesN.IsAtInfinity);
+    }
+    @Test
+    public void ecSecp256k1PublicPrivateKeyPair()
+    {
+        ModNumber p = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        g.y = ModNumber.stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        ModNumber n = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mzero;
+        ModNumber b = new ModNumber(0x07L);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ModNumber privateKey = ModNumber.stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+        ModNumber publicKeyX = ModNumber.stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+        ModNumber publicKeyY = ModNumber.stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, null);
+        assertFalse(ecKeyPair.y.IsAtInfinity);
+        assertEquals(publicKeyX, ecKeyPair.y.x);
+        assertEquals(publicKeyY, ecKeyPair.y.y);
+    }
+    @Test
+    public void signatureECDSASecp256k1SignAndVerifySHA256Valid()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        g.y = ModNumber.stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        ModNumber n = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mzero;
+        ModNumber b = new ModNumber(0x07L);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ModNumber privateKey = ModNumber.stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+        ModNumber publicKeyX = ModNumber.stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+        ModNumber publicKeyY = ModNumber.stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+        ECPoint publicKey = new ECPoint();
+        publicKey.IsAtInfinity = false;
+        publicKey.x = publicKeyX;
+        publicKey.y = publicKeyY;
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        boolean valid = ecDsa.verify(hashBigEndian, signature);
+        assertTrue(valid);
+    }
 
 }

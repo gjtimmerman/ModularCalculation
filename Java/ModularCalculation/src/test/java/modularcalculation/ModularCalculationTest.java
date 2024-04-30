@@ -3,6 +3,7 @@ package modularcalculation;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -7434,6 +7435,157 @@ public class ModularCalculationTest {
         byte[] signature = ecDsa.sign(hashBigEndian);
         boolean valid = ecDsa.verify(hashBigEndian, signature);
         assertTrue(valid);
+    }
+    @Test
+    public void signatureECDSASecp256k1SignAndVerifySHA256InValid()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", 16);
+        g.y = ModNumber.stomn("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", 16);
+        ModNumber n = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mzero;
+        ModNumber b = new ModNumber(0x07L);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ModNumber privateKey = ModNumber.stomn("4eac29116c7cf6deaa31a08a8037c5ae3d72468d87a8487b695bd0740af17ae5", 16);
+        ModNumber publicKeyX = ModNumber.stomn("9e89efe1f6766e013daa213a6c3aa898208f24e223e2c888b3da485c9e16825d", 16);
+        ModNumber publicKeyY = ModNumber.stomn("14c060c914d55aef7e6c3330784ede0eb0004d00e3231261e800faa8470b3c6c", 16);
+        ECPoint publicKey = new ECPoint();
+        publicKey.IsAtInfinity = false;
+        publicKey.x = publicKeyX;
+        publicKey.y = publicKeyY;
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKey, publicKey);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        byte[] wrongHash = Arrays.copyOf(hashBigEndian,hashBigEndian.length);
+        wrongHash[0]++;
+        boolean valid = ecDsa.verify(wrongHash, signature);
+        assertFalse(valid);
+    }
+    @Test
+    public void signatureECDSAECDSANISTP521SignAndVerifySHA256Valid()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+        g.y = ModNumber.stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+        ModNumber n = ModNumber.stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mgm.Diff(mzero, new ModNumber(3L));
+        ModNumber b = ModNumber.stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        boolean valid = ecDsa.verify(hashBigEndian, signature);
+        assertTrue(valid);
+    }
+    @Test
+    public void signatureECDSAECDSANISTP521SignAndVerifySHA256InValid()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+        g.y = ModNumber.stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+        ModNumber n = ModNumber.stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mgm.Diff(mzero, new ModNumber(3L));
+        ModNumber b = ModNumber.stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        byte[] wrongHash = Arrays.copyOf(hashBigEndian,hashBigEndian.length);
+        wrongHash[0]++;
+        boolean valid = ecDsa.verify(wrongHash, signature);
+        assertFalse(valid);
+    }
+    @Test
+    public void signatureECDSAECDSASignAndVerifyNISTP224SHA256ValidRandomPrivateKey()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("ffffffffffffffffffffffffffffffff000000000000000000000001", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21", 16);
+        g.y = ModNumber.stomn("bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34", 16);
+        ModNumber n = ModNumber.stomn("ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mgm.Diff(mzero, new ModNumber(3L));
+        ModNumber b = ModNumber.stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        boolean valid = ecDsa.verify(hashBigEndian, signature);
+        assertTrue(valid);
+    }
+    @Test
+    public void signatureECDSAECDSASignAndVerifyNISTP384SHA256ValidRandomPrivateKey()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+        g.y = ModNumber.stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+        ModNumber n = ModNumber.stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mgm.Diff(mzero, new ModNumber(3L));
+        ModNumber b = ModNumber.stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        boolean valid = ecDsa.verify(hashBigEndian, signature);
+        assertTrue(valid);
+    }
+    @Test
+    public void signatureECDSAECDSASignAndVerifyNISTP384SHA256inValidRandomPrivateKey()
+    {
+        int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+        byte [] hashBigEndian = new byte[hashBigEndianInts.length];
+        for (int i = 0; i < hashBigEndianInts.length; i++)
+            hashBigEndian[i] = (byte)hashBigEndianInts[i];
+        ModNumber p = ModNumber.stomn("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff", 16);
+        MultGroupMod mgm = new MultGroupMod(p);
+        ECPoint g = new ECPoint();
+        g.x = ModNumber.stomn("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+        g.y = ModNumber.stomn("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+        ModNumber n = ModNumber.stomn("ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973", 16);
+        ModNumber mzero = new ModNumber(0L);
+        ModNumber a = mgm.Diff(mzero, new ModNumber(3L));
+        ModNumber b = ModNumber.stomn("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+        EC myEC = new EC(mgm, g, n, a, b);
+        ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+        ECDSA ecDsa = new ECDSA(ecKeyPair);
+        byte[] signature = ecDsa.sign(hashBigEndian);
+        byte[] wrongHash = Arrays.copyOf(hashBigEndian,hashBigEndian.length);
+        wrongHash[0]++;
+        boolean valid = ecDsa.verify(wrongHash, signature);
+        assertFalse(valid);
     }
 
 }

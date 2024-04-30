@@ -1,6 +1,7 @@
 package modularcalculation;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,6 +73,13 @@ public class ModNumber {
             mask <<= 8;
         }
         this.num[lCount] = tmp;
+    }
+    public ModNumber(BigInteger bi)
+    {
+        byte [] bigEndianBytes = bi.toByteArray();
+        byte [] littleEndianBytes = convertEndianess(bigEndianBytes);
+        ModNumber n = new ModNumber(littleEndianBytes);
+        num = n.num;
     }
 
     public ModNumber(int[] arr) {

@@ -1,15 +1,36 @@
 package modularcalculation;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
+import java.security.*;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModularCalculationTest {
-
+    KeyStore myKeyStore;
+//    @BeforeAll
+//    public void initalizeAll()
+//    {
+//        try {
+//            myKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+//
+//        }
+//        catch (KeyStoreException e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
     @Test
     public void subtractScalarSimple()
     {
@@ -7587,5 +7608,93 @@ public class ModularCalculationTest {
         boolean valid = ecDsa.verify(wrongHash, signature);
         assertFalse(valid);
     }
+    @Test
+    void rsaDecryptSymmetricKey()
+    {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(ModNumber.MaxMod * 8);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey)rsaPrivateKey;
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = new ModNumber(rsaPublicKey.getModulus());
+            rsaParameters.PrivExp = new ModNumber(rsaPrivateKey.getPrivateExponent());
+            rsaParameters.PubExp = new ModNumber(rsaPublicKey.getPublicExponent());
+            rsaParameters.Coefficient = new ModNumber(rsaPrivateCrtKey.getCrtCoefficient());
+            rsaParameters.Prime1 = new ModNumber(rsaPrivateCrtKey.getPrimeP());
+            rsaParameters.Prime2 = new ModNumber(rsaPrivateCrtKey.getPrimeQ());
+            rsaParameters.Exp1 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentP());
+            rsaParameters.Exp2 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentQ());
+            RSA rsa = new RSA(rsaParameters);
+            Cipher myCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            ModNumber symmetricKey = ModNumber.stomn("DB278FB45AE1C1D78FA27EBEA3730432DA100140A40F0CCE71A7F95D027C2D15", 16);
+            byte [] symmetricKeyBigEndian = symmetricKey.convertEndianess(0);
+            myCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+            byte [] encryptedKey = myCipher.doFinal(symmetricKeyBigEndian);
+            byte [] encryptedKeyLittleEndian = ModNumber.convertEndianess(encryptedKey);
+            ModNumber encryptedKeyModNumber = new ModNumber(encryptedKeyLittleEndian);
+            ModNumber decryptedKeyModNumber = rsa.decrypt(encryptedKeyModNumber);
+            assertEquals(symmetricKey, decryptedKeyModNumber);
+        }
+        catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
+               BadPaddingException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    @Test
+    void rsaEncrypt()
+    {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(ModNumber.MaxMod * 8);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey)rsaPrivateKey;
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = new ModNumber(rsaPublicKey.getModulus());
+            rsaParameters.PrivExp = new ModNumber(rsaPrivateKey.getPrivateExponent());
+            rsaParameters.PubExp = new ModNumber(rsaPublicKey.getPublicExponent());
+            rsaParameters.Coefficient = new ModNumber(rsaPrivateCrtKey.getCrtCoefficient());
+            rsaParameters.Prime1 = new ModNumber(rsaPrivateCrtKey.getPrimeP());
+            rsaParameters.Prime2 = new ModNumber(rsaPrivateCrtKey.getPrimeQ());
+            rsaParameters.Exp1 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentP());
+            rsaParameters.Exp2 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentQ());
+            RSA rsa = new RSA(rsaParameters);
+            Cipher myCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 
+            String message = "Dit is een test";
+            byte [] messageBytes = message.getBytes();
+//            ModNumber convertedMessage = ModNumber.fromText(message);
+            ModNumber convertedMessage = new ModNumber(messageBytes);
+            ModNumber encryptedMessage = rsa.encrypt(convertedMessage);
+            myCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+            byte [] encryptedMessageBigEndian1 = myCipher.doFinal(messageBytes);
+            byte [] encryptedMessageBigEndian2 = encryptedMessage.convertEndianess(0);
+            myCipher.init(Cipher.DECRYPT_MODE, rsaPrivateCrtKey);
+//            byte [] decryptedMessageBigEndian = myCipher.doFinal(encryptedMessageBigEndian2);
+//            ModNumber decryptedMessage = rsa.decrypt(encryptedMessage);
+            byte [] encryptedMessageLittleEndian = ModNumber.convertEndianess(encryptedMessageBigEndian1);
+            ModNumber encryptedMessageModNumber = new ModNumber(encryptedMessageLittleEndian);
+            ModNumber decryptedMessage = rsa.decrypt(encryptedMessageModNumber);
+            byte [] decryptedMessageLittleEndian = decryptedMessage.convertEndianess(0);
+//            byte [] decryptedMessageLittleEndian = ModNumber.convertEndianess(decryptedMessageBigEndian);
+//            byte [] decryptedMessage = ModNumber.convertEndianess(decryptedMessageBigEndian);
+//            ModNumber decryptedMessageModNumber = new ModNumber(decryptedMessage);
+//            String decryptedString = decryptedMessageModNumber.getText();
+            String decryptedString = new String(decryptedMessageLittleEndian);
+            assertEquals(message, decryptedString);
+        }
+        catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+               | IllegalBlockSizeException |
+               BadPaddingException
+                e)
+        {
+            e.printStackTrace();
+        }
+
+    }
 }

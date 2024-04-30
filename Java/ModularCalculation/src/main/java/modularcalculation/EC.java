@@ -84,12 +84,13 @@ public class EC
 
         return result;
     }
-    public ECPoint Mult(ECPoint p, ModNumber n)
+    public ECPoint Mult(ECPoint p, ModNumber mn)
     {
         if (!IsOnCurve(p))
             throw new IllegalArgumentException("The point is not on the curve!");
         if (p.IsAtInfinity)
             return new ECPoint(p);
+        ModNumber n = new ModNumber(mn);
         ECPoint pCopy = new ECPoint(p);
         ModNumber mzero = new ModNumber(0L);
         ECPoint result = new ECPoint();

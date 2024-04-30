@@ -67,9 +67,10 @@ public  ECPoint CalculateV(byte[] hash, ModNumber u1, ModNumber u2, ModNumber mr
         }
         catch (InterruptedException | ExecutionException e)
         {
-            throw new IllegalArgumentException("Illegal argument");
+            e.printStackTrace();
         }
-        ECPoint ptv = ecKeyPair.ec.Add((ECPoint)pt1, (ECPoint)pt2);
+        executorService.shutdown();
+        ECPoint ptv = ecKeyPair.ec.Add(pt1, pt2);
         return ptv;
         }
 }

@@ -978,7 +978,7 @@ public class ModNumber {
             tmp <<= 8;
 
         }
-        tmp <<= ((LSIZE - padLeftOver) * 8);
+        tmp <<= ((LSIZE - padLeftOver - 1) * 8);
         tmp |= num[mCount];
         res.num[totalNumWords - padLeftCount - 2] = tmp;
         for (int i = 0; i < mCount; i++)

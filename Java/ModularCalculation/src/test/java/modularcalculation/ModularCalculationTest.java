@@ -7686,4 +7686,130 @@ public class ModularCalculationTest {
         }
 
     }
+    @Test
+    void rsaDecrypt()
+    {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(ModNumber.MaxMod * 8);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey)rsaPrivateKey;
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = new ModNumber(rsaPublicKey.getModulus());
+            rsaParameters.PrivExp = new ModNumber(rsaPrivateKey.getPrivateExponent());
+            rsaParameters.PubExp = new ModNumber(rsaPublicKey.getPublicExponent());
+            rsaParameters.Coefficient = new ModNumber(rsaPrivateCrtKey.getCrtCoefficient());
+            rsaParameters.Prime1 = new ModNumber(rsaPrivateCrtKey.getPrimeP());
+            rsaParameters.Prime2 = new ModNumber(rsaPrivateCrtKey.getPrimeQ());
+            rsaParameters.Exp1 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentP());
+            rsaParameters.Exp2 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentQ());
+            RSA rsa = new RSA(rsaParameters);
+            Cipher myCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+
+            String message = "Dit is een test";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(0);
+            myCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+            byte [] encryptedMessageBigEndian = myCipher.doFinal(convertedMessageBigEndian);
+            byte [] encryptedMessage = ModNumber.convertEndianess(encryptedMessageBigEndian);
+            ModNumber encryptedMessageModNumber = new ModNumber(encryptedMessage);
+            ModNumber decryptedMessageModNumber = rsa.decrypt(encryptedMessageModNumber);
+            String decryptedString = decryptedMessageModNumber.getText();
+            assertEquals(message, decryptedString);
+        }
+        catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+               | IllegalBlockSizeException |
+               BadPaddingException
+                e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+    @Test
+    void signatureRsaVerifySHA256()
+    {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(ModNumber.MaxMod * 8);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey)rsaPrivateKey;
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = new ModNumber(rsaPublicKey.getModulus());
+            rsaParameters.PrivExp = new ModNumber(rsaPrivateKey.getPrivateExponent());
+            rsaParameters.PubExp = new ModNumber(rsaPublicKey.getPublicExponent());
+            rsaParameters.Coefficient = new ModNumber(rsaPrivateCrtKey.getCrtCoefficient());
+            rsaParameters.Prime1 = new ModNumber(rsaPrivateCrtKey.getPrimeP());
+            rsaParameters.Prime2 = new ModNumber(rsaPrivateCrtKey.getPrimeQ());
+            rsaParameters.Exp1 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentP());
+            rsaParameters.Exp2 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentQ());
+            RSA rsa = new RSA(rsaParameters);
+            Signature mySignature = Signature.getInstance("SHA256withRSA");
+            MessageDigest myDigest = MessageDigest.getInstance("SHA256");
+            String message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(0);
+            byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
+            mySignature.initSign(rsaPrivateCrtKey);
+            mySignature.update(convertedMessageBigEndian);
+            byte [] signatureBigEndian = mySignature.sign();
+            byte [] signatureLittleEndian = ModNumber.convertEndianess(signatureBigEndian);
+            ModNumber signatureModNumber = new ModNumber(signatureLittleEndian);
+            ModNumber decryptedSignatureModNumber = rsa.decryptSignature(signatureModNumber);
+            byte[] decryptedSignatureBigEndian = decryptedSignatureModNumber.convertEndianess(0);
+            assertArrayEquals(messageDigest, decryptedSignatureBigEndian);
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException
+               | SignatureException
+                e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+    @Test
+    void signatureRsaCreateSHA256()
+    {
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(ModNumber.MaxMod * 8);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) keyPair.getPrivate();
+            RSAPrivateCrtKey rsaPrivateCrtKey = (RSAPrivateCrtKey)rsaPrivateKey;
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) keyPair.getPublic();
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = new ModNumber(rsaPublicKey.getModulus());
+            rsaParameters.PrivExp = new ModNumber(rsaPrivateKey.getPrivateExponent());
+            rsaParameters.PubExp = new ModNumber(rsaPublicKey.getPublicExponent());
+            rsaParameters.Coefficient = new ModNumber(rsaPrivateCrtKey.getCrtCoefficient());
+            rsaParameters.Prime1 = new ModNumber(rsaPrivateCrtKey.getPrimeP());
+            rsaParameters.Prime2 = new ModNumber(rsaPrivateCrtKey.getPrimeQ());
+            rsaParameters.Exp1 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentP());
+            rsaParameters.Exp2 = new ModNumber(rsaPrivateCrtKey.getPrimeExponentQ());
+            RSA rsa = new RSA(rsaParameters);
+            Signature mySignature = Signature.getInstance("SHA256withRSA");
+            MessageDigest myDigest = MessageDigest.getInstance("SHA256");
+            String message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(0);
+            byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
+            ModNumber signatureModNumber = rsa.encryptSignature(messageDigest, "2.16.840.1.101.3.4.2.1");
+            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            mySignature.initVerify(rsaPublicKey);
+            mySignature.update(convertedMessageBigEndian);
+            assertTrue(mySignature.verify(signatureBigEndian));
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException
+               | SignatureException
+                e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
 }

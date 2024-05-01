@@ -7667,25 +7667,14 @@ public class ModularCalculationTest {
             Cipher myCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 
             String message = "Dit is een test";
-            byte [] messageBytes = message.getBytes();
-//            ModNumber convertedMessage = ModNumber.fromText(message);
-            ModNumber convertedMessage = new ModNumber(messageBytes);
+            ModNumber convertedMessage = ModNumber.fromText(message);
             ModNumber encryptedMessage = rsa.encrypt(convertedMessage);
-            myCipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
-            byte [] encryptedMessageBigEndian1 = myCipher.doFinal(messageBytes);
-            byte [] encryptedMessageBigEndian2 = encryptedMessage.convertEndianess(0);
+            byte [] encryptedMessageBigEndian = encryptedMessage.convertEndianess(0);
             myCipher.init(Cipher.DECRYPT_MODE, rsaPrivateCrtKey);
-//            byte [] decryptedMessageBigEndian = myCipher.doFinal(encryptedMessageBigEndian2);
-//            ModNumber decryptedMessage = rsa.decrypt(encryptedMessage);
-            byte [] encryptedMessageLittleEndian = ModNumber.convertEndianess(encryptedMessageBigEndian1);
-            ModNumber encryptedMessageModNumber = new ModNumber(encryptedMessageLittleEndian);
-            ModNumber decryptedMessage = rsa.decrypt(encryptedMessageModNumber);
-            byte [] decryptedMessageLittleEndian = decryptedMessage.convertEndianess(0);
-//            byte [] decryptedMessageLittleEndian = ModNumber.convertEndianess(decryptedMessageBigEndian);
-//            byte [] decryptedMessage = ModNumber.convertEndianess(decryptedMessageBigEndian);
-//            ModNumber decryptedMessageModNumber = new ModNumber(decryptedMessage);
-//            String decryptedString = decryptedMessageModNumber.getText();
-            String decryptedString = new String(decryptedMessageLittleEndian);
+            byte [] decryptedMessageBigEndian = myCipher.doFinal(encryptedMessageBigEndian);
+            byte [] decryptedMessage = ModNumber.convertEndianess(decryptedMessageBigEndian);
+            ModNumber decryptedMessageModNumber = new ModNumber(decryptedMessage);
+            String decryptedString = decryptedMessageModNumber.getText();
             assertEquals(message, decryptedString);
         }
         catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException

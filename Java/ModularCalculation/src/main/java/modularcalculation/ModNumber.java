@@ -948,8 +948,8 @@ public class ModNumber {
         for (int i = 0; i < totalBytesShift - 2; i++)
         {
             tmp <<= 8;
-            byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
-            short maskShort = (short)(mask & 0xFF);
+            byte mask = stable ? (byte)0xFF : (byte)((random.nextInt() & 0x7FFFFFFF) % 0x00FF + 1);
+            short maskShort = (short)(mask & 0x00FF);
             tmp |= maskShort;
         }
         res.num[totalNumWords - 1] = tmp;
@@ -962,8 +962,8 @@ public class ModNumber {
             for (int j = 0; j < LSIZE; j++)
             {
                 tmp <<= 8;
-                byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
-                short maskShort = (short)(mask & 0xFF);
+                byte mask = stable ? (byte)0xFF : (byte)((random.nextInt() & 0x7FFFFFFF) % 0x00FF + 1);
+                short maskShort = (short)(mask & 0x00FF);
                 tmp |= maskShort;
 
             }
@@ -972,8 +972,8 @@ public class ModNumber {
         tmp = 0;
         for (int j = 0; j < padLeftOver; j++)
         {
-            byte mask = stable ? (byte)0xFF : (byte)(random.nextInt() & 0x00FF + 1);
-            short maskShort = (short)(mask & 0xFF);
+            byte mask = stable ? (byte)0xFF : (byte)((random.nextInt() & 0x7FFFFFFF) % 0x00FF + 1);
+            short maskShort = (short)(mask & 0x00FF);
             tmp |= maskShort;
             tmp <<= 8;
 

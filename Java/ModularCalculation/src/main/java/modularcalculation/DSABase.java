@@ -30,6 +30,7 @@ abstract class DSABase
             {
                 for (int i = 0; i < lSize; i++)
                     k[i] = (random.nextLong());
+
                 mk = new ModNumber(k);
                 if (mk == mzero)
                     ModNumber.addAssignScalar(mk, (int)(random.nextInt() + 1));

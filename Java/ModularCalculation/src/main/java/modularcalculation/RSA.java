@@ -19,9 +19,9 @@ public class RSA
         Coefficient = rsaParameters.Coefficient;
         PrivExp = rsaParameters.PrivExp;
     }
-    public ModNumber encrypt(ModNumber m)
+    public ModNumber encrypt(ModNumber m, int size)
     {
-        ModNumber masked = m.getPKCS1Mask(false, ModNumber.MaxMod);
+        ModNumber masked = m.getPKCS1Mask(false, ModNumber.MaxMod, size);
         MultGroupMod mgm = new MultGroupMod(Modulus);
         return mgm.Exp(masked, PubExp);
     }
@@ -54,7 +54,7 @@ public class RSA
     public ModNumber encryptSignature(byte [] hashBigendian, String hashOid)
     {
         ModNumber unmaskedResult = ModNumber.createBERASNString(hashBigendian, hashOid);
-        ModNumber maskedResult = unmaskedResult.getPKCS1Mask(true, ModNumber.MaxMod);
+        ModNumber maskedResult = unmaskedResult.getPKCS1Mask(true, ModNumber.MaxMod, 0);
         MultGroupMod mgmp = new MultGroupMod(Prime1);
         MultGroupMod mgmq = new MultGroupMod(Prime2);
         MultGroupMod mgmn = new MultGroupMod(Modulus);

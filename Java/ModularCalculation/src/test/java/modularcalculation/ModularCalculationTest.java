@@ -5870,13 +5870,13 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageTooLong()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFFFFFF", 16);
-        assertThrows(IllegalArgumentException.class,() -> message.getPKCS1Mask(false, 16));
+        assertThrows(IllegalArgumentException.class,() -> message.getPKCS1Mask(false, 16, 0));
     }
     @Test
     public void getPKCS1MaskMessageEmptyModulus26Fs()
     {
         ModNumber message = new ModNumber(0L);
-        ModNumber mres = message.getPKCS1Mask(false, 13);
+        ModNumber mres = message.getPKCS1Mask(false, 13, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 26), "0".repeat(ModNumber.HexStringLength - 26));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 26,ModNumber.HexStringLength - 26 + 4), "0002");
@@ -5886,7 +5886,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageFourFsModulus26Fs()
     {
         ModNumber message = ModNumber.stomn("FFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 13);
+        ModNumber mres = message.getPKCS1Mask(false, 13, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 26), "0".repeat(ModNumber.HexStringLength - 26));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 26,ModNumber.HexStringLength - 26 + 4), "0002");
@@ -5896,7 +5896,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageEightFsModulus30Fs()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 15);
+        ModNumber mres = message.getPKCS1Mask(false, 15, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 30), "0".repeat(ModNumber.HexStringLength - 30));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 30,ModNumber.HexStringLength - 30 + 4), "0002");
@@ -5906,7 +5906,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageEightFsModulus32Fs()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 16);
+        ModNumber mres = message.getPKCS1Mask(false, 16, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 32), "0".repeat(ModNumber.HexStringLength - 32));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 32,ModNumber.HexStringLength - 32 + 4), "0002");
@@ -5916,7 +5916,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageEightFsModulus34Fs()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 17);
+        ModNumber mres = message.getPKCS1Mask(false, 17, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 34), "0".repeat(ModNumber.HexStringLength - 34));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 34,ModNumber.HexStringLength - 34 + 4), "0002");
@@ -5926,7 +5926,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageEightFsModulus36Fs()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 18);
+        ModNumber mres = message.getPKCS1Mask(false, 18, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 36), "0".repeat(ModNumber.HexStringLength - 36));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 36,ModNumber.HexStringLength - 36 + 4), "0002");
@@ -5936,7 +5936,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageTwentyFsModulus72Fs()
     {
         ModNumber message = ModNumber.stomn("FFFFFFFFFFFFFFFFFFFF", 16);
-        ModNumber mres = message.getPKCS1Mask(false, 36);
+        ModNumber mres = message.getPKCS1Mask(false, 36, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.HexStringLength - 72), "0".repeat(ModNumber.HexStringLength - 72));
         assertEquals(resStr.substring(ModNumber.HexStringLength - 72,ModNumber.HexStringLength - 72 + 4), "0002");
@@ -5946,7 +5946,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageMaxFs()
     {
         ModNumber message = ModNumber.stomn("F".repeat(ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 22), 16);
-        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod);
+        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.LSIZE * 2), "0".repeat(ModNumber.LSIZE * 2));
         assertEquals(resStr.substring(ModNumber.LSIZE * 2,ModNumber.LSIZE * 2 + 4), "0002");
@@ -5957,7 +5957,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageMaxFsMinus2()
     {
         ModNumber message = ModNumber.stomn("F".repeat(ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 24), 16);
-        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod);
+        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.LSIZE * 2), "0".repeat(ModNumber.LSIZE * 2));
         assertEquals(resStr.substring(ModNumber.LSIZE * 2,ModNumber.LSIZE * 2 + 4), "0002");
@@ -5968,7 +5968,7 @@ public class ModularCalculationTest {
     public void getPKCS1MaskMessageMaxFsMinus4()
     {
         ModNumber message = ModNumber.stomn("F".repeat(ModNumber.HexStringLength - ModNumber.LSIZE * 2 - 26), 16);
-        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod);
+        ModNumber mres = message.getPKCS1Mask(false, ModNumber.MaxMod, 0);
         String resStr = mres.toString(16);
         assertEquals(resStr.substring(0, ModNumber.LSIZE * 2), "0".repeat(ModNumber.LSIZE * 2));
         assertEquals(resStr.substring(ModNumber.LSIZE * 2,ModNumber.LSIZE * 2 + 4), "0002");
@@ -6274,7 +6274,7 @@ public class ModularCalculationTest {
             RSA rsa = new RSA(rsaParameters);
             String message = "Dit is een test";
             ModNumber convertedMessage = ModNumber.fromText(message);
-            ModNumber encryptedMessage = rsa.encrypt(convertedMessage);
+            ModNumber encryptedMessage = rsa.encrypt(convertedMessage, message.length() * Character.BYTES);
             ModNumber decryptedMessage = rsa.decrypt(encryptedMessage);
             String decryptedString = decryptedMessage.getText();
             assertEquals(message, decryptedString);
@@ -7668,7 +7668,7 @@ public class ModularCalculationTest {
 
             String message = "Dit is een test";
             ModNumber convertedMessage = ModNumber.fromText(message);
-            ModNumber encryptedMessage = rsa.encrypt(convertedMessage);
+            ModNumber encryptedMessage = rsa.encrypt(convertedMessage, message.length() * Character.BYTES);
             byte [] encryptedMessageBigEndian = encryptedMessage.convertEndianess(0);
             myCipher.init(Cipher.DECRYPT_MODE, rsaPrivateCrtKey);
             byte [] decryptedMessageBigEndian = myCipher.doFinal(encryptedMessageBigEndian);

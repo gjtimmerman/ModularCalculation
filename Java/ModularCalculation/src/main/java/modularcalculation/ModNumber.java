@@ -927,10 +927,14 @@ public class ModNumber {
         String inputStr = isr.readLine();
         return ModNumber.stomn(inputStr, base);
     }
-    public ModNumber getPKCS1Mask(boolean stable, int modulusSize)
+    public ModNumber getPKCS1Mask(boolean stable, int modulusSize, int size)
     {
         int keyByteSize = (int)modulusSize;
-        int mSize = getByteCount();
+        int mSize;
+        if (size == 0)
+            mSize = getByteCount();
+        else
+            mSize = size;
         int mCount = mSize / LSIZE;
         if (keyByteSize - 11 < mSize)
             throw new IllegalArgumentException("Message size greater than Key Byte size minus 11");

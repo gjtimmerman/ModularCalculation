@@ -1214,8 +1214,7 @@ ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize)
 		tmp |= mask;
 		tmp <<= 8;
 	}
-//	tmp <<= (LLSIZE - padLeftOver - 1) * 8; have to check!
-	tmp <<= (LLSIZE - padLeftOver) * 8;
+	tmp <<= (LLSIZE - padLeftOver - 1) * 8; // have to add size parameter !
 	tmp |= m.num[mCount];
 	res.num[totalNumWords - padLeftCount - 2] = tmp;
 	for (unsigned int i = 0; i < mCount; i++)

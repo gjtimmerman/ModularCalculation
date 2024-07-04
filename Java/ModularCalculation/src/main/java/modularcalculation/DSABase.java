@@ -39,7 +39,9 @@ abstract class DSABase
                     mk.num[lSize-1] -= random.nextLong();
                 }
                 r = CalcR(mk);
-            } while (r == mzero);
+            } while (r == mzero
+            || (r.num[lSize-1] & 0x8000000000000000L) != 0 // necessary only for BouncyCastle ECDSA implementation
+            );
             final ModNumber mkRef = mk;
             final ModNumber rRef = r;
             final ModNumber mHashRef = mHash;
@@ -61,7 +63,9 @@ abstract class DSABase
                 e.printStackTrace();
             }
             s = mgm.Mult(kInverse, hashPlusXr);
-        } while (s == mzero);
+        } while (s == mzero
+                || (s.num[lSize-1] & 0x8000000000000000L) != 0 // necessary only for BouncyCastle ECDSA implementation
+        );
         executorService.shutdown();
         if (!(ModNumber.lessThan(s, Q) && ModNumber.lessThan(r, Q)))
             throw new IllegalArgumentException("Wrong signature");

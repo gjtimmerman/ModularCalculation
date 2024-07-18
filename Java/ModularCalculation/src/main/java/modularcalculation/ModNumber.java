@@ -113,6 +113,18 @@ public class ModNumber {
         return res;
     }
 
+    public static byte[] stringToBytes(String s)
+    {
+        byte[] res = new byte[s.length()/2];
+        for (int i = 0; i < s.length(); i += 2)
+        {
+            String byteStr = s.substring(i, i+2);
+            short x = Short.parseShort(byteStr, 16);
+            res[i/2] = (byte)x;
+        }
+        return res;
+    }
+
     public static byte[] convertEndianess(byte[] b)
     {
         byte[] res = new byte[b.length];

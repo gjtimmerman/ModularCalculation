@@ -14,7 +14,7 @@ public class ECKeyPair
         else
             this.mx = new ModNumber(0L);
         ModNumber mzero = new ModNumber(0L);
-        if (this.mx == mzero)
+        if (this.mx.equals(mzero))
         {
             long[] x = new long[ModNumber.LCOUNT];
             int lSize = ec.nLen / ModNumber.LSIZE;

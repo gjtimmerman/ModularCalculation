@@ -87,17 +87,31 @@ abstract class DSABase
     }
     byte [] CreateBERASNStringForDSASignature(byte[] r, byte[] s)
     {
-        byte[] retValue = new byte[4 + r.length + 2 + s.length];
-        retValue[0] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
-        retValue[1] = (byte)(r.length + 2 + s.length + 2);
-        retValue[2] = (byte)ASNElementType.INTEGER_VALUE.getElementNumber();
-        retValue[3] = (byte)r.length;
+        int nLen = r.length  + s.length;
+        int lenSize;
+        if (nLen + 4 > 127)
+            lenSize = nLen + 6 + 2;
+        else
+            lenSize = nLen + 6;
+        byte[] retValue = new byte[lenSize];
+        int index = 0;
+        retValue[index++] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
+        if (r.length  + s.length > 123)
+        {
+            retValue[index++] = (byte)0x82;
+            retValue[index++] = (byte)0x0;
+            retValue[index++] = (byte)(r.length + 2 + s.length + 2);
+        }
+        else
+            retValue[index++] = (byte)(r.length + 2 + s.length + 2);
+        retValue[index++] = (byte)ASNElementType.INTEGER_VALUE.getElementNumber();
+        retValue[index++] = (byte)r.length;
         for (int i = 0; i < r.length; i++)
-            retValue[4 + i] = r[i];
-        retValue[4 + r.length] = (byte)ASNElementType.INTEGER_VALUE.getElementNumber();
-        retValue[5 + r.length] = (byte)s.length;
+            retValue[index + i] = r[i];
+        retValue[index++ + r.length] = (byte)ASNElementType.INTEGER_VALUE.getElementNumber();
+        retValue[index++ + r.length] = (byte)s.length;
         for (int i = 0; i < s.length; i++)
-            retValue[6 + r.length + i] = s[i];
+            retValue[index + r.length + i] = s[i];
         return retValue;
     }
     public String ConvertSignatureToString(byte [] signature, boolean DEREncoded)

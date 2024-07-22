@@ -90,7 +90,7 @@ abstract class DSABase
         int nLen = r.length  + s.length;
         int lenSize;
         if (nLen + 4 > 127)
-            lenSize = nLen + 6 + 2;
+            lenSize = nLen + 6 + 1;
         else
             lenSize = nLen + 6;
         byte[] retValue = new byte[lenSize];
@@ -98,8 +98,7 @@ abstract class DSABase
         retValue[index++] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
         if (r.length  + s.length > 123)
         {
-            retValue[index++] = (byte)0x82;
-            retValue[index++] = (byte)0x0;
+            retValue[index++] = (byte)0x81;
             retValue[index++] = (byte)(r.length + 2 + s.length + 2);
         }
         else

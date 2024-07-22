@@ -8449,8 +8449,9 @@ public class ModularCalculationTest {
             ModNumber ma = mgm.Diff(mzero, new ModNumber(3L));
             ModNumber mb = ModNumber.stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
             EC myEC = new EC(mgm,ecG, mn, ma, mb);
-
-            ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+            String privateKeyStr = "914E2FA303F1C7FCBE21E7A37EB7F1AF8D0C510BA23E46ED0D049AB88F282E41F63B1A99235F73CF68F46FF6E073CEAEB3F3B14EF5F29901D0D75D0C9C04DB4A";
+            ModNumber privateKeyMn = ModNumber.stomn(privateKeyStr, 16);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKeyMn, null);
             String x = ecKeyPair.mx.toString(16);
             String aStr = ma.toString(16);
             String bStr = mb.toString(16);
@@ -8470,8 +8471,8 @@ public class ModularCalculationTest {
             PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
             Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
             String signature = ecdsa.sign(messageDigest, true);
-//            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
             byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
+            Thread.sleep(10);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8480,6 +8481,7 @@ public class ModularCalculationTest {
                | SignatureException | InvalidKeySpecException
                // | InvalidAlgorithmParameterException
                | NoSuchProviderException
+                | InterruptedException
                 e)
         {
             e.printStackTrace();

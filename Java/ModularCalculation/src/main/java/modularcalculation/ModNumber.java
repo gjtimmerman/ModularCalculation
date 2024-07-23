@@ -1075,8 +1075,15 @@ public class ModNumber {
                                         byte masked2 = (byte)(p[i-1] & mask2);
                                         return new ASNElementResult(ASNElementType.SEQUENCE, masked2, i - 2);
                                     }
-                                    default:
-                                        throw new IllegalArgumentException("Not a short length specifier!");
+                                    case 1:
+                                    {
+                                        int nLen = p[i-1] &0x7F;
+                                        int sLen = 0;
+                                        for (int j = 0; j < nLen; j++) {
+                                            sLen |= (p[i - 1 - nLen + j] << (j * 8));
+                                        }
+                                        return new ASNElementResult(ASNElementType.SEQUENCE, sLen, i - 2 - nLen);
+                                    }
 
                                 }
                             case OBJECT_IDENTIFIER:

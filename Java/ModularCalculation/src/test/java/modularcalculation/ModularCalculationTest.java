@@ -8471,8 +8471,8 @@ public class ModularCalculationTest {
             PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
             Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
             String signature = ecdsa.sign(messageDigest, true);
+
             byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
-            Thread.sleep(10);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8481,9 +8481,7 @@ public class ModularCalculationTest {
                | SignatureException | InvalidKeySpecException
                // | InvalidAlgorithmParameterException
                | NoSuchProviderException
-                | InterruptedException
-                e)
-        {
+                 e) {
             e.printStackTrace();
         }
 

@@ -70,7 +70,25 @@ abstract class DSABase
         if (!(ModNumber.lessThan(s, Q) && ModNumber.lessThan(r, Q)))
             throw new IllegalArgumentException("Wrong signature");
         byte[] rBigEndian = r.convertEndianess(nLen);
+        int i;
+        for (i = 0; i < rBigEndian.length; i++)
+            if (rBigEndian[i] != 0)
+                break;
+        if (i > 0){
+            byte [] rBigEndianSmaller = new byte[rBigEndian.length - i];
+            System.arraycopy(rBigEndian, 0, rBigEndianSmaller, 0, rBigEndianSmaller.length);
+            rBigEndian = rBigEndianSmaller;
+        }
         byte[] sBigEndian = s.convertEndianess(nLen);
+        for (i = 0; i < sBigEndian.length; i++)
+            if (sBigEndian[i] != 0)
+                break;
+        if (i > 0){
+            byte [] sBigEndianSmaller = new byte[sBigEndian.length - i];
+            System.arraycopy(sBigEndian, 0, sBigEndianSmaller, 0, sBigEndianSmaller.length);
+            sBigEndian = sBigEndianSmaller;
+        }
+
         if (DEREncoded)
         {
             return CreateBERASNStringForDSASignature(rBigEndian, sBigEndian);
@@ -78,31 +96,44 @@ abstract class DSABase
         else
         {
             byte[] rs = new byte[rBigEndian.length + sBigEndian.length];
-            for (int i = 0; i < rBigEndian.length; i++)
-                rs[i] = rBigEndian[i];
-            for (int i = 0; i < sBigEndian.length; i++)
-                rs[rBigEndian.length + i] = sBigEndian[i];
+            for (int j = 0; j < rBigEndian.length; j++)
+                rs[j] = rBigEndian[j];
+            for (int j = 0; j < sBigEndian.length; j++)
+                rs[rBigEndian.length + j] = sBigEndian[j];
             return rs;
         }
     }
     byte [] CreateBERASNStringForDSASignature(byte[] r, byte[] s)
     {
         int nLen = r.length  + s.length;
+        int extraBytes = 4;
         int lenSize;
-        if (nLen + 4 > 127)
-            lenSize = nLen + 6 + 1;
-        else
-            lenSize = nLen + 6;
-        byte[] retValue = new byte[lenSize];
+        byte[] retValue;
         int index = 0;
-        retValue[index++] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
-        if (r.length  + s.length > 123)
-        {
-            retValue[index++] = (byte)0x81;
-            retValue[index++] = (byte)(r.length + 2 + s.length + 2);
+
+        if (nLen + extraBytes > 0x7F) {
+            int numLenBytes = 1;
+            int tmpLen = nLen + extraBytes;
+            while ((tmpLen >>>= 8) != 0)
+                numLenBytes++;
+            lenSize = numLenBytes + nLen + extraBytes + 2;
+            retValue = new byte[lenSize];
+            retValue[index++] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
+            retValue[index++] = (byte)(0x80 | numLenBytes);
+            index += numLenBytes;
+            tmpLen = nLen + extraBytes;
+            for (int i = 0; i < numLenBytes; i++)
+            {
+                retValue[index - i - 1] = (byte)(tmpLen & 0xFF);
+                tmpLen >>>= 8;
+            }
         }
-        else
-            retValue[index++] = (byte)(r.length + 2 + s.length + 2);
+        else {
+            lenSize = nLen + extraBytes + 2;
+            retValue = new byte[lenSize];
+            retValue[index++] = (byte)(ASNElementType.SEQUENCE.getElementNumber() | 0x20);
+            retValue[index++] = (byte)(r.length + s.length + extraBytes);
+        }
         retValue[index++] = (byte)ASNElementType.INTEGER_VALUE.getElementNumber();
         retValue[index++] = (byte)r.length;
         for (int i = 0; i < r.length; i++)
@@ -113,6 +144,7 @@ abstract class DSABase
             retValue[index + r.length + i] = s[i];
         return retValue;
     }
+
     public String ConvertSignatureToString(byte [] signature, boolean DEREncoded)
     {
         if (DEREncoded)

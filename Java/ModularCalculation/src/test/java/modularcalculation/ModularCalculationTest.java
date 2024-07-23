@@ -7492,7 +7492,7 @@ public class ModularCalculationTest {
         assertFalse(valid);
     }
     @Test
-    public void signatureECDSAECDSANISTP521SignAndVerifySHA256Valid()
+    public void signatureECDSANISTP521SignAndVerifySHA256Valid()
     {
         int[] hashBigEndianInts = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
         byte [] hashBigEndian = new byte[hashBigEndianInts.length];
@@ -7956,11 +7956,10 @@ public class ModularCalculationTest {
             byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(0);
             byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
             String signature = dsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBytes = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(dsaPublicKey);
             mySignature.update(convertedMessageBigEndian);
-            assertTrue(mySignature.verify(signatureBytes));
+            assertTrue(mySignature.verify(signatureBigEndian));
         }
         catch (NoSuchAlgorithmException | InvalidKeyException
                | SignatureException
@@ -8159,8 +8158,7 @@ public class ModularCalculationTest {
             byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(message.length() * Character.BYTES);
             byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
             String signature = ecdsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8226,8 +8224,7 @@ public class ModularCalculationTest {
             byte [] convertedChangedMessageBigEndian = convertedChangedMessage.convertEndianess(0);
             byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
             String signature = ecdsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedChangedMessageBigEndian);
             assertFalse(mySignature.verify(signatureBigEndian));
@@ -8285,8 +8282,7 @@ public class ModularCalculationTest {
             byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(message.length() * Character.BYTES);
             byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
             String signature = ecdsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8343,8 +8339,7 @@ public class ModularCalculationTest {
             byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(message.length() * Character.BYTES);
             byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
             String signature = ecdsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8407,8 +8402,7 @@ public class ModularCalculationTest {
             PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
             Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
             String signature = ecdsa.sign(messageDigest, true);
-            ModNumber signatureModNumber = ModNumber.stomn(signature, 16);
-            byte [] signatureBigEndian = signatureModNumber.convertEndianess(0);
+            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);
             assertTrue(mySignature.verify(signatureBigEndian));
@@ -8449,9 +8443,7 @@ public class ModularCalculationTest {
             ModNumber ma = mgm.Diff(mzero, new ModNumber(3L));
             ModNumber mb = ModNumber.stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
             EC myEC = new EC(mgm,ecG, mn, ma, mb);
-            String privateKeyStr = "914E2FA303F1C7FCBE21E7A37EB7F1AF8D0C510BA23E46ED0D049AB88F282E41F63B1A99235F73CF68F46FF6E073CEAEB3F3B14EF5F29901D0D75D0C9C04DB4A";
-            ModNumber privateKeyMn = ModNumber.stomn(privateKeyStr, 16);
-            ECKeyPair ecKeyPair = new ECKeyPair(myEC, privateKeyMn, null);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
             String x = ecKeyPair.mx.toString(16);
             String aStr = ma.toString(16);
             String bStr = mb.toString(16);
@@ -8471,7 +8463,7 @@ public class ModularCalculationTest {
             PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
             Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
             String signature = ecdsa.sign(messageDigest, true);
-
+            System.out.println(signature);
             byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initVerify(publicKey);
             mySignature.update(convertedMessageBigEndian);

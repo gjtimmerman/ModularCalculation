@@ -75,8 +75,10 @@ abstract class DSABase
             if (rBigEndian[i] != 0)
                 break;
         if (i > 0){
+            if ((rBigEndian[i] & 0x80) != 0)
+                i--;
             byte [] rBigEndianSmaller = new byte[rBigEndian.length - i];
-            System.arraycopy(rBigEndian, 0, rBigEndianSmaller, 0, rBigEndianSmaller.length);
+            System.arraycopy(rBigEndian, i, rBigEndianSmaller, 0, rBigEndianSmaller.length);
             rBigEndian = rBigEndianSmaller;
         }
         byte[] sBigEndian = s.convertEndianess(nLen);
@@ -84,8 +86,10 @@ abstract class DSABase
             if (sBigEndian[i] != 0)
                 break;
         if (i > 0){
+            if ((sBigEndian[i] & 0x80) != 0)
+                i--;
             byte [] sBigEndianSmaller = new byte[sBigEndian.length - i];
-            System.arraycopy(sBigEndian, 0, sBigEndianSmaller, 0, sBigEndianSmaller.length);
+            System.arraycopy(sBigEndian, i, sBigEndianSmaller, 0, sBigEndianSmaller.length);
             sBigEndian = sBigEndianSmaller;
         }
 

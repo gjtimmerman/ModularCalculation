@@ -1224,9 +1224,10 @@ ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize)
 	return res;
 }
 
-ModNumber RemovePKCS1Mask(const ModNumber& m)
+std::string RemovePKCS1Mask(const std::string asnString)
 {
-	unsigned char* pMaskedNumber = (unsigned char*)m.num;
+	unsigned char* pMaskedNumberBigEndian = (unsigned char*)asnString.c_str();
+	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size());
 	int i;
 	for (i = MAXMOD - 1; i >= 0; i--)
 	{
@@ -1249,8 +1250,9 @@ ModNumber RemovePKCS1Mask(const ModNumber& m)
 		throw std::domain_error("Not a valid PKCS1 Mask");
 	if (pMaskedNumber[i] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
-	ModNumber res(pMaskedNumber, i);
-	return res;
+	std::string returnValue = std::string((char *)pMaskedNumber);
+	delete[] pMaskedNumber;
+	return returnValue;
 
 }
 
@@ -1275,15 +1277,22 @@ std::tuple<ASNElementType,unsigned int, unsigned int> ReadASNElement(unsigned ch
 					{
 						switch (p[i-1] >> 7)
 						{
-						case 0:
-						{
-							unsigned char mask = 0x7F;
-							unsigned char masked = p[i - 1] & mask;
-							return std::make_tuple(ASNElementType::SEQUENCE, masked, i - 2);
-						}
-						default:
-							throw std::domain_error("Not a short length specifier!");
-
+							case 0:
+							{
+								unsigned char mask = 0x7F;
+								unsigned char masked = p[i - 1] & mask;
+								return std::make_tuple(ASNElementType::SEQUENCE, masked, i - 2);
+							}
+							case 1:
+							{
+								unsigned char lLen = p[i - 1] & 0x7F;
+								unsigned int byteLen = 0;
+								for (int j = 0; j < lLen; j++)
+								{
+									byteLen |= (p[i - lLen - 1 + j] << (j * 8));
+								}
+								return std::make_tuple(ASNElementType::SEQUENCE, byteLen, i - lLen - 2);
+							}
 						}
 					}
 					case (int)ASNElementType::OBJECT_IDENTIFIER:
@@ -1353,7 +1362,20 @@ std::string CreateBERASNStringForDSASignature(std::list<std::string> content)
 	std::string r = *myIterator++;
 	std::string s = *myIterator++;
 	ASNString.append(1, (unsigned char)ASNElementType::SEQUENCE | 0x20);
-	ASNString.append(1, (unsigned char)(r.length() + 2 + s.length() + 2));
+	unsigned int len = (unsigned char)(r.length() + s.length());
+	unsigned int extra = 2 + 2;
+	if (len + extra > 0x7F)
+	{
+		unsigned int tmpLen = len + extra;
+		unsigned int numLenBytes = 1;
+		while ((tmpLen >>= 8) != 0)
+			numLenBytes++;
+		ASNString.append(1, (0x80 | (char)numLenBytes));
+		for (unsigned int i = 0; i < numLenBytes; i++)
+			ASNString.append(1, (len + extra) >> (numLenBytes - i - 1) * 8);
+	}
+	else
+		ASNString.append(1, len + extra);
 	ASNString.append(1, (unsigned char)ASNElementType::INTEGER_VALUE);
 	ASNString.append(1, (unsigned char)r.length());
 	ASNString.append(r);
@@ -1432,12 +1454,13 @@ ModNumber CreateBERASNString(std::list<std::string> content)
 
 }
 
-std::list<std::string> ParseBERASNString(const ModNumber& m)
+std::list<std::string> ParseBERASNString(const std::string asnString)
 {
-	unsigned char* pMaskedNumber = (unsigned char*)m.num;
+	unsigned char* pMaskedNumberBigEndian = (unsigned char*)asnString.c_str();
+	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size());
 	std::list<std::string> result;
-	unsigned int i;
-	for (i = MAXMOD - 1; i > 0; i--)
+	int i;
+	for (i = (int)(asnString.size() - 1); i > 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
@@ -1515,6 +1538,7 @@ std::list<std::string> ParseBERASNString(const ModNumber& m)
 			}
 		}
 	}
+	delete[] pMaskedNumber;
 	return result;
 }
 
@@ -1540,14 +1564,18 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	ModNumber h = mgmp.Mult(Coefficient, diff);
 	ModNumber hq = mgmn.Mult(h,Prime2);
 	ModNumber res =  mgmn.Add(m2, hq);
-	return RemovePKCS1Mask(res);
+	std::string maskedResult = res.to_string(16);
+	std::string result = RemovePKCS1Mask(maskedResult);
+	ModNumber resultMn = ModNumber::stomn(result, 16);
+	return resultMn;
 }
 
 ModNumber RSA::DecryptSignature(const ModNumber signature) const
 {
 	MultGroupMod mgm(Modulus);
 	ModNumber decryptedSignature = mgm.Exp(signature, pubExp);
-	ModNumber removedMask = RemovePKCS1Mask(decryptedSignature);
+	std::string decryptedSignatureStr = decryptedSignature.to_string(16);
+	std::string removedMask = RemovePKCS1Mask(decryptedSignatureStr);
 	std::list<std::string> result = ParseBERASNString(removedMask);
 	std::list<std::string>::iterator resultIterator = result.begin();
 	resultIterator++;
@@ -1604,8 +1632,10 @@ std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& 
 	std::list<std::string> results;
 	if (DerEncoded)
 	{
-		ModNumber mSignature = ModNumber::stomn(signature, 16);
-		results = ParseBERASNString(mSignature);
+//		ModNumber mSignature = ModNumber::stomn(signature, 16);
+//		unsigned char * signatureLittleEndian = ConvertEndianess((const unsigned char *)signature.c_str(), (unsigned int)signature.length());
+//		ModNumber mSignature = ModNumber(signatureLittleEndian, (int)signature.length());
+		results = ParseBERASNString(signature);
 	}
 	else
 	{

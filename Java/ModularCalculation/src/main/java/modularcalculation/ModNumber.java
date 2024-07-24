@@ -1048,7 +1048,7 @@ public class ModNumber {
 
         return res.toString();
     }
-    ASNElementResult ReadASNElement(byte[] p, int i)
+    static ASNElementResult ReadASNElement(byte[] p, int i)
     {
         if (i == 0)
             throw new IllegalArgumentException("Not a valid BER encodign");
@@ -1138,13 +1138,14 @@ public class ModNumber {
         throw new IllegalArgumentException("Error");
 
     }
-    public List<Object> ParseBERASNString()
+    public static List<Object> ParseBERASNString(byte [] berAsnString)
     {
         List<Object> res = new ArrayList<Object>();
-        byte[] pC = toByteArray();
+//        byte[] pC = toByteArray();
+        byte [] pC = berAsnString;
 
         int i;
-        for (i = MaxMod - 1; i > 0; i--)
+        for (i = pC.length - 1; i > 0; i--)
             if (pC[i] != 0)
                 break;
         ASNElementResult ASNElement1 = ReadASNElement(pC, i);

@@ -6096,8 +6096,10 @@ public class ModularCalculationTest {
     @Test
     public void readDSASignature()
     {
-        ModNumber signature = ModNumber.stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
-        List<Object> results = signature.ParseBERASNString();
+        String signature = "302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232";
+        byte [] signatureBytesBigEndian = ModNumber.stringToBytes(signature);
+        byte [] signatureBytesLittleEndian = ModNumber.convertEndianess(signatureBytesBigEndian);
+        List<Object> results = ModNumber.ParseBERASNString(signatureBytesLittleEndian);
         int[] exp1 = { 0x27, 0xFB, 0xE1, 0x36, 0x28, 0xA0, 0xAA, 0x70, 0x53, 0xE3, 0xC1, 0x1C, 0xE6, 0xB4, 0xE7, 0xF4, 0x06, 0x24, 0xC1, 0x8F };
         int[] exp2 = { 0x6D, 0x9F, 0x22, 0xC0, 0xAA, 0x16, 0x84, 0x1B, 0x26, 0x96, 0x91, 0x66, 0xC6, 0x92, 0xE9, 0x2B, 0x41, 0x17, 0x62, 0x32 };
         byte[] result1 = (byte[])results.get(0);

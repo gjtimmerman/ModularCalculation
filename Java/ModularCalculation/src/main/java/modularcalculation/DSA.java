@@ -28,9 +28,10 @@ public static DSACalculateU1U2MrResult DSACalculateU1U2Mr(ModNumber Q, byte[] ha
         byte[] s;
         if (DEREncoded)
         {
-            ModNumber mSignature = ModNumber.stomn(signature, 16);
+            byte [] signatureBytesBigEndian = ModNumber.stringToBytes(signature);
+            byte [] signatureBytesLittleEndian = ModNumber.convertEndianess(signatureBytesBigEndian);
             List<Object> signatureOctets;
-            signatureOctets = mSignature.ParseBERASNString();
+            signatureOctets = ModNumber.ParseBERASNString(signatureBytesLittleEndian);
             r = (byte[])signatureOctets.get(0);
             s = (byte[])signatureOctets.get(1);
         }

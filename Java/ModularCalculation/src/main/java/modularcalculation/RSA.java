@@ -84,7 +84,8 @@ public class RSA
         MultGroupMod mgm = new MultGroupMod(Modulus);
         ModNumber decryptedSignature = mgm.Exp(signature, PubExp);
         ModNumber removedMask = decryptedSignature.removePKCS1Mask();
-        List<Object> result = removedMask.ParseBERASNString();
+        byte [] removedMaskBytes = removedMask.toByteArray();
+        List<Object> result = ModNumber.ParseBERASNString(removedMaskBytes);
         byte [] hashBigEndian = (byte [])result.get(1);
         byte[] hashLittleEndian;
 

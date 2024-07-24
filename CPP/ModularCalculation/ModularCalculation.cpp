@@ -637,6 +637,21 @@ std::string ModNumber::AdjustStringLength(std::string s,size_t desiredLength)
 	return s;
 }
 
+unsigned char* strtoCharArray(std::string str)
+{
+	if (str.size() % 2 != 0)
+		throw std::invalid_argument("Invalid input string, odd length");
+	unsigned char* result = new unsigned char[str.size() / 2];
+	for (int i = 0; i < str.size(); i += 2)
+	{
+		std::string tmp = str.substr(i, 2);
+		int res = std::stoi(tmp, 0, 16);
+		result[i / 2] = (char)res;
+
+	}
+	return result;
+}
+
 ModNumber ModNumber::stomn_hex_base(std::string s)
 {
 	llint n[COUNTLL] = {};
@@ -1226,8 +1241,9 @@ ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize)
 
 std::string RemovePKCS1Mask(const std::string asnString)
 {
-	unsigned char* pMaskedNumberBigEndian = (unsigned char*)asnString.c_str();
-	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size());
+	unsigned char* pMaskedNumberBigEndian = strtoCharArray(asnString);
+	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size()/2);
+	delete[] pMaskedNumberBigEndian;
 	int i;
 	for (i = MAXMOD - 1; i >= 0; i--)
 	{
@@ -1250,7 +1266,8 @@ std::string RemovePKCS1Mask(const std::string asnString)
 		throw std::domain_error("Not a valid PKCS1 Mask");
 	if (pMaskedNumber[i] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
-	std::string returnValue = std::string((char *)pMaskedNumber);
+	unsigned char* returnValueBigEndian = ConvertEndianess(pMaskedNumber, i);
+	std::string returnValue = std::string((char *)returnValueBigEndian,i);
 	delete[] pMaskedNumber;
 	return returnValue;
 
@@ -1456,8 +1473,9 @@ ModNumber CreateBERASNString(std::list<std::string> content)
 
 std::list<std::string> ParseBERASNString(const std::string asnString)
 {
-	unsigned char* pMaskedNumberBigEndian = (unsigned char*)asnString.c_str();
+	unsigned char* pMaskedNumberBigEndian = strtoCharArray(asnString);
 	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size());
+	delete[] pMaskedNumberBigEndian;
 	std::list<std::string> result;
 	int i;
 	for (i = (int)(asnString.size() - 1); i > 0; i--)
@@ -1566,7 +1584,7 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	ModNumber res =  mgmn.Add(m2, hq);
 	std::string maskedResult = res.to_string(16);
 	std::string result = RemovePKCS1Mask(maskedResult);
-	ModNumber resultMn = ModNumber::stomn(result, 16);
+	ModNumber resultMn = ModNumber::fromText(result);
 	return resultMn;
 }
 

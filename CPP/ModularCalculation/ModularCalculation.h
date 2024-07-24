@@ -437,6 +437,7 @@ ModNumber CalculateDHSharedSecret(const DHParameters& publicKey, const DHParamet
 
 ModNumber GenerateDHPrivateKey(const ModNumber& modulus);
 
+unsigned char* strtoCharArray(std::string str);
 
 template <typename T>
 ModNumber ModNumber::fromText(std::basic_string<T> text)

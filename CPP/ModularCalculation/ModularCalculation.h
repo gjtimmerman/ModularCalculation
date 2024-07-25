@@ -164,9 +164,9 @@ private:
 	friend unsigned char* ConvertEndianess(const ModNumber& m, unsigned int cb);
 	friend ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);
-	friend std::string RemovePKCS1Mask(const std::string asnString);
+	friend std::tuple<unsigned char *, int> RemovePKCS1Mask(const std::string asnString);
 	friend ModNumber CreateBERASNString(std::list<std::string> content);
-	friend std::list<std::string> ParseBERASNString(const std::string asnString);
+	friend std::list<std::string> ParseBERASNString(unsigned char *, size_t);
 	friend std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
 
 };
@@ -427,9 +427,11 @@ unsigned char* ConvertEndianess(const ModNumber& m, unsigned int cb = 0);
 ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 
 ModNumber GetPKCS1Mask(const ModNumber& m, bool stable = false, int modulusSize = MAXMOD);
-std::string RemovePKCS1Mask(const std::string asnString);
+std::tuple<unsigned char *, int> RemovePKCS1Mask(const std::string asnString);
 ModNumber CreateBERASNString(std::list<std::string> content);
 std::list<std::string> ParseBERASNString(const std::string asnString);
+std::list<std::string> ParseBERASNString(unsigned char *, size_t);
+
 std::tuple<ASNElementType, unsigned int, unsigned int> ReadASNElement(unsigned char* p, unsigned int i);
 
 ModNumber CalculateECDHSharedSecret(const ECKeyPair& pair1, const ECKeyPair& pair2);

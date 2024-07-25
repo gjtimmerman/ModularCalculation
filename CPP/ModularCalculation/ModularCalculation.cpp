@@ -1239,13 +1239,13 @@ ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize)
 	return res;
 }
 
-std::string RemovePKCS1Mask(const std::string asnString)
+std::tuple<unsigned char *, int> RemovePKCS1Mask(const std::string asnString)
 {
 	unsigned char* pMaskedNumberBigEndian = strtoCharArray(asnString);
-	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size()/2);
+	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.length()/2);
 	delete[] pMaskedNumberBigEndian;
 	int i;
-	for (i = MAXMOD - 1; i >= 0; i--)
+	for (i = (int)asnString.length()/2 - 1; i >= 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
@@ -1266,10 +1266,10 @@ std::string RemovePKCS1Mask(const std::string asnString)
 		throw std::domain_error("Not a valid PKCS1 Mask");
 	if (pMaskedNumber[i] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
-	unsigned char* returnValueBigEndian = ConvertEndianess(pMaskedNumber, i);
-	std::string returnValue = std::string((char *)returnValueBigEndian,i);
-	delete[] pMaskedNumber;
-	return returnValue;
+//	unsigned char* returnValueBigEndian = ConvertEndianess(pMaskedNumber, i);
+//	std::string returnValue = std::string((char *)pMaskedNumber,i);
+//	delete[] pMaskedNumber;
+	return std::make_tuple(pMaskedNumber, i);
 
 }
 
@@ -1378,7 +1378,10 @@ std::string CreateBERASNStringForDSASignature(std::list<std::string> content)
 	std::list<std::string>::iterator myIterator = content.begin();
 	std::string r = *myIterator++;
 	std::string s = *myIterator++;
-	ASNString.append(1, (unsigned char)ASNElementType::SEQUENCE | 0x20);
+	std::stringstream strStream;
+	strStream.fill('0');
+	strStream << std::setw(2) <<std::hex << ((unsigned int)ASNElementType::SEQUENCE | 0x20);
+	
 	unsigned int len = (unsigned char)(r.length() + s.length());
 	unsigned int extra = 2 + 2;
 	if (len + extra > 0x7F)
@@ -1387,19 +1390,25 @@ std::string CreateBERASNStringForDSASignature(std::list<std::string> content)
 		unsigned int numLenBytes = 1;
 		while ((tmpLen >>= 8) != 0)
 			numLenBytes++;
-		ASNString.append(1, (0x80 | (char)numLenBytes));
+		strStream << std::setw(2) << std::hex << (0x80 | (char)numLenBytes);
 		for (unsigned int i = 0; i < numLenBytes; i++)
-			ASNString.append(1, (len + extra) >> (numLenBytes - i - 1) * 8);
+			strStream << std::setw(2) << std::hex << ((len + extra) >> (numLenBytes - i - 1) * 8);
 	}
 	else
-		ASNString.append(1, len + extra);
-	ASNString.append(1, (unsigned char)ASNElementType::INTEGER_VALUE);
-	ASNString.append(1, (unsigned char)r.length());
-	ASNString.append(r);
-	ASNString.append(1, (unsigned char)ASNElementType::INTEGER_VALUE);
-	ASNString.append(1, (unsigned char)s.length());
-	ASNString.append(s);
-	return ASNString;
+		strStream << std::setw(2) << std::hex << len + extra;
+	
+
+	strStream << std::setw(2) << std::hex << (unsigned int)(ASNElementType::INTEGER_VALUE);
+
+	strStream << std::setw(2) << std::hex << r.length();
+	for (int i = 0; i < r.length(); i++)
+		strStream << std::setw(2) << std::hex << (unsigned int)(unsigned char)r[i];
+	
+	strStream << std::setw(2) << std::hex << (unsigned int)ASNElementType::INTEGER_VALUE;
+	strStream << std::setw(2) << std::hex << s.length();
+	for (int i = 0; i < s.length(); i++)
+		strStream << std::setw(2) << std::hex << (unsigned int)(unsigned char)s[i];
+	return strStream.str();
 }
 
 ModNumber CreateBERASNString(std::list<std::string> content)
@@ -1473,12 +1482,17 @@ ModNumber CreateBERASNString(std::list<std::string> content)
 
 std::list<std::string> ParseBERASNString(const std::string asnString)
 {
+	unsigned char* pMaskedNumber;
 	unsigned char* pMaskedNumberBigEndian = strtoCharArray(asnString);
-	unsigned char* pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.size());
+	pMaskedNumber = ConvertEndianess(pMaskedNumberBigEndian, (unsigned int)asnString.length());
 	delete[] pMaskedNumberBigEndian;
+	return ParseBERASNString(pMaskedNumber, asnString.length());
+}
+std::list<std::string> ParseBERASNString(unsigned char * pMaskedNumber, size_t size)
+{
 	std::list<std::string> result;
 	int i;
-	for (i = (int)(asnString.size() - 1); i > 0; i--)
+	for (i = (int)size-1; i > 0; i--)
 	{
 		if (pMaskedNumber[i])
 			break;
@@ -1583,8 +1597,8 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	ModNumber hq = mgmn.Mult(h,Prime2);
 	ModNumber res =  mgmn.Add(m2, hq);
 	std::string maskedResult = res.to_string(16);
-	std::string result = RemovePKCS1Mask(maskedResult);
-	ModNumber resultMn = ModNumber::fromText(result);
+	std::tuple<unsigned char *, int> result = RemovePKCS1Mask(maskedResult);
+	ModNumber resultMn = ModNumber(std::get<0>(result), std::get<1>(result));
 	return resultMn;
 }
 
@@ -1593,8 +1607,8 @@ ModNumber RSA::DecryptSignature(const ModNumber signature) const
 	MultGroupMod mgm(Modulus);
 	ModNumber decryptedSignature = mgm.Exp(signature, pubExp);
 	std::string decryptedSignatureStr = decryptedSignature.to_string(16);
-	std::string removedMask = RemovePKCS1Mask(decryptedSignatureStr);
-	std::list<std::string> result = ParseBERASNString(removedMask);
+	std::tuple<unsigned char*,int> pRemovedMask = RemovePKCS1Mask(decryptedSignatureStr);
+	std::list<std::string> result = ParseBERASNString(std::get<0>(pRemovedMask), (size_t)std::get<1>(pRemovedMask));
 	std::list<std::string>::iterator resultIterator = result.begin();
 	resultIterator++;
 	ModNumber hashBigEndian((const unsigned char *)resultIterator->c_str());
@@ -1651,8 +1665,10 @@ std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& 
 	if (DerEncoded)
 	{
 //		ModNumber mSignature = ModNumber::stomn(signature, 16);
+//		unsigned char* signatureLittleEndian = ConvertEndianess(mSignature, signature.length()/2);
 //		unsigned char * signatureLittleEndian = ConvertEndianess((const unsigned char *)signature.c_str(), (unsigned int)signature.length());
 //		ModNumber mSignature = ModNumber(signatureLittleEndian, (int)signature.length());
+//		std::string signatureLittleEndianStr = std::string((char *)signatureLittleEndian, signature.size());
 		results = ParseBERASNString(signature);
 	}
 	else

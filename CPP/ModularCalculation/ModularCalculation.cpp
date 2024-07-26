@@ -1266,9 +1266,6 @@ std::tuple<unsigned char *, int> RemovePKCS1Mask(const std::string asnString)
 		throw std::domain_error("Not a valid PKCS1 Mask");
 	if (pMaskedNumber[i] != 0x00u)
 		throw std::domain_error("Not a valid PKCS1 Mask");
-//	unsigned char* returnValueBigEndian = ConvertEndianess(pMaskedNumber, i);
-//	std::string returnValue = std::string((char *)pMaskedNumber,i);
-//	delete[] pMaskedNumber;
 	return std::make_tuple(pMaskedNumber, i);
 
 }
@@ -1599,6 +1596,7 @@ ModNumber RSA::Decrypt(const ModNumber& c) const
 	std::string maskedResult = res.to_string(16);
 	std::tuple<unsigned char *, int> result = RemovePKCS1Mask(maskedResult);
 	ModNumber resultMn = ModNumber(std::get<0>(result), std::get<1>(result));
+	delete[] std::get<0>(result);
 	return resultMn;
 }
 
@@ -2042,8 +2040,6 @@ void DeleteKey(const wchar_t *keyName, NCRYPT_PROV_HANDLE provHandle, int usage)
 	else
 		return;
 	status = NCryptDeleteKey(keyHandle, 0);
-	evaluateStatus(status);
-	status = NCryptFreeObject(keyHandle);
 	evaluateStatus(status);
 }
 

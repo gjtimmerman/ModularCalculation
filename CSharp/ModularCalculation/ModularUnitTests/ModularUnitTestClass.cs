@@ -5940,8 +5940,8 @@ namespace ModularUnitTests
         [TestMethod]
         public void TestReadDSASignature()
         {
-            ModNumber signature = ModNumber.Stomn("302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232", 16);
-            List<object> results = signature.ParseBERASNString();
+            String signature = "302C021427FBE13628A0AA7053E3C11CE6B4E7F40624C18F02146D9F22C0AA16841B26969166C692E92B41176232";
+            List<object> results = ModNumber.ParseBERASNString(signature);
             byte[] exp1 = { 0x27, 0xFB, 0xE1, 0x36, 0x28, 0xA0, 0xAA, 0x70, 0x53, 0xE3, 0xC1, 0x1C, 0xE6, 0xB4, 0xE7, 0xF4, 0x06, 0x24, 0xC1, 0x8F };
             byte[] exp2 = { 0x6D, 0x9F, 0x22, 0xC0, 0xAA, 0x16, 0x84, 0x1B, 0x26, 0x96, 0x91, 0x66, 0xC6, 0x92, 0xE9, 0x2B, 0x41, 0x17, 0x62, 0x32 };
             byte[] result1 = (byte[])results[0];
@@ -7322,7 +7322,7 @@ namespace ModularUnitTests
             Assert.IsFalse(valid);
         }
         [TestMethod]
-        public void TestSignatureECDSANISTP521SignAndVerifySHA256Valid()
+        public void TestSignatureECDSANISTP521SignAndVerifySHA256ValidNoDER()
         {
             byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
             ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
@@ -7341,6 +7341,27 @@ namespace ModularUnitTests
             bool valid = ecDsa.Verify(hashBigEndian, signature);
             Assert.IsTrue(valid);
         }
+        [TestMethod]
+        public void TestSignatureECDSANISTP521SignAndVerifySHA256ValidDER()
+        {
+            byte[] hashBigEndian = { 0x25, 0xbd, 0xec, 0xae, 0x5c, 0x8b, 0xc7, 0x90, 0x5c, 0xbb, 0xda, 0x89, 0x48, 0x5a, 0xfe, 0xc7, 0xc6, 0x07, 0xd6, 0x0a, 0xc0, 0xb1, 0xd4, 0xea, 0x66, 0xc3, 0xca, 0x01, 0xd7, 0x59, 0x3d, 0x87 };
+            ModNumber p = ModNumber.Stomn("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 16);
+            MultGroupMod mgm = new MultGroupMod(p);
+            ModularCalculation.ECPoint g = new ModularCalculation.ECPoint();
+            g.x = ModNumber.Stomn("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
+            g.y = ModNumber.Stomn("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
+            ModNumber n = ModNumber.Stomn("1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409", 16);
+            ModNumber mzero = new ModNumber(0ul);
+            ModNumber a = mgm.Diff(mzero, new ModNumber(3));
+            ModNumber b = ModNumber.Stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm, g, n, a, b);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC);
+            ECDSA ecDsa = new ECDSA(ecKeyPair);
+            string signature = ecDsa.Sign(hashBigEndian, true);
+            bool valid = ecDsa.Verify(hashBigEndian, signature, true);
+            Assert.IsTrue(valid);
+        }
+
         [TestMethod]
         public void TestSignatureECDSANISTP521SignAndVerifySHA256InValid()
         {

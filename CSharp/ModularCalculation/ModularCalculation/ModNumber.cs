@@ -282,6 +282,22 @@ namespace ModularCalculation
             }
             return result;
         }
+        public static byte[] HexStringToByteArray(string str)
+        {
+            if (str.Length % 2 != 0)
+                throw new ArgumentException("String is not a valid Hex representation");
+            byte[] result = new byte[str.Length / 2];
+            for (int i = 0; i < str.Length; i+=2)
+            {
+                string tmp = str.Substring(i, 2);
+                int resultInt;
+                bool ret = int.TryParse(tmp, System.Globalization.NumberStyles.HexNumber, null, out resultInt);
+                if (!ret)
+                    throw new ArgumentException("String is not a valid Hex representation");
+                result[i/2] = (byte)resultInt;
+            }
+            return result;
+        }
         public ModNumber (uint[] arr)
         {
             FromUintArray(arr);
@@ -1427,7 +1443,7 @@ namespace ModularCalculation
 #if UNSAFE
         unsafe (ASNElementType, uint, uint) ReadASNElement(byte *p, uint i )
 #else
-        (ASNElementType, uint, uint) ReadASNElement(byte[] p, uint i)
+        static (ASNElementType, uint, uint) ReadASNElement(byte[] p, uint i)
 #endif
         {
             if (i == 0)
@@ -1510,20 +1526,13 @@ namespace ModularCalculation
             throw new ArgumentException("Error");
 
         }
-        public List<object> ParseBERASNString()
+        public static List<object> ParseBERASNString(string BERASNString)
         {
             List<object> res = new List<object>();
-#if UNSAFE
-            unsafe
-            {
-                fixed(ulong *p = &this.num[0])
-                {
-                    byte *pC = (byte*)p;
-#else
-                    byte[] pC = ToByteArray();
-#endif
+
+                    byte[] pC = HexStringToByteArray(BERASNString);
                     uint i;
-                    for (i = MaxMod - 1; i > 0; i--)
+                    for (i = (uint)pC.Length - 1; i > 0; i--)
                         if (pC[i] != 0)
                             break;
                     (ASNElementType type, uint len, uint index) ASNElement1 = ReadASNElement(pC, i);
@@ -1590,10 +1599,6 @@ namespace ModularCalculation
                             }
                         }
                     }
-#if UNSAFE
-                }
-            }
-#endif
 
             return res;
         }
@@ -2156,7 +2161,7 @@ namespace ModularCalculation
             MultGroupMod mgm = new MultGroupMod(Modulus);
             ModNumber decryptedSignature = mgm.Exp(signature, PubExp);
             ModNumber removedMask = decryptedSignature.RemovePKCS1Mask();
-            List<object> result = removedMask.ParseBERASNString();
+            List<object> result = ModNumber.ParseBERASNString(removedMask.ToString(16));
             byte [] hashBigEndian = (byte [])result[1];
             byte[] hashLittleEndian;
 #if UNSAFE
@@ -2446,9 +2451,8 @@ namespace ModularCalculation
             byte[] s;
             if (DEREncoded)
             {
-                ModNumber mSignature = ModNumber.Stomn(signature, 16);
                 List<object> signatureOctets;
-                signatureOctets = mSignature.ParseBERASNString();
+                signatureOctets = ModNumber.ParseBERASNString(signature);
                 r = (byte[])signatureOctets[0];
                 s = (byte[])signatureOctets[1];
             }

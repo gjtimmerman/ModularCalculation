@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using System.Formats.Asn1;
@@ -41,7 +42,7 @@ namespace ModularCalculation
         public const int ISIZE = sizeof(uint);
         public const int LCOUNT = NCOUNT / LSIZE;
         public const int ICOUNT = NCOUNT / ISIZE;
-        public const int NSIZE = NCOUNT * 8;
+        public const int NSIZE = NCOUNT * LSIZE;
         public ulong[] num = new ulong[LCOUNT];
         public const int HexStringLength = NCOUNT * 2;
         public const int OctalStringLength = (NSIZE % 3 == 0) ? (NSIZE / 3) : (NSIZE / 3 + 1);
@@ -60,6 +61,7 @@ namespace ModularCalculation
         }
         public ModNumber(byte[] n)
         {
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pN = &num[0])
@@ -71,10 +73,35 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+
+            int lCount = n.Length / LSIZE;
+            ulong tmp;
+            for (int i = 0; i < lCount; i++)
+            {
+                tmp = 0ul;
+                for (int j = 0; j < LSIZE; j++)
+                {
+                    tmp |= ((ulong)n[i * LSIZE + j] << j * 8);
+                }
+                num[i] = tmp;
+            }
+            int lSize = n.Length % LSIZE;
+            if (lSize == 0)
+                return;
+            tmp = 0ul;
+            for (int j = 0; j < lSize; j++)
+            {
+                tmp |= ((ulong)n[lCount * LSIZE + j] << j * 8);
+            }
+            num[lCount] = tmp;
+#endif
         }
-        unsafe public ModNumber (byte *pNumber, int len)
+
+#if UNSAFE
+        unsafe public ModNumber(byte* pNumber, int len)
         {
-            fixed (ulong *p = num)
+            fixed (ulong* p = num)
             {
                 byte* pB = (byte*)p;
                 for (int i = 0; i < len; i++)
@@ -83,6 +110,26 @@ namespace ModularCalculation
 
 
         }
+#else
+        public ModNumber (ulong [] num, int byteLen)
+        {
+            int lCount = byteLen / LSIZE;
+            for (int i = 0; i < lCount; i++)
+                this.num[i] = num[i];
+            int lSize = byteLen % LSIZE;
+            if (lSize == 0)
+                return;
+            ulong tmp = 0ul;
+            ulong mask = 0xff;
+            for (int j = 0; j < lSize; j++)
+            {
+                ulong masked = num[lCount] & mask;
+                tmp |= masked;
+                mask <<= 8;
+            }
+            this.num[lCount] = tmp;
+        }
+#endif
         public override bool Equals(object? other)
         {
             if (other is ModNumber om)
@@ -114,6 +161,8 @@ namespace ModularCalculation
                 if (num[i] != 0ul)
                     throw new ArgumentException("Modulus is too large!");
         }
+
+#if UNSAFE
         unsafe public static byte[] convertEndianess(byte * b, int cb)
         {
             byte[] res = new byte[cb];
@@ -123,6 +172,18 @@ namespace ModularCalculation
             }
             return res;
         }
+#else
+        public static byte[] convertEndianess(byte[] b, int cb, int start = 0)
+        {
+            byte[] res = new byte[cb];
+            for (int i = 0; i < cb; i++)
+            {
+                res[i] = b[(cb+start) - i - 1];
+            }
+            return res;
+        }
+
+#endif
         public static byte[] convertEndianess(byte[] b)
         {
             byte[] res = new byte[b.Length];
@@ -132,6 +193,7 @@ namespace ModularCalculation
         }
         public byte[] convertEndianess(int cb = 0)
         {
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = &num[0])
@@ -141,9 +203,120 @@ namespace ModularCalculation
                     return convertEndianess(pB, n);
                 }
             }
+#else
+            int n = cb > 0 ? cb : (int)GetByteCount();
+            byte[] res = new byte[n];
+            int lCount = n / LSIZE;
+            int lSize = n % LSIZE;
+            ulong mask;
+            for (int i = 0; i < lCount; i++)
+            {
+                mask = 0xff;
+                for(int j = 0; j < LSIZE; j++)
+                {
+                    ulong tmp = num[i] & mask;
+                    res [n - (i * LSIZE + j) - 1] = (byte)(tmp >> j * 8);
+                    mask <<= 8;
+                }
+            }
+            mask = 0xff;
+            for (int j = 0; j < lSize; j++)
+            {
+                ulong tmp = num[lCount] & mask;
+                res[n - (lCount * LSIZE + j) - 1] = (byte)(tmp >> j * 8);
+                mask <<= 8;
+            }
+            return res;
+#endif
         }
+
+#if !UNSAFE
+        public uint[] ToUintArray()
+        {
+            uint []result = new uint[ICOUNT];
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            for (int i = 0; i < LCOUNT; i++)
+            {
+                result[i * 2] = (uint)(num[i] & lomask);
+                result[i * 2 + 1] = (uint)((num[i] & himask) >> ISIZE * 8);
+            }
+            return result;
+        }
+        public void FromUintArray(uint[] arr)
+        {
+            for (int i = 0; i < LCOUNT; i++)
+            {
+                num[i] = arr[i * 2];
+                num[i] |= ((ulong)arr[i * 2 + 1]) << ISIZE * 8;
+            }
+
+        }
+        public byte[] ToByteArray()
+        {
+            byte[] result = new byte[num.Length*LSIZE];
+            for (int i = 0; i < num.Length; i++)
+            {
+                ulong byteMask = 0xfful;
+                for (int j = 0; j < LSIZE; j++)
+                {
+                    byte bValue = (byte)((num[i] & byteMask) >> j * 8);
+                    result[i * LSIZE + j] = bValue;
+                    byteMask <<= 8;
+                }
+            }
+            return result;
+        }
+        public char[] ToCharArray()
+        {
+            char[] result = new char[num.Length * LSIZE/sizeof(char)];
+            for (int i = 0; i < num.Length; i++)
+            {
+                ulong charMask = 0xfffful;
+                for (int j = 0; j < LSIZE/sizeof(char); j++)
+                {
+                    char cValue = (char)((num[i] & charMask) >> j * sizeof(char) * 8);
+                    result[i * LSIZE/sizeof(char) + j] = cValue;
+                    charMask <<= 8 * sizeof(char);
+                }
+            }
+            return result;
+        }
+        public ModNumber (uint[] arr)
+        {
+            FromUintArray(arr);
+        }
+        public static uint[] ShiftUintArrayR(uint[] arr, int bitCount=1)
+        {
+            if (bitCount == 0)
+                return arr;
+            for (int i = 0; i < bitCount; i++)
+            {
+                arr[0] >>= 1;
+                if ((arr[1] & 0x01) != 0)
+                    arr[0] |= 0x80000000;
+                arr[1] >>= 1;
+            }
+            return arr;
+        }
+        public static uint[] ShiftUintArrayL(uint[] arr, int bitCount = 1)
+        {
+            if (bitCount == 0)
+                return arr;
+            for (int i = 0; i < bitCount; i++)
+            {
+                arr[1] <<= 1;
+                if ((arr[0] & 0x80000000) != 0)
+                    arr[1] |= 0x01;
+                arr[0] <<= 1;
+            }
+            return arr;
+        }
+
+#endif
         public static ModNumber operator -(ModNumber l, uint r)
         {
+#if UNSAFE
             ModNumber result = new ModNumber();
             l.num.CopyTo(result.num, 0);
             unsafe
@@ -170,13 +343,35 @@ namespace ModularCalculation
 
                 }
             }
+#else
+            uint[] resUint = l.ToUintArray();
+            uint carry = 0;
+            uint ltmp = resUint[0];
+            if (ltmp < r)
+                carry = 1;
+            resUint[0] = ltmp - r;
+            for (int i = 1; carry > 0 && i < ICOUNT; i++)
+            {
+                if (carry <= resUint[i])
+                {
+                    resUint[i] -= carry;
+                    carry = 0;
+                }
+                else
+                    resUint[i] -= carry;
+
+            }
+            ModNumber result = new ModNumber(resUint); 
+#endif
+        
             return result;
         }
         public static ModNumber operator -(ModNumber l, ModNumber r)
         {
-            ModNumber result = new ModNumber();
             if (l == r)
-                return result;              // Optimization
+                return new ModNumber();              // Optimization
+#if UNSAFE
+            ModNumber result = new ModNumber();
             l.num.CopyTo(result.num, 0);
             unsafe
             {
@@ -205,8 +400,29 @@ namespace ModularCalculation
                     }
 
                 }
-
             }
+#else
+            uint[] resUint = l.ToUintArray();
+            uint[] lUint = l.ToUintArray();
+            uint[] rUint = r.ToUintArray();
+            uint carry = 0;
+            for (int i = 0; i < ICOUNT; i++)
+            {
+                uint ltmp = lUint[i];
+                uint rtmp = rUint[i];
+                if (ltmp >= carry)
+                {
+                    ltmp -= carry;
+                    carry = 0;
+                }
+                else
+                    ltmp -= carry;
+                if (ltmp < rtmp)
+                    carry = 1;
+                resUint[i] = ltmp - rtmp;
+            }
+            ModNumber result = new ModNumber(resUint);
+#endif
             return result;
         }
 
@@ -215,6 +431,7 @@ namespace ModularCalculation
             if (lpos >= ICOUNT)
                 throw new ArgumentException("lpos out of range");
             ulong res = 0ul;
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pNum = &num[0])
@@ -230,6 +447,19 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            uint[] thisUintArray = ToUintArray();
+            res = ((ulong)thisUintArray[lpos]) + scalar;
+            thisUintArray[lpos++] = (uint)(res & lomask);
+            while ((res & himask) > 0ul && lpos < ICOUNT)
+            {
+                res = thisUintArray[lpos] + ((res & himask) >> ISIZE * 8);
+                thisUintArray[lpos++] = (uint)(res & lomask);
+            }
+            FromUintArray(thisUintArray);
+#endif
             return this;
         }
         public static ModNumber operator +(ModNumber l, uint scalar)
@@ -241,6 +471,8 @@ namespace ModularCalculation
         public static ModNumber operator +(ModNumber l, ModNumber r)
         {
             ModNumber mres = new ModNumber(l);
+
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pRNum = &r.num[0])
@@ -252,11 +484,20 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            uint[] rUint = r.ToUintArray();
+            for (int i = 0; i < ICOUNT; i++)
+            {
+                mres.AddAssignScalar(i, rUint[i]);
+            }
+
+#endif
             return mres;
         }
         public static ModNumber operator *(ModNumber l, uint scalar)
         {
             ModNumber mres = new ModNumber(0ul);
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pNum = &l.num[0])
@@ -279,11 +520,31 @@ namespace ModularCalculation
 
                 }
             }
+#else
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            uint[] lUint = l.ToUintArray();
+            int firstNonzeroWord;
+            for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
+            {
+                if (lUint[firstNonzeroWord] != 0)
+                    break;
+            }
+            for (int i = 0; i <= firstNonzeroWord; i++)
+            {
+                ulong tmpres = ((ulong)lUint[i]) * scalar;
+                mres.AddAssignScalar(i, (uint)(tmpres & lomask));
+                if (i < ICOUNT - 1)
+                    mres.AddAssignScalar(i + 1, (uint)((tmpres & himask) >> ISIZE * 8));
+            }
+
+#endif
             return mres;
         }
         public static ModNumber operator *(ModNumber ml, ModNumber mr)
         {
             ModNumber mres = new ModNumber();
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pr = &mr.num[0])
@@ -301,6 +562,20 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            uint[] rUint = mr.ToUintArray();
+            int firstNonzeroWord;
+            for (firstNonzeroWord = ICOUNT - 1; firstNonzeroWord >= 0; firstNonzeroWord--)
+            {
+                if (rUint[firstNonzeroWord] != 0)
+                    break;
+            }
+            for (int i = 0; i <= firstNonzeroWord; i++)
+            {
+                mres += ((ml * rUint[i]) << ISIZE * 8 * i);
+            }
+
+#endif
             return mres;
         }
         private int FindFirstNonZeroBitInWord(uint word)
@@ -361,7 +636,6 @@ namespace ModularCalculation
 
         public static ModNumber operator <<(ModNumber n, int i)
         {
-            ModNumber mres = new ModNumber();
             int words = 0;
             if (i >= ISIZE * 8)
             {
@@ -370,6 +644,8 @@ namespace ModularCalculation
                 words = i / (ISIZE * 8);
                 i %= ISIZE * 8;
             }
+#if UNSAFE
+            ModNumber mres = new ModNumber();
             unsafe
             {
                 fixed (ulong* pN = &n.num[0])
@@ -388,22 +664,37 @@ namespace ModularCalculation
                 }
 
             }
+#else
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            uint[] resUint = new uint[ICOUNT];
+            uint[] nUint = n.ToUintArray();
+            resUint[ICOUNT - 1] = nUint[ICOUNT - words - 1] << i;
+            for (int j = ICOUNT - 2; j >= words; j--)
+            {
+                ulong tmp = ((ulong)(nUint[j - words])) << i;
+                resUint[j + 1] |= (uint)((tmp & himask) >> ISIZE * 8);
+                resUint[j] = (uint)(tmp & lomask);
+            }
+            ModNumber mres = new ModNumber(resUint);
+#endif
             return mres;
         }
 
         public static ModNumber operator >>(ModNumber n, int i)
         {
-            ModNumber mres = new ModNumber();
             int words = 0;
             if (i >= ISIZE * 8)
             {
                 if (i >= NSIZE)
                 {
-                    return mres;
+                    return new ModNumber();
                 }
                 words = i / (ISIZE * 8);
                 i %= ISIZE * 8;
             }
+#if UNSAFE
+            ModNumber mres = new ModNumber();
             unsafe
             {
                 fixed (ulong* pN = &n.num[0])
@@ -421,14 +712,29 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            ulong lomask = 0xffffffff;
+            ulong himask = lomask << ISIZE * 8;
+            uint[] resUint = new uint[ICOUNT];
+            uint[] nUint = n.ToUintArray();
+            resUint[0] = nUint[words] >> i;
+            for (int j = 0; j < ICOUNT - words - 1; j++)
+            {
+                ulong tmp = ((ulong)nUint[j + words + 1]) << ((ISIZE * 8) - i);
+                resUint[j] |= (uint)(tmp & lomask);
+                resUint[j + 1] = (uint)((tmp & himask) >> ISIZE * 8);
+            }
+            ModNumber mres = new ModNumber(resUint);
+#endif
             return mres;
         }
         public (ModNumber, uint) DivideAndModulo(uint scalar, bool onlyModulo)
         {
             if (scalar == 0)
                 throw new DivideByZeroException("Division by zero not allowed!");
-            ModNumber mres = new ModNumber();
             uint modRes;
+#if UNSAFE
+            ModNumber mres = new ModNumber();
             unsafe
             {
                 fixed (ulong* pN = &num[0])
@@ -452,6 +758,27 @@ namespace ModularCalculation
                     modRes = ((uint*)&tmp)[1];
                 }
             }
+#else
+            ulong himask = 0xfffffffful << ISIZE * 8;
+            uint[] resUint = new uint[ICOUNT];
+            uint[] nUint = ToUintArray();
+            ulong tmp = 0ul;
+            for (int i = ModNumber.ICOUNT - 1; i >= 0; i--)
+            {
+                tmp |= nUint[i];
+                if (scalar <= tmp)
+                {
+                    if (!onlyModulo)
+                        resUint[i] = (uint)(tmp / scalar);
+                    tmp %= scalar;
+
+                }
+                tmp <<= ModNumber.ISIZE * 8;
+            }
+            modRes = (uint)((tmp & himask) >> ISIZE * 8);
+            ModNumber mres = new ModNumber(resUint);
+
+#endif
             return (mres, modRes);
         }
 
@@ -596,6 +923,7 @@ namespace ModularCalculation
         }
         public uint GetByteCount()
         {
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* p = &this.num[0])
@@ -608,10 +936,28 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            for (int i = LCOUNT - 1; i >= 0; i--)
+            {
+                if (num[i] != 0)
+                {
+                    ulong mask = 0xfful << (LSIZE - 1) * 8;
+                    for (int j = 0; j < LSIZE; j++)
+                    {
+                        if ((num[i] & mask) != 0ul)
+                        {
+                            return (uint)(i * LSIZE + (LSIZE - j));
+                        }
+                        mask >>= 8;
+                    }
+                }
+            }
+#endif
             return 0;
         }
         public ushort GetDoubleByteValue(int cb)
         {
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = &this.num[0])
@@ -620,6 +966,13 @@ namespace ModularCalculation
                     return ps[cb];
                 }
             }
+#else
+            int lCount = cb / 4;
+            int sCount = cb % 4;
+            ulong mask = 0xfffful << (sCount*16);
+            return (ushort)((num[lCount] & mask) >> (sCount*16));
+
+#endif
         }
         public ModNumber Sqrt()
         {
@@ -639,6 +992,7 @@ namespace ModularCalculation
                 mremainder <<= 16;
                 mdivisor <<= 8;
                 mres <<= 8;
+#if UNSAFE
                 unsafe
                 {
                     fixed (ulong* p = &mremainder.num[0])
@@ -648,6 +1002,9 @@ namespace ModularCalculation
                     }
 
                 }
+#else
+                mremainder.num[0] |= tmp;
+#endif
                 if (mremainder == mzero)
                     continue;
                 ushort counter = 1;
@@ -811,6 +1168,7 @@ namespace ModularCalculation
         {
             StringBuilder res = new StringBuilder(new string('0', ModNumber.OctalStringLength));
             uint mask = 7u;
+#if UNSAFE
             unsafe
             {
                 fixed (ulong* pN = &num[0])
@@ -843,6 +1201,31 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            uint[] thisUint = ToUintArray();
+            uint[] buffer = new uint[2];
+            buffer[0] = thisUint[0];
+            int tripleCount = 0;
+            int wordCount = 0;
+            for (int i = 0; i < ModNumber.NSIZE; i++)
+            {
+                if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                {
+                    if ((wordCount / (8 * ModNumber.ISIZE) + 1) < ModNumber.ICOUNT)
+                    {
+                        buffer[1] = thisUint[wordCount / (8 * ModNumber.ISIZE) + 1];
+                    }
+                }
+                if (tripleCount++ % 3 == 0)
+                {
+                    uint numToPrint = buffer[0] & mask;
+                    char charToPrint = (char)('0' + numToPrint);
+                    res[ModNumber.OctalStringLength - (tripleCount / 3) - 1] = charToPrint;
+                }
+                buffer = ShiftUintArrayR(buffer);
+            }
+
+#endif
             return res.ToString();
         }
 
@@ -928,6 +1311,7 @@ namespace ModularCalculation
         public ModNumber RemovePKCS1Mask()
         {
             ModNumber res;
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = num)
@@ -952,6 +1336,27 @@ namespace ModularCalculation
                     res = new ModNumber(pB, i);
                 }
             }
+#else
+            byte[] thisBytes = ToByteArray();
+            int i;
+            for (i = num.Length * LSIZE - 1; i >= 0; i--)
+                if (thisBytes[i] != 0)
+                    break;
+            if (thisBytes[i + 1] != 0x00u)
+                throw new ArgumentException("Not a valid PKCS1 Mask");
+            if (thisBytes[i] == 0x01u)
+                while (thisBytes[--i] == 0xFF && i >= 0)
+                    ;
+            else if (thisBytes[i] == 0x02u)
+                while (thisBytes[i] != 0x00u && i >= 0)
+                    i--;
+            else
+                throw new ArgumentException("Not a valid PKCS1 Mask");
+            if (thisBytes[i] != 0x00u)
+                throw new ArgumentException("Not a valid PKCS1 Mask");
+            res = new ModNumber(num, i);
+
+#endif
             return res;
         }
         public static ModNumber fromText(string text)
@@ -963,6 +1368,7 @@ namespace ModularCalculation
                 throw new ArgumentException("Text message too long!");
             if (textSize == LCOUNT && textLeft > 0)
                 throw new ArgumentException("Text message too long!");
+#if UNSAFE
             unsafe
             {
                 fixed (char* p = text)
@@ -971,17 +1377,27 @@ namespace ModularCalculation
                     for (int i = 0; i < textSize; i++)
                         res[i] = pUL[i];
                 }
-                ulong tmp = 0ul;
-                for (int i = 0; i < textLeft / sizeof(char); i++)
-                {
-                    ulong c = text[(textSize * LSIZE) / sizeof(char) + i];
-                    c <<= sizeof(char) * 8 * i;
-                    tmp |= c;
-                }
-                if (textLeft > 0)
-                    res[textSize] = tmp;
-
             }
+#else
+            for (int i = 0; i < textSize; i++)
+            {
+                for (int j = 0; j < LSIZE/sizeof(char); j++)
+                {
+                    res[i] |= ((ulong)text[i * LSIZE / sizeof(char) + j]) << (j * sizeof(char)*8);
+                }
+            }
+#endif
+            ulong tmp = 0ul;
+            for (int i = 0; i < textLeft / sizeof(char); i++)
+            {
+                ulong c = text[(textSize * LSIZE) / sizeof(char) + i];
+                c <<= sizeof(char) * 8 * i;
+                tmp |= c;
+            }
+            if (textLeft > 0)
+                res[textSize] = tmp;
+
+            
             return new ModNumber(res);
         }
         public string getText()
@@ -990,6 +1406,7 @@ namespace ModularCalculation
             if (byteCount % sizeof(char) != 0)
                 byteCount += sizeof(char) - byteCount % sizeof(char);
             StringBuilder res = new StringBuilder((int)byteCount/sizeof(char));
+#if UNSAFE
             unsafe
             {
                 fixed(ulong* p = &this.num[0])
@@ -999,9 +1416,19 @@ namespace ModularCalculation
                         res.Append(pC[i]);
                 }
             }
+#else
+            char[] thisChar = ToCharArray();
+            for (int i = 0; i < byteCount / sizeof(char); i++)
+                res.Append(thisChar[i]);
+
+#endif
             return res.ToString();
         }
+#if UNSAFE
         unsafe (ASNElementType, uint, uint) ReadASNElement(byte *p, uint i )
+#else
+        (ASNElementType, uint, uint) ReadASNElement(byte[] p, uint i)
+#endif
         {
             if (i == 0)
                 throw new ArgumentException("Not a valid BER encodign");
@@ -1086,11 +1513,15 @@ namespace ModularCalculation
         public List<object> ParseBERASNString()
         {
             List<object> res = new List<object>();
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = &this.num[0])
                 {
                     byte *pC = (byte*)p;
+#else
+                    byte[] pC = ToByteArray();
+#endif
                     uint i;
                     for (i = MaxMod - 1; i > 0; i--)
                         if (pC[i] != 0)
@@ -1159,8 +1590,11 @@ namespace ModularCalculation
                             }
                         }
                     }
+#if UNSAFE
                 }
             }
+#endif
+
             return res;
         }
         public static ModNumber CreateBERASNString(byte[] hashBigEndian, string plainOid)
@@ -1216,6 +1650,7 @@ namespace ModularCalculation
             result.AddRange(outerASN);
             byte[] resultArray = result.ToArray();
             byte[] resultLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte *p = resultArray)
@@ -1223,12 +1658,17 @@ namespace ModularCalculation
                     resultLittleEndian = ModNumber.convertEndianess(p, resultArray.Length);
                 }
             }
+#else
+            resultLittleEndian = ModNumber.convertEndianess(resultArray);
+
+#endif
             ModNumber res = new ModNumber(resultLittleEndian);
             return res;
         }
         public static ModNumber GetLeftMostBytes(ModNumber mn, int leftBytes)
         {
             byte[] leftMostBytes = new byte[leftBytes];
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *p = mn.num)
@@ -1240,6 +1680,13 @@ namespace ModularCalculation
 
                 }
             }
+#else
+            byte[] thisBytes = mn.ToByteArray();
+            uint numBytes = mn.GetByteCount();
+            for (int i = 0; i < leftBytes; i++)
+                leftMostBytes[i] = thisBytes[numBytes - leftBytes + i];
+
+#endif
             return new ModNumber(leftMostBytes);
         }
     }
@@ -1301,6 +1748,7 @@ namespace ModularCalculation
             uint mask = 7u;
             int wordsToSkip = scale / ModNumber.ISIZE;
             int bitsToSkip = (scale % ModNumber.ISIZE) * 8;
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *pN = &mn.num[0])
@@ -1364,7 +1812,62 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            uint[] mnUint = mn.ToUintArray();
+            uint[] buffer = new uint[2];
+            buffer[0] = mnUint[wordsToSkip];
+            buffer[1] = mnUint[wordsToSkip + 1];
+            int tripleCount = 0;
+            (int digitsLeft, int digitsToSkip) = CalculateOctalStringLength();
+            res.Append(new string('0', digitsToSkip + digitsLeft + 1));
+            res[digitsLeft] = '.';
+            int wordCount = bitsToSkip;
+            buffer = ModNumber.ShiftUintArrayR(buffer, wordCount);
+            for (int i = scale * 8; i < ModNumber.NSIZE; i++)
+            {
+                if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                {
+                    if (wordCount / (8 * ModNumber.ISIZE) + 1 < ModNumber.ICOUNT - wordsToSkip)
+                        buffer[1] = mnUint[wordsToSkip+wordCount / (8 * ModNumber.ISIZE) + 1];
+                    else
+                        buffer[1] = 0;
+                }
+                if (tripleCount++ % 3 == 0)
+                {
+                    uint numToPrint = buffer[0] & mask;
+                    char charToPrint = (char)('0' + numToPrint);
+                    res[digitsLeft - (tripleCount / 3) - 1] = charToPrint;
+                }
+                buffer = ModNumber.ShiftUintArrayR(buffer);
+            }
+            buffer[1] = mnUint[wordsToSkip];
+            if (wordsToSkip > 0)
+            {
+                buffer[0] = mnUint[wordsToSkip-1];
+            }
+            else
+                buffer[0] = 0u;
+            buffer = ModNumber.ShiftUintArrayL(buffer, (ModNumber.ISIZE * 8) - bitsToSkip);
+            wordCount = ModNumber.ISIZE * 8 - bitsToSkip;
+            tripleCount = 0;
+            for (int i = 0; i < scale * 8; i++)
+            {
+                if ((wordCount++ % (8 * ModNumber.ISIZE)) == 0)
+                    if (wordCount < (wordsToSkip * ModNumber.ISIZE * 8))
+                        buffer[0] = mnUint[wordsToSkip -1 - (wordCount / (8 * ModNumber.ISIZE))];
+                    else
+                        buffer[0] = 0;
+                if (tripleCount++ % 3 == 0)
+                {
+                    uint numToPrint = (buffer[1] >> (32 - 3)) & mask;
+                    char charToPrint = (char)('0' + numToPrint);
+                    res[digitsLeft + (tripleCount / 3) + 1] = charToPrint;
+                }
+                buffer = ModNumber.ShiftUintArrayL(buffer);
+            }
 
+
+#endif
             return res.ToString();
         }
         public int calculateDecimalStringLengthLeft()
@@ -1447,6 +1950,7 @@ namespace ModularCalculation
             ModNumber res = new ModNumber(0ul);
             ModNumber lMod = l % n;
             ModNumber rMod = r % n;
+#if UNSAFE
             unsafe
             {
                 fixed(ulong *pR = &rMod.num[0])
@@ -1471,6 +1975,27 @@ namespace ModularCalculation
                     }
                 }    
             }
+#else
+            uint[] rModUint = rMod.ToUintArray();
+            int limit;
+            for (limit = ModNumber.ICOUNT - 1; limit >= 0; limit--)
+            {
+                if (rModUint[limit] != 0)
+                    break;
+            }
+            for (int i = 0; i <= limit; i++)
+            {
+                ModNumber tmp = lMod * rModUint[i];
+                for (int j = 0; j < i; j++)
+                {
+                    tmp %= n;
+                    tmp <<= ModNumber.ISIZE * 8;
+                }
+                tmp %= n;
+                res += tmp;
+            }
+
+#endif
             res %= n;
             return res;
         }
@@ -1634,6 +2159,7 @@ namespace ModularCalculation
             List<object> result = removedMask.ParseBERASNString();
             byte [] hashBigEndian = (byte [])result[1];
             byte[] hashLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte* pb = hashBigEndian)
@@ -1642,6 +2168,10 @@ namespace ModularCalculation
 
                 }
             }
+#else
+            hashLittleEndian = ModNumber.convertEndianess(hashBigEndian);
+
+#endif
             ModNumber retval = new ModNumber(hashLittleEndian);
             return retval;
 
@@ -1697,6 +2227,7 @@ namespace ModularCalculation
             cbPrime1 += keyBlob[16];
             int cbPrime2 = keyBlob[21] * 0x100;
             cbPrime2 += keyBlob[20];
+#if UNSAFE
             unsafe
             {
                 fixed(byte *pData = &keyBlob[24])
@@ -1727,6 +2258,33 @@ namespace ModularCalculation
                     rsaParameters.PrivExp = new ModNumber(privExpLittleEndian);
                 }
             }
+#else
+            int offset = 24;
+            byte[] pubExpLittleEndian = ModNumber.convertEndianess(keyBlob, cbPubExp, offset);
+            rsaParameters.PubExp = new ModNumber(pubExpLittleEndian);
+            offset += cbPubExp;
+            byte[] modulusLittleEndian = ModNumber.convertEndianess(keyBlob, cbModulus, offset);
+            rsaParameters.Modulus = new ModNumber(modulusLittleEndian);
+            offset += cbModulus;
+            byte[] prime1LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Prime1 = new ModNumber(prime1LittleEndian);
+            offset += cbPrime1;
+            byte[] prime2LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime2, offset);
+            rsaParameters.Prime2 = new ModNumber(prime2LittleEndian);
+            offset += cbPrime2;
+            byte[] exp1LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Exp1 = new ModNumber(exp1LittleEndian);
+            offset += cbPrime1;
+            byte[] exp2LittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime2, offset);
+            rsaParameters.Exp2 = new ModNumber(exp2LittleEndian);
+            offset += cbPrime2;
+            byte[] coefficientLittleEndian = ModNumber.convertEndianess(keyBlob, cbPrime1, offset);
+            rsaParameters.Coefficient = new ModNumber(coefficientLittleEndian);
+            offset += cbPrime1;
+            byte[] privExpLittleEndian = ModNumber.convertEndianess(keyBlob, cbModulus, offset);
+            rsaParameters.PrivExp = new ModNumber(privExpLittleEndian);
+
+#endif
             return rsaParameters;
         }
         private ModNumber PubExp;
@@ -1753,6 +2311,7 @@ namespace ModularCalculation
         public byte [] CalculateDSASignature(ModNumber Q, ModNumber x, byte[] hash, bool DEREncoded)
         {
             byte[] hashLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed(byte* p = &hash[0])
@@ -1760,6 +2319,10 @@ namespace ModularCalculation
                     hashLittleEndian = ModNumber.convertEndianess(p, hash.Length);
                 }
             }
+#else
+            hashLittleEndian = ModNumber.convertEndianess(hash);
+
+#endif
             ModNumber mHash = new ModNumber(hashLittleEndian);
             int nLen = (int)Q.GetByteCount();
             if (hash.Length > nLen)
@@ -1770,45 +2333,38 @@ namespace ModularCalculation
             ModNumber s;
             ModNumber mk;
             ModNumber mzero = new ModNumber(0ul);
-            unsafe
+            int lSize = nLen / ModNumber.LSIZE;
+            do
             {
-                fixed(ulong *p = k)
+                do
                 {
-                    byte* pB = (byte*)p;
-                    do
+                    for (int i = 0; i < lSize; i++)
+                        k[i] = (ulong)(random.NextInt64());
+                    mk = new ModNumber(k);
+                    if (mk == mzero)
+                        mk += (uint)(random.Next() + 1);
+                    while (mk >= Q)
                     {
-                        do
-                        {
-                            for (int i = 0; i < nLen; i++)
-                                pB[i] = (byte)(random.Next() % 0x100);
-                            mk = new ModNumber(k);
-                            if (mk == mzero)
-                                mk += (uint)random.Next() + 1;
-                            while (mk >= Q)
-                            {
-                                pB[nLen - 1] -= (byte)(random.Next() % 0x7E + 1);
-                                mk = new ModNumber(k);
-                            }
-                            r = CalcR(mk);
-                        } while (r == mzero);
-                        ModNumber ?kInverse = null;
-                        MultGroupMod mgm = new MultGroupMod(Q);
-                        Thread th1 = new Thread(() => { kInverse = mgm.Inverse(mk); });
-                        th1.Start();
-                        ModNumber ?hashPlusXr = null;
-                        Thread th2 = new Thread(() =>
-                        {
-                            ModNumber xr = mgm.Mult(x, r);
-                            hashPlusXr = mgm.Add(mHash, xr);
-                        });
-                        th2.Start();
-                        th1.Join();
-                        th2.Join();
-                        s = mgm.Mult(kInverse!, hashPlusXr!);
-                    } while (s == mzero);
+                        mk.num[lSize-1] -= (ulong)random.NextInt64();
+                    }
+                    r = CalcR(mk);
+                } while (r == mzero);
+                ModNumber ?kInverse = null;
+                MultGroupMod mgm = new MultGroupMod(Q);
+                Thread th1 = new Thread(() => { kInverse = mgm.Inverse(mk); });
+                th1.Start();
+                ModNumber ?hashPlusXr = null;
+                Thread th2 = new Thread(() =>
+                {
+                    ModNumber xr = mgm.Mult(x, r);
+                    hashPlusXr = mgm.Add(mHash, xr);
+                });
+                th2.Start();
+                th1.Join();
+                th2.Join();
+                s = mgm.Mult(kInverse!, hashPlusXr!);
+            } while (s == mzero);
 
-                }
-            }
             if (!(s < Q && r < Q))
                 throw new ArgumentException("Wrong signature");
             byte[] rBigEndian = r.convertEndianess(nLen);
@@ -1918,6 +2474,7 @@ namespace ModularCalculation
         {
             byte[] rLittleEndian;
             byte[] sLittleEndian;
+#if UNSAFE
             unsafe
             {
                 fixed (byte* pr = r)
@@ -1927,8 +2484,14 @@ namespace ModularCalculation
                     sLittleEndian = ModNumber.convertEndianess(ps, s.Length);
                 }
             }
+#else
+            rLittleEndian = ModNumber.convertEndianess(r);
+            sLittleEndian = ModNumber.convertEndianess(s);
+
+#endif
             ModNumber mHash;
             int bcQ = (int)Q.GetByteCount();
+#if UNSAFE
             unsafe
             {
                 fixed (byte* p = hash)
@@ -1941,6 +2504,15 @@ namespace ModularCalculation
                     }
                 }
             }
+#else
+            byte[] hashLittleEndian = ModNumber.convertEndianess(hash);
+            mHash = new ModNumber(hashLittleEndian);
+            if (hash.Length > bcQ)
+            {
+                mHash = ModNumber.GetLeftMostBytes(mHash, bcQ);
+            }
+
+#endif
             ModNumber mr = new ModNumber(rLittleEndian);
             ModNumber ms = new ModNumber(sLittleEndian);
             if (!(mr < Q && ms < Q))
@@ -2020,6 +2592,8 @@ namespace ModularCalculation
             byteLength += keyBlob[4];
             if (byteLength != ModNumber.MaxMod)
                 throw new ApplicationException("Keylength not equal to MAXMOD!");
+#endif
+#if SMALLMOD && UNSAFE
             unsafe
             {
                 fixed (byte* pData = &keyBlob[32])
@@ -2041,7 +2615,26 @@ namespace ModularCalculation
                     dsaParameters.x = new ModNumber(xLittleEndian);
                 }
             }
-#elif MEDMOD || LARGEMODSIGNATURE
+#endif
+#if SMALLMOD && !UNSAFE
+            int offset = 32;
+            byte[] qLittleEndian = ModNumber.convertEndianess(keyBlob, 20, offset);
+            dsaParameters.Q = new ModNumber(qLittleEndian);
+            offset += 20;
+            byte[] pLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.P = new ModNumber(pLittleEndian);
+            offset += byteLength;
+            byte[] gLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.g = new ModNumber(gLittleEndian);
+            offset += byteLength;
+            byte[] yLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.y = new ModNumber(yLittleEndian);
+            offset += byteLength;
+            byte[] xLittleEndian = ModNumber.convertEndianess(keyBlob, 20, offset);
+            dsaParameters.x = new ModNumber(xLittleEndian);
+
+#endif
+#if MEDMOD || LARGEMODSIGNATURE
             if (keyBlob[0] != 0x44 && keyBlob[1] != 0x50 && keyBlob[2] != 0x56 && keyBlob[3] != 0x32)
                 throw new ApplicationException("Key structure not of type RSA Full Private!");
             int byteLength = keyBlob[5] * 0x100;
@@ -2052,6 +2645,8 @@ namespace ModularCalculation
             seedLength += keyBlob[16];
             int groupSize = keyBlob[21] * 0x100;
             groupSize += keyBlob[20];
+#endif
+#if (MEDMOD || LARGEMODSIGNATURE) && UNSAFE
             unsafe
             {
                 fixed (byte* pData = &keyBlob[28 + seedLength])
@@ -2073,6 +2668,23 @@ namespace ModularCalculation
                     dsaParameters.x = new ModNumber(xLittleEndian);
                 }
             }
+#endif
+#if (MEDMOD || LARGEMODSIGNATURE) && !UNSAFE
+            int offset = 28 + seedLength;
+            byte[] qLittleEndian = ModNumber.convertEndianess(keyBlob, groupSize, offset);
+            dsaParameters.Q = new ModNumber(qLittleEndian);
+            offset += groupSize;
+            byte[] pLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.P = new ModNumber(pLittleEndian);
+            offset += byteLength;
+            byte[] gLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.g = new ModNumber(gLittleEndian);
+            offset += byteLength;
+            byte[] yLittleEndian = ModNumber.convertEndianess(keyBlob, byteLength, offset);
+            dsaParameters.y = new ModNumber(yLittleEndian);
+            offset += byteLength;
+            byte[] xLittleEndian = ModNumber.convertEndianess(keyBlob, groupSize, offset);
+            dsaParameters.x = new ModNumber(xLittleEndian);
 
 #endif
             return dsaParameters;
@@ -2257,28 +2869,21 @@ namespace ModularCalculation
             if (this.mx == mzero)
             {
                 ulong[] x = new ulong[ModNumber.LCOUNT];
-                unsafe
+                uint lSize = ec.nLen / ModNumber.LSIZE;
+                Random random = new Random();
+                ModNumber mxTmp;
+                for (uint i = 0; i < lSize; i++)
                 {
-                    fixed (ulong* xPtr = x)
-                    {
-                        byte *p = (byte*)xPtr;
-                        Random random = new Random();
-                        ModNumber mxTmp;
-                        for (uint i = 0; i < ec.nLen; i++)
-                        {
-                            p[i] = (byte)(random.Next() % 0x100);
-                        }
-                        mxTmp = new ModNumber(x);
-                        if (mxTmp == mzero)
-                            mxTmp += (uint)random.Next() + 1;
-                        while (mxTmp >= ec.n)
-                        {
-                            p[ec.nLen - 1] -= (byte)(random.Next() + 1);
-                            mxTmp = new ModNumber(x);
-                        }
-                        this.mx = mxTmp;
-                    }
+                    x[i] = (ulong)random.NextInt64();
                 }
+                mxTmp = new ModNumber(x);
+                if (mxTmp == mzero)
+                    mxTmp += (uint)random.NextInt64() + 1;
+                while (mxTmp >= ec.n)
+                {
+                    mxTmp.num[lSize - 1] -= (ulong)random.NextInt64();
+                }
+                this.mx = mxTmp;
             }
             if (y == null)
                 this.y = CalcPublicKey(this.mx);

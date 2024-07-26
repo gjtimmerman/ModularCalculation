@@ -1664,11 +1664,6 @@ std::tuple<ModNumber, ModNumber, ModNumber> DSACalculateU1U2Mr(const ModNumber& 
 	std::list<std::string> results;
 	if (DerEncoded)
 	{
-//		ModNumber mSignature = ModNumber::stomn(signature, 16);
-//		unsigned char* signatureLittleEndian = ConvertEndianess(mSignature, signature.length()/2);
-//		unsigned char * signatureLittleEndian = ConvertEndianess((const unsigned char *)signature.c_str(), (unsigned int)signature.length());
-//		ModNumber mSignature = ModNumber(signatureLittleEndian, (int)signature.length());
-//		std::string signatureLittleEndianStr = std::string((char *)signatureLittleEndian, signature.size());
 		results = ParseBERASNString(signature);
 	}
 	else
@@ -1856,6 +1851,8 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 			{
 				p[i] = (unsigned char)(rand() % 0x100);
 			}
+			unsigned char* pq = (unsigned char*)&q.num;
+			p[nLen - 1] &= pq[nLen - 1];
 			mk = ModNumber(k);
 			if (mk == mzero)
 			{
@@ -1863,7 +1860,7 @@ std::string DSABase::CalculateDSASignature(ModNumber q, ModNumber x, unsigned ch
 			}
 			while (mk >= q)
 			{
-				p[nLen - 1] -= unsigned char(rand() % 0x7F + 1);
+				p[nLen - 1] -= 1;
 				mk = ModNumber(k);
 			}
 			r = CalcR(mk);

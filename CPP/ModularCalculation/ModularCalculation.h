@@ -161,6 +161,7 @@ private:
 	friend class MultGroupMod;
 	friend class RSA;
 	friend class EC;
+	friend class DSABase;
 	friend unsigned char* ConvertEndianess(const ModNumber& m, unsigned int cb);
 	friend ModNumber GetLeftMostBytes(const ModNumber& m, unsigned int n);
 	friend ModNumber GetPKCS1Mask(const ModNumber& m, bool stable, int modulusSize);

@@ -294,7 +294,8 @@ namespace ModularCalculation
                 bool ret = int.TryParse(tmp, System.Globalization.NumberStyles.HexNumber, null, out resultInt);
                 if (!ret)
                     throw new ArgumentException("String is not a valid Hex representation");
-                result[i/2] = (byte)resultInt;
+                int index = str.Length / 2 - i / 2 - 1;
+                result[str.Length/2 - i/2 - 1] = (byte)resultInt;
             }
             return result;
         }

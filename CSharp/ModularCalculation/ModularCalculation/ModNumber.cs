@@ -1471,10 +1471,20 @@ namespace ModularCalculation
                                                     byte masked2 = (byte)(p[i-1] & mask2);
                                                     return (ASNElementType.SEQUENCE, masked2, i - 2);
                                                 }
-                                            default:
-                                                throw new ArgumentException("Not a short length specifier!");
+                                            case 1:
+                                                {
+                                                    uint nLen = p[i - 1] & 0x7Fu;
+                                                    uint byteLen = 0u;
+                                                    for (int j = 0; j < nLen; j++)
+                                                    {
+                                                        uint tmp = p[i - nLen - 1];
+                                                        byteLen |= (tmp << (j * 8));
 
+                                                    }
+                                                    return (ASNElementType.SEQUENCE, byteLen, i - nLen - 2);
+                                                }
                                         }
+                                        break;
                                     case (byte)ASNElementType.OBJECT_IDENTIFIER:
                                         switch(p[i-1] >> 7)
                                         {
@@ -2391,17 +2401,40 @@ namespace ModularCalculation
         }
         byte [] CreateBERASNStringForDSASignature(byte[] r, byte[] s)
         {
-            byte[] retValue = new byte[4 + r.Length + 2 + s.Length];
-            retValue[0] = (byte)ASNElementType.SEQUENCE | (byte)0x20u;
-            retValue[1] = (byte)(r.Length + 2 + s.Length + 2);
-            retValue[2] = (byte)ASNElementType.INTEGER_VALUE;
-            retValue[3] = (byte)r.Length;
+            byte[] retValue;
+            int index = 0;
+            int nLen = r.Length + s.Length;
+            int extra = 2 + 2;
+            int totalLength = nLen + extra;
+            if (totalLength > 0x7F)
+            {
+                int lenBytes = 1;
+                int tmp = totalLength;
+                while ((tmp >>= 8) != 0)
+                    lenBytes++;
+                retValue = new byte[2 + totalLength + lenBytes];
+                retValue[index++] = (byte)ASNElementType.SEQUENCE | (byte)0x20u;
+                retValue[index++] = (byte)(0x80 | lenBytes);
+                tmp = totalLength;
+                for (int j = 0; j < lenBytes; j++)
+                    retValue[index + lenBytes - j - 1] = (byte)((tmp >> 8 * j) & 0xFF);
+                index += lenBytes;
+            }
+            else
+            {
+                retValue = new byte[2 + totalLength];
+                retValue[index++] = (byte)ASNElementType.SEQUENCE | (byte)0x20u;
+                retValue[index++] = (byte)(totalLength);
+            }
+            retValue[index++] = (byte)ASNElementType.INTEGER_VALUE;
+            retValue[index++] = (byte)r.Length;
             for (int i = 0; i < r.Length; i++)
-                retValue[4 + i] = r[i];
-            retValue[4 + r.Length] = (byte)ASNElementType.INTEGER_VALUE;
-            retValue[5 + r.Length] = (byte)s.Length;
+                retValue[index + i] = r[i];
+            index += r.Length;
+            retValue[index++] = (byte)ASNElementType.INTEGER_VALUE;
+            retValue[index++] = (byte)s.Length;
             for (int i = 0; i < s.Length; i++)
-                retValue[6 + r.Length + i] = s[i];
+                retValue[index + i] = s[i];
             return retValue;
         }
         public string ConvertSignatureToString(byte [] signature, bool DEREncoded)

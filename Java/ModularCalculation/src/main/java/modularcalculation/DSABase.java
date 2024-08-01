@@ -24,6 +24,10 @@ abstract class DSABase
         ModNumber mzero = new ModNumber(0L);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         int lSize = nLen / ModNumber.LSIZE;
+        int lRest = nLen % ModNumber.LSIZE;
+        int lSizeCheck = lSize;
+        if (lRest != 0)
+            lSizeCheck++;
         do
         {
             do
@@ -40,8 +44,8 @@ abstract class DSABase
                 }
                 r = CalcR(mk);
             } while (r == mzero
-            || (r.num[lSize-1] & 0x8000000000000000L) != 0 // necessary only for BouncyCastle ECDSA implementation
-            );
+                    || (r.num[lSizeCheck-1] & (0x8000000000000000L >>> ((lRest == 0 ? 0 : 8 - lRest ) * 8))) != 0) // necessary only for BouncyCastle ECDSA implementation
+            ;
             final ModNumber mkRef = mk;
             final ModNumber rRef = r;
             final ModNumber mHashRef = mHash;
@@ -64,8 +68,8 @@ abstract class DSABase
             }
             s = mgm.Mult(kInverse, hashPlusXr);
         } while (s == mzero
-                || (s.num[lSize-1] & 0x8000000000000000L) != 0 // necessary only for BouncyCastle ECDSA implementation
-        );
+                || (s.num[lSizeCheck-1] & (0x8000000000000000L >>> ((lRest == 0 ? 0 : 8 - lRest ) * 8))) != 0) // necessary only for BouncyCastle ECDSA implementation
+        ;
         executorService.shutdown();
         if (!(ModNumber.lessThan(s, Q) && ModNumber.lessThan(r, Q)))
             throw new IllegalArgumentException("Wrong signature");

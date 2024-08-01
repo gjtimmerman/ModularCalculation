@@ -8643,8 +8643,6 @@ public class ModularCalculationTest {
             PrivateKey privateKey = keyFactory.generatePrivate(ecPrivateKeySpec);
             PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
             Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
-//            String signature = ecdsa.sign(messageDigest, true);
-//            byte [] signatureBigEndian = ModNumber.stringToBytes(signature);
             mySignature.initSign(privateKey);
             mySignature.update(convertedMessageBigEndian);
             byte [] signatureBigEndian = mySignature.sign();
@@ -8660,5 +8658,193 @@ public class ModularCalculationTest {
         }
 
     }
+    @Test
+    void signatureECDSASignNISTP521VerifySHA256InValidRandomPrivateKey()
+    {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            MessageDigest myDigest = MessageDigest.getInstance("SHA256");
+            String message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            String changedMessage = "Dit is een test om te zien of een signature geverifieerd kan worden";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            ModNumber convertedChangedMessage = ModNumber.fromText(changedMessage);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(0);
+            byte [] convertedChangedMessageBigEndian = convertedChangedMessage.convertEndianess(0);
+            byte [] changedMessageDigest = myDigest.digest(convertedChangedMessageBigEndian);
+            String p = "1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+            ModNumber mp = ModNumber.stomn(p, 16);
+            MultGroupMod mgm = new MultGroupMod(mp);
+            String gx = "c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66";
+            String gy = "11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650";
+            ModNumber mgx = ModNumber.stomn(gx, 16);
+            ModNumber mgy = ModNumber.stomn(gy, 16);
+            ECPoint ecG = new ECPoint();
+            ecG.x = mgx;
+            ecG.y = mgy;
+            String n = "1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409";
+            ModNumber mn = ModNumber.stomn(n, 16);
+            ModNumber mzero = new ModNumber(0L);
+            ModNumber ma = mgm.Diff(mzero, new ModNumber(3L));
+            ModNumber mb = ModNumber.stomn("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16);
+            EC myEC = new EC(mgm,ecG, mn, ma, mb);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+            String x = ecKeyPair.mx.toString(16);
+            String aStr = ma.toString(16);
+            String bStr = mb.toString(16);
+
+            ECFieldFp ecFieldFp = new ECFieldFp(new BigInteger(p, 16));
+            EllipticCurve ellipticCurve = new EllipticCurve(ecFieldFp, new BigInteger(aStr, 16), new BigInteger(bStr, 16));
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(new BigInteger(gx, 16), new BigInteger(gy, 16));
+            ECParameterSpec ecParameterSpec = new ECParameterSpec(ellipticCurve, g, new BigInteger(n, 16), 1 );
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            ECDSA ecdsa = new ECDSA(ecKeyPair);
+            String yx = ecKeyPair.y.x.toString(16);
+            String yy = ecKeyPair.y.y.toString(16);
+            BigInteger privateKeyBigInteger = new BigInteger(x, 16);
+            java.security.spec.ECPoint y = new java.security.spec.ECPoint(new BigInteger(yx, 16), new BigInteger(yy, 16));
+            ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(privateKeyBigInteger, ecParameterSpec);
+            ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(y, ecParameterSpec);
+            PrivateKey privateKey = keyFactory.generatePrivate(ecPrivateKeySpec);
+            PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
+            Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
+            mySignature.initSign(privateKey);
+            mySignature.update(convertedMessageBigEndian);
+            byte [] signatureBigEndian = mySignature.sign();
+            String signature = ModNumber.bytesToString(signatureBigEndian);
+            assertFalse(ecdsa.verify(changedMessageDigest, signature, true));
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException
+               | SignatureException | InvalidKeySpecException
+               // | InvalidAlgorithmParameterException
+               | NoSuchProviderException
+                e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Test
+    void signatureECDSASignNISTP224SignSHA256ValidRandomPrivateKey()
+    {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            MessageDigest myDigest = MessageDigest.getInstance("SHA256");
+            String message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(message.length() * Character.BYTES);
+            byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
+            String p = "ffffffffffffffffffffffffffffffff000000000000000000000001";
+            ModNumber mp = ModNumber.stomn(p, 16);
+            MultGroupMod mgm = new MultGroupMod(mp);
+            String gx = "b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21";
+            String gy = "bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34";
+            ModNumber mgx = ModNumber.stomn(gx, 16);
+            ModNumber mgy = ModNumber.stomn(gy, 16);
+            ECPoint ecG = new ECPoint();
+            ecG.x = mgx;
+            ecG.y = mgy;
+            String n = "ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d";
+            ModNumber mn = ModNumber.stomn(n, 16);
+            ModNumber mzero = new ModNumber(0L);
+            ModNumber ma = mgm.Diff(mzero, new ModNumber(3L));
+            ModNumber mb = ModNumber.stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+            EC myEC = new EC(mgm,ecG, mn, ma, mb);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+            String x = ecKeyPair.mx.toString(16);
+            String aStr = ma.toString(16);
+            String bStr = mb.toString(16);
+
+            ECFieldFp ecFieldFp = new ECFieldFp(new BigInteger(p, 16));
+            EllipticCurve ellipticCurve = new EllipticCurve(ecFieldFp, new BigInteger(aStr, 16), new BigInteger(bStr, 16));
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(new BigInteger(gx, 16), new BigInteger(gy, 16));
+            ECParameterSpec ecParameterSpec = new ECParameterSpec(ellipticCurve, g, new BigInteger(n, 16), 1 );
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            ECDSA ecdsa = new ECDSA(ecKeyPair);
+            String yx = ecKeyPair.y.x.toString(16);
+            String yy = ecKeyPair.y.y.toString(16);
+            BigInteger privateKeyBigInteger = new BigInteger(x, 16);
+            java.security.spec.ECPoint y = new java.security.spec.ECPoint(new BigInteger(yx, 16), new BigInteger(yy, 16));
+            ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(privateKeyBigInteger, ecParameterSpec);
+            ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(y, ecParameterSpec);
+            PrivateKey privateKey = keyFactory.generatePrivate(ecPrivateKeySpec);
+            PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
+            String signature = ecdsa.sign(messageDigest, true);
+            byte[] signatureBytes = ModNumber.stringToBytes(signature);
+            Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
+            mySignature.initVerify(publicKey);
+            mySignature.update(convertedMessageBigEndian);
+            assertTrue(mySignature.verify(signatureBytes));
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException
+               | SignatureException | InvalidKeySpecException
+               // | InvalidAlgorithmParameterException
+               | NoSuchProviderException
+                e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    void signatureECDSASignNISTP224VerifySHA256ValidRandomPrivateKey()
+    {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+            MessageDigest myDigest = MessageDigest.getInstance("SHA256");
+            String message = "Dit is een test om te zien of een signature geverifieerd kan worden!";
+            ModNumber convertedMessage = ModNumber.fromText(message);
+            byte [] convertedMessageBigEndian = convertedMessage.convertEndianess(message.length() * Character.BYTES);
+            byte [] messageDigest = myDigest.digest(convertedMessageBigEndian);
+            String p = "ffffffffffffffffffffffffffffffff000000000000000000000001";
+            ModNumber mp = ModNumber.stomn(p, 16);
+            MultGroupMod mgm = new MultGroupMod(mp);
+            String gx = "b70e0cbd6bb4bf7f321390b94a03c1d356c21122343280d6115c1d21";
+            String gy = "bd376388b5f723fb4c22dfe6cd4375a05a07476444d5819985007e34";
+            ModNumber mgx = ModNumber.stomn(gx, 16);
+            ModNumber mgy = ModNumber.stomn(gy, 16);
+            ECPoint ecG = new ECPoint();
+            ecG.x = mgx;
+            ecG.y = mgy;
+            String n = "ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d";
+            ModNumber mn = ModNumber.stomn(n, 16);
+            ModNumber mzero = new ModNumber(0L);
+            ModNumber ma = mgm.Diff(mzero, new ModNumber(3L));
+            ModNumber mb = ModNumber.stomn("b4050a850c04b3abf54132565044b0b7d7bfd8ba270b39432355ffb4", 16);
+            EC myEC = new EC(mgm,ecG, mn, ma, mb);
+            ECKeyPair ecKeyPair = new ECKeyPair(myEC, null, null);
+            String x = ecKeyPair.mx.toString(16);
+            String aStr = ma.toString(16);
+            String bStr = mb.toString(16);
+
+            ECFieldFp ecFieldFp = new ECFieldFp(new BigInteger(p, 16));
+            EllipticCurve ellipticCurve = new EllipticCurve(ecFieldFp, new BigInteger(aStr, 16), new BigInteger(bStr, 16));
+            java.security.spec.ECPoint g = new java.security.spec.ECPoint(new BigInteger(gx, 16), new BigInteger(gy, 16));
+            ECParameterSpec ecParameterSpec = new ECParameterSpec(ellipticCurve, g, new BigInteger(n, 16), 1 );
+            KeyFactory keyFactory = KeyFactory.getInstance("EC", "BC");
+            ECDSA ecdsa = new ECDSA(ecKeyPair);
+            String yx = ecKeyPair.y.x.toString(16);
+            String yy = ecKeyPair.y.y.toString(16);
+            BigInteger privateKeyBigInteger = new BigInteger(x, 16);
+            java.security.spec.ECPoint y = new java.security.spec.ECPoint(new BigInteger(yx, 16), new BigInteger(yy, 16));
+            ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(privateKeyBigInteger, ecParameterSpec);
+            ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(y, ecParameterSpec);
+            PrivateKey privateKey = keyFactory.generatePrivate(ecPrivateKeySpec);
+            PublicKey publicKey = keyFactory.generatePublic(ecPublicKeySpec);
+            Signature mySignature = Signature.getInstance("SHA256withECDSA", "BC");
+            mySignature.initSign(privateKey);
+            mySignature.update(convertedMessageBigEndian);
+            byte [] signatureBigEndian = mySignature.sign();
+            String signature = ModNumber.bytesToString(signatureBigEndian);
+            assertTrue(ecdsa.verify(messageDigest, signature, true));
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException
+               | SignatureException | InvalidKeySpecException
+               // | InvalidAlgorithmParameterException
+               | NoSuchProviderException
+                e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
 }

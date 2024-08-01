@@ -124,6 +124,15 @@ public class ModNumber {
         }
         return res;
     }
+    public static String bytesToString(byte [] b)
+    {
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < b.length; i++)
+        {
+            res.append(String.format("%02X", b[i]));
+        }
+        return res.toString();
+    }
 
     public static byte[] convertEndianess(byte[] b)
     {
@@ -1052,10 +1061,11 @@ public class ModNumber {
     {
         if (i == 0)
             throw new IllegalArgumentException("Not a valid BER encodign");
-        switch(p[i] >>> 6)
+        int pi = p[i] & 0xFF;
+        switch(pi >>> 6)
         {
             case 0:
-                switch(p[i] >>> 5)
+                switch(pi >>> 5)
                 {
                     case 0:
                     case 1:
@@ -1064,20 +1074,21 @@ public class ModNumber {
                         byte mask = (byte)0x1F;
                         byte masked = (byte)(p[i] & mask);
                         ASNElementType asnType = ASNElementType.fromByte(masked);
+                        int pIMinusOne = p[i - 1] & 0xFF;
                         switch(asnType)
                         {
-                            case SEQUENCE:
-                                switch(p[i-1] >>> 7)
-                                {
-                                    case 0:
-                                    {
-                                        byte mask2 = (byte)0x7F;
-                                        byte masked2 = (byte)(p[i-1] & mask2);
+
+                            case SEQUENCE: {
+
+
+                                switch (pIMinusOne >>> 7) {
+                                    case 0: {
+                                        byte mask2 = (byte) 0x7F;
+                                        byte masked2 = (byte) (pIMinusOne & mask2);
                                         return new ASNElementResult(ASNElementType.SEQUENCE, masked2, i - 2);
                                     }
-                                    case 1:
-                                    {
-                                        int nLen = p[i-1] &0x7F;
+                                    case 1: {
+                                        int nLen = pIMinusOne & 0x7F;
                                         int sLen = 0;
                                         for (int j = 0; j < nLen; j++) {
                                             sLen |= (p[i - 1 - nLen + j] << (j * 8));
@@ -1086,36 +1097,37 @@ public class ModNumber {
                                     }
 
                                 }
+                            }
                             case OBJECT_IDENTIFIER:
-                                switch(p[i-1] >>> 7)
+                                switch(pIMinusOne >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;
-                                        byte masked2 = (byte)(p[i - 1] & mask2);
+                                        byte masked2 = (byte)(pIMinusOne & mask2);
                                         return new ASNElementResult(ASNElementType.OBJECT_IDENTIFIER, masked2, i - 2);
                                     default:
                                         throw new IllegalArgumentException("Not a short length specifier!");
                                 }
                             case NULL_VALUE:
-                                if (p[i - 1] != 0)
+                                if (pIMinusOne != 0)
                                     throw new IllegalArgumentException("Not a valid NULL object");
                                 return new ASNElementResult(ASNElementType.NULL_VALUE, p[i - 1], i - 2);
                             case OCTET_STRING:
-                                switch(p[i-1] >>> 7)
+                                switch(pIMinusOne >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;
-                                        byte masked2 = (byte)(p[i - 1] & mask2);
+                                        byte masked2 = (byte)(pIMinusOne & mask2);
                                         return new ASNElementResult(ASNElementType.OCTET_STRING, masked2, i - 2);
                                     default:
                                         throw new IllegalArgumentException("Not a short length specifier!");
                                 }
                             case INTEGER_VALUE:
-                                switch(p[i-1] >>> 7)
+                                switch(pIMinusOne >>> 7)
                                 {
                                     case 0:
                                         byte mask2 = (byte)0x7F;
-                                        byte masked2 = (byte)(p[i-1] & mask2);
+                                        byte masked2 = (byte)(pIMinusOne & mask2);
                                         return new ASNElementResult(ASNElementType.INTEGER_VALUE, masked2, i - 2);
                                     default:
                                         throw new IllegalArgumentException("Not a short length specifier!");
@@ -1141,7 +1153,6 @@ public class ModNumber {
     public static List<Object> ParseBERASNString(byte [] berAsnString)
     {
         List<Object> res = new ArrayList<Object>();
-//        byte[] pC = toByteArray();
         byte [] pC = berAsnString;
 
         int i;

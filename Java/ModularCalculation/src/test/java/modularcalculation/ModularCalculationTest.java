@@ -18,19 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ModularCalculationTest {
-    KeyStore myKeyStore;
-//    @BeforeAll
-//    public void initalizeAll()
-//    {
-//        try {
-//            myKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-//
-//        }
-//        catch (KeyStoreException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
+
     @Test
     public void subtractScalarSimple()
     {

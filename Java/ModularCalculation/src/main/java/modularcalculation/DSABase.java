@@ -74,27 +74,32 @@ abstract class DSABase
         if (!(ModNumber.lessThan(s, Q) && ModNumber.lessThan(r, Q)))
             throw new IllegalArgumentException("Wrong signature");
         byte[] rBigEndian = r.convertEndianess(nLen);
-        int i;
-        for (i = 0; i < rBigEndian.length; i++)
-            if (rBigEndian[i] != 0)
-                break;
-        if (i > 0){
-            if ((rBigEndian[i] & 0x80) != 0)
-                i--;
-            byte [] rBigEndianSmaller = new byte[rBigEndian.length - i];
-            System.arraycopy(rBigEndian, i, rBigEndianSmaller, 0, rBigEndianSmaller.length);
-            rBigEndian = rBigEndianSmaller;
+        if (DEREncoded) {
+            int i;
+            for (i = 0; i < rBigEndian.length; i++)
+                if (rBigEndian[i] != 0)
+                    break;
+            if (i > 0) {
+                if ((rBigEndian[i] & 0x80) != 0)
+                    i--;
+                byte[] rBigEndianSmaller = new byte[rBigEndian.length - i];
+                System.arraycopy(rBigEndian, i, rBigEndianSmaller, 0, rBigEndianSmaller.length);
+                rBigEndian = rBigEndianSmaller;
+            }
         }
         byte[] sBigEndian = s.convertEndianess(nLen);
-        for (i = 0; i < sBigEndian.length; i++)
-            if (sBigEndian[i] != 0)
-                break;
-        if (i > 0){
-            if ((sBigEndian[i] & 0x80) != 0)
-                i--;
-            byte [] sBigEndianSmaller = new byte[sBigEndian.length - i];
-            System.arraycopy(sBigEndian, i, sBigEndianSmaller, 0, sBigEndianSmaller.length);
-            sBigEndian = sBigEndianSmaller;
+        if (DEREncoded) {
+            int i;
+            for (i = 0; i < sBigEndian.length; i++)
+                if (sBigEndian[i] != 0)
+                    break;
+            if (i > 0) {
+                if ((sBigEndian[i] & 0x80) != 0)
+                    i--;
+                byte[] sBigEndianSmaller = new byte[sBigEndian.length - i];
+                System.arraycopy(sBigEndian, i, sBigEndianSmaller, 0, sBigEndianSmaller.length);
+                sBigEndian = sBigEndianSmaller;
+            }
         }
 
         if (DEREncoded)
